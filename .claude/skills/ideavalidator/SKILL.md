@@ -38,7 +38,12 @@ two or three calls maximum. Mandatory fields; everything else may stay a hypothe
 4. **Why us** — audience, access, data, domain or distribution the founder already has.
 5. **Candidate verticals** — 3-8 segments they could start with (offer to let the research propose more).
 6. **Money** — value metric guess, price guess, and the one channel they can reach buyers through today.
-7. **Day-one constraints** — monthly cost floor, founder hours per week, income target (optional).
+7. **Business model & success definition** — is this direct-sales SaaS, PLG/freemium, a directory/
+   graph, a marketplace/network, usage/API, or a service? And what counts as success: cash now
+   (services), a compounding/defensible product, a PLG/network, or venture-scale? If unsure, say so and
+   let the `frame` stage classify it. This steers how every stage scores market size, WTP and economics
+   (a PLG/graph model is judged on its funnel and paying fraction, not outbound sales).
+8. **Day-one constraints** — monthly cost floor, founder hours per week, income target (optional).
 
 Rules: accept "don't know" (record it as UNKNOWN; the research will try to fill it). Offer concrete
 options where sensible (B2B/B2C, subscription/per-use/service, geography). Do not pitch or improve

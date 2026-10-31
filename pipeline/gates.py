@@ -60,9 +60,17 @@ def _usable_scores(output: dict, rule: GateRule) -> dict:
     return scores
 
 
-def _kill_reasons(output: dict, scores: dict, rule: GateRule) -> list:
+def _effective_critical(stage_id: str, rule: GateRule, output: dict) -> tuple:
+    """Critical criteria after the objective's demotions (business-model flexibility)."""
+    from .objectives import demotions
+
+    demoted = set(demotions(output.get("objective", ""), stage_id))
+    return tuple(c for c in rule.critical if c not in demoted)
+
+
+def _kill_reasons(output: dict, scores: dict, critical: tuple) -> list:
     reasons = [f"kill flag: {flag}" for flag in output.get("kill_flags") or []]
-    for name in rule.critical:
+    for name in critical:
         if scores.get(name, 5.0) < 2:
             reasons.append(f"critical criterion '{name}' scored {scores[name]:g} (<2)")
     return reasons
@@ -81,7 +89,7 @@ def evaluate(stage_id: str, output: dict) -> Gate:
     if not scores:
         return Gate(stage_id, "UNKNOWN", 0.0, ["no usable scores in output"])
     avg = round(sum(scores.values()) / len(scores), 2)
-    reasons = _kill_reasons(output, scores, rule)
+    reasons = _kill_reasons(output, scores, _effective_critical(stage_id, rule, output))
     if reasons:
         return Gate(stage_id, "KILL", avg, reasons)
     floor_ok = min(scores.values()) >= 2

@@ -55,3 +55,26 @@ def test_render_missing_template_raises(brief_path):
     fake = Stage("nope", "Nope", "S0", (), "Why?")
     with pytest.raises(FileNotFoundError):
         render(fake, load_brief(brief_path), {})
+
+
+def test_render_injects_business_model_and_success_tokens(tmp_path):
+    from pipeline.prompts import load_brief
+    p = tmp_path / "i.md"
+    p.write_text("---\nslug: i\nbusiness_model: plg_freemium_directory\n"
+                 "success_definition: compounding_product\n---\n# Idea brief\nbody\n")
+    b = load_brief(p)
+    assert b.business_model == "plg_freemium_directory"
+    assert b.success_definition == "compounding_product"
+    from pipeline.stages import get_stage
+    txt = render(get_stage("market"), b, {})
+    assert "plg_freemium_directory" in txt
+    assert "compounding_product" in txt or "compounding" in txt.lower()
+
+
+def test_common_block_has_flexibility_rules(tmp_path):
+    from pipeline.prompts import load_brief, PROMPT_DIR
+    common = (PROMPT_DIR / "_common.md").read_text().lower()
+    assert "business model" in common
+    assert "substitute" in common and "complement" in common
+    assert "already doing" in common or "incumbent" in common  # disconfirmation check
+    assert "re-scope" in common or "rescope" in common or "narrow the thesis" in common

@@ -4,9 +4,16 @@ title: One-line name of the idea
 date: 2026-01-01
 author: 
 status: intake
+business_model:   # direct-sales SaaS | plg_freemium | directory_graph | marketplace_network | usage_api | services | hybrid (blank = let frame classify)
+success_definition:   # services_cash | compounding_product | plg_network | venture_scale (blank = default: profitable from day one)
 ---
 
 # Idea brief
+
+## Thesis spine (the parts that must NOT be silently dropped later)
+- Core mechanism (how it acquires and compounds value):
+- Intended moat / end-state:
+- Non-negotiables (what makes it THIS business, not a generic service):
 
 ## One-sentence pitch
 <Who> struggling with <job/problem> can <outcome> using <solution>, instead of <current alternative>.

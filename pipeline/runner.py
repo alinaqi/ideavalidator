@@ -83,6 +83,8 @@ def run_stage(stage, ctx: RunContext) -> dict:
     prompt = render(stage, ctx.brief, prior_summaries(ctx.out_dir, stage.depends_on + stage.optional))
     research = _investigate(ctx, prompt)
     data = _structure(ctx, stage, research)
+    from .objectives import resolve
+    data["objective"] = resolve(ctx.brief).key
     data = finalize(stage, data, research)
     data["idea"] = ctx.brief.slug
     data["model"] = research.model or getattr(ctx.client, "model", "")

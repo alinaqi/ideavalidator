@@ -52,3 +52,26 @@ def test_rollup_precedence():
     assert rollup([mk("PIVOT"), mk("KILL")]).verdict == "KILL"
     assert rollup([mk("GO"), mk("UNKNOWN")]).verdict == "UNKNOWN"
     assert rollup([]).verdict == "UNKNOWN"
+
+
+def test_objective_demotes_critical_so_low_score_caps_at_pivot():
+    rule = RULES["wtp"]
+    scores = {c: 4 for c in rule.criteria}
+    scores["budget_exists"] = 1  # critical by default -> KILL
+    assert evaluate("wtp", _out(scores)).verdict == "KILL"
+    out = _out(scores); out["objective"] = "plg_network"
+    g = evaluate("wtp", out)
+    assert g.verdict == "PIVOT"  # demoted: low immediate WTP no longer hard-kills a PLG thesis
+
+
+def test_objective_does_not_rescue_kill_flags():
+    out = _out({c: 5 for c in RULES["wtp"].criteria}, ["category_price_near_zero"])
+    out["objective"] = "plg_network"
+    assert evaluate("wtp", out).verdict == "KILL"
+
+
+def test_unknown_objective_behaves_like_default():
+    rule = RULES["economics"]
+    scores = {c: 4 for c in rule.criteria}; scores["breakeven_reachability"] = 1
+    out = _out(scores); out["objective"] = "bogus"
+    assert evaluate("economics", out).verdict == "KILL"

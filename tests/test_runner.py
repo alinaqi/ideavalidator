@@ -70,3 +70,19 @@ def test_decision_prompt_includes_council_summary_when_present(brief_path, out_d
     client = FakeClient()
     run_stage(get_stage("decision"), _ctx(brief_path, out_dir, client))
     assert "COUNCIL SAID X" in client.prompts[0]
+
+
+def test_run_stage_tags_objective_and_softens_wtp_for_compounding(brief_path, out_dir, tmp_path):
+    from pipeline.prompts import Brief
+    from pipeline.stages import get_stage
+    b = Brief(slug="test-idea", title="T", body="SMS waitlists",
+              meta={}, business_model="plg_freemium", success_definition="compounding_product")
+    for dep in ("problem", "market", "icp"):
+        (out_dir / f"{dep}.json").write_text(json.dumps({"stage": dep, "summary": f"s {dep}"}))
+    low = FakeClient({"summary": "s", "scores": {"price_comparables": 4, "value_metric_clarity": 4,
+                     "budget_exists": 1, "behavioral_signal": 1, "margin_room": 4},
+                     "kill_flags": [], "evidence": [], "unknowns": []})
+    ctx = RunContext(brief=b, out_dir=out_dir, client=low)
+    data = run_stage(get_stage("wtp"), ctx)
+    assert data["objective"] == "compounding_product"
+    assert data["gate"]["verdict"] == "PIVOT"  # would be KILL under the default objective

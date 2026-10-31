@@ -337,6 +337,27 @@
       "items": {
         "type": "string"
       }
+    },
+    "business_model_classification": {
+      "type": "string",
+      "description": "chosen model (direct-sales/PLG/directory/marketplace/usage-api/services/hybrid) + why"
+    },
+    "thesis_spine": {
+      "type": "object",
+      "properties": {
+        "core_mechanism": {
+          "type": "string"
+        },
+        "moat_end_state": {
+          "type": "string"
+        },
+        "non_negotiables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [

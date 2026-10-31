@@ -67,6 +67,15 @@ pytest --cov=pipeline --cov-report=term-missing      # 80% minimum coverage
 Code limits: ≤20 lines per function, ≤3 parameters, nesting ≤2, ≤200 lines and ≤10 functions per
 file. Tests are written first (RED → GREEN → VALIDATE).
 
+## Flexible to the business model
+
+Set `business_model` and `success_definition` in the brief (or let `frame` classify them). The objective
+(`services_cash` / `compounding_product` / `plg_network` / `venture_scale` / default) reweights the gates:
+a PLG/directory/network thesis is sized by its funnel and a small paying fraction of a large free base,
+not as outbound per-customer sales, and is not hard-killed on low per-user willingness-to-pay. Every stage
+also refuses to silently re-scope the thesis, classifies competitors as substitute/complement/adjacent,
+and runs a disconfirmation + source-grading check before any KILL-level blocker. See `docs/WORKFLOW.md` §1b.
+
 ## How it judges
 
 Each stage: grounded research pass → schema-constrained JSON → evidence normalised with PDLC labels

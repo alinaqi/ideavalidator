@@ -253,6 +253,28 @@
       "items": {
         "type": "string"
       }
+    },
+    "scope_drift": {
+      "type": "object",
+      "properties": {
+        "distance_from_thesis": {
+          "type": "string"
+        },
+        "forced_or_convenient": {
+          "type": "string",
+          "enum": [
+            "EVIDENCE_FORCED",
+            "CONVENIENCE",
+            "NONE"
+          ]
+        },
+        "discards_assets_or_moat": {
+          "type": "boolean"
+        },
+        "preserved_original_option": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [

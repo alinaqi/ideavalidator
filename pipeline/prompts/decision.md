@@ -31,8 +31,16 @@ testing**, never GO to build.
 7. **Positioning draft** (April Dunford): competitive alternative, unique attributes, value, best-fit
    customer, market category — one line each, to be tested in outreach copy.
 
+Also required this stage:
+- **scope_drift**: state how far the recommended bet has moved from the founder's Thesis spine, whether
+  the drift was forced by evidence or chosen for convenience, and whether it discards any stated asset/
+  moat. If it does, say so plainly and present the un-narrowed thesis as a preserved option with its own
+  experiment, not just the narrow bet.
+- Design the two-week plan for the ACTUAL business model: for a PLG/directory/network thesis the first
+  tests are build-N-profiles / claim-rate / activation-funnel, NOT only a pre-sale of an adjacent service.
+
 ## Required sections
-verdict, rationale, bet_record, pivot_options, two_week_plan, evidence_ledger_summary,
+verdict, rationale, scope_drift, bet_record, pivot_options, two_week_plan, evidence_ledger_summary,
 what_would_change_our_mind, positioning_draft
 
 ## Scoring criteria

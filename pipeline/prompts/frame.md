@@ -25,9 +25,16 @@ Date: {{today}}
    tools whose buyer has no budget). State whether it matches and why.
 6. List the 5-8 **research questions** the next stages must answer, ordered by decision impact.
 
+0. **Classify the business model** if the brief's business_model is UNKNOWN (direct-sales SaaS,
+   PLG/freemium, directory/graph, marketplace/network, usage/API, services, or a hybrid), and confirm
+   the success definition. State both; later stages are scored against them.
+0b. **Write the Thesis spine** — the parts that must NOT be silently dropped later: the core mechanism
+   (how it acquires and compounds value), the intended moat/end-state, and the non-negotiables (what
+   makes it this business and not a generic service). Everything downstream is judged for fidelity to it.
+
 ## Required sections
-opportunity_statement, actor, job, context_triggers, current_alternatives, desired_outcomes,
-lean_canvas, hypotheses, tarpit_check, research_questions
+business_model_classification, thesis_spine, opportunity_statement, actor, job, context_triggers,
+current_alternatives, desired_outcomes, lean_canvas, hypotheses, tarpit_check, research_questions
 
 ## Scoring criteria
 actor_specificity (could we name 20 real people/companies that match?), job_clarity (job stated in

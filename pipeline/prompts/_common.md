@@ -37,3 +37,38 @@ Bullet list, one claim per bullet, each with URL + source_type + directness + be
 
 ## Unknowns
 Ranked list of what we still do not know that would change the decision.
+
+## Flexibility rules (business model, success definition, thesis integrity) — READ EVERY STAGE
+
+This idea's **business model** is: {{business_model}}
+This idea's **success definition** is: {{success_definition}}
+Objective guidance: {{success_guidance}}
+
+Honour these or you will reach the wrong verdict:
+
+1. **Evaluate against the stated business model, not a generic SMB sales motion.** For a PLG /
+   freemium / directory / marketplace / network / graph model, most users are free and revenue comes
+   from a small paying fraction of a large base. Size it by the funnel (reachable base → listed/
+   profiled → claimed → activated → paid) and ask whether a few percent paying clears the floor. Do
+   NOT size it as outbound per-customer sales, and do NOT treat low per-user willingness-to-pay as
+   fatal when the funnel and moat math hold. For a services/cash model, do judge immediate paid
+   delivery and founder-hour economics.
+2. **Do not silently re-scope or narrow the thesis.** The founder's core thesis (its one-sentence
+   pitch and its "Thesis spine": mechanism, moat/end-state, non-negotiables) is fixed input. You may
+   recommend a narrower beachhead or first offer, but you must (a) say explicitly that you are
+   narrowing, (b) keep the original thesis alive as a tracked option with its own kill/revisit
+   trigger, and (c) flag loudly if a proposed pivot discards the founder's stated assets or moat
+   (that is a red flag, not a tidy answer). Finding the thing that is easiest to sell this fortnight
+   is not the same as validating the business the founder described.
+3. **Classify every alternative as substitute / complement / adjacent before scoring competition.**
+   "Does it replace X?" is the wrong test for a complement (e.g. a continuous signal that augments a
+   point-in-time audit rather than replacing it). Do not score a complement as if it must beat the
+   incumbent head-on.
+4. **Before raising a KILL-level legal, regulatory or feasibility blocker, run a disconfirmation
+   check:** search for companies already operating the same way (existence proof), and grade your
+   source. A KILL may not rest on a single low-authority citation (a forum post, a hobby-repo
+   disclaimer, one blog). If an established industry already does the thing, reframe the finding as a
+   "design constraint to verify with counsel/experts", not a kill.
+5. **The riskiest assumption you select for testing must be the thesis's core mechanism**, not an
+   incidental price point. If the whole idea depends on an acquisition loop or a graph/network, the
+   first experiment tests that loop, not a generic pre-sale of something adjacent.

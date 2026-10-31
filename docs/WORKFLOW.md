@@ -25,6 +25,35 @@ acquisition before unit economics are proven, first invoice before the first big
 
 ---
 
+## 1b. Flexibility: business model and success definition
+
+The validator judges an idea against the *kind of business* it is, not a single template. Two inputs,
+set in the brief frontmatter (or classified by the `frame` stage if blank), steer every stage:
+
+- **business_model**: direct-sales SaaS, plg_freemium, directory_graph, marketplace_network, usage_api,
+  services, or hybrid. A PLG/directory/network model is sized by its funnel (reachable base -> profiled
+  -> claimed -> activated -> paid) and a small paying fraction of a large free base, NOT as an outbound
+  per-customer sales motion. Low per-user willingness-to-pay does not kill such a model when the funnel
+  and moat math hold.
+- **success_definition** -> objective: `services_cash`, `compounding_product`, `plg_network`,
+  `venture_scale`, or default. The objective reweights the gates: for compounding/PLG theses the
+  immediate-WTP and break-even criteria are demoted from hard-KILL to at-most-PIVOT (see
+  `pipeline/objectives.py`), because the right first test is the acquisition loop, not a two-week pre-sale.
+
+Three integrity rules every stage now enforces (in `pipeline/prompts/_common.md`):
+1. **No silent re-scoping.** The founder's one-sentence pitch and Thesis spine (core mechanism, moat/
+   end-state, non-negotiables, written in `frame`) are fixed. A stage may narrow the beachhead but must
+   say so, keep the original thesis alive as a tracked option, and flag loudly if a pivot discards the
+   founder's stated assets or moat. Easiest-to-sell-this-fortnight is not the same as validated.
+2. **Substitute vs complement.** Classify each alternative before scoring competition; a complement
+   (e.g. a continuous signal that augments an audit) is not judged as if it must replace the incumbent.
+3. **Disconfirmation before KILL.** Before a KILL-level legal/feasibility blocker, check for incumbents
+   already doing it and grade the source; a KILL may not rest on one low-authority citation.
+
+The `decision` stage reports **scope_drift**: how far the recommended bet moved from the thesis, whether
+that was evidence-forced or convenient, and whether it discards a moat — with the un-narrowed thesis
+preserved as its own option.
+
 ## 2. Roles and tools
 
 | Role | Who / what | Responsibility |

@@ -41,3 +41,8 @@ viability_risk_coverage (pricing/margin/channel assumptions have tests), feasibi
 
 ## Kill flags for this stage
 `core_value_assumption_already_invalidated`, `riskiest_assumption_untestable_without_full_build`
+
+
+## Flexibility addenda
+- The top-priority assumption MUST be the thesis's core mechanism (e.g. the acquisition/claim loop or the graph/network effect), not an incidental price point. Design its cheapest real test.
+- If a prior stage narrowed the idea, add a research-coverage gap for the ORIGINAL (un-narrowed) thesis and the cheapest test that would keep it alive or kill it.
