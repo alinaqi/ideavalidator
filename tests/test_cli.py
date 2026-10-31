@@ -57,3 +57,19 @@ def test_doctor_reports_missing_key_then_ok(tmp_path, monkeypatch, capsys):
     assert cli.main(["doctor"]) == 0
     out = capsys.readouterr().out
     assert "9/9" in out and "gemini-3.1-pro-preview" in out
+
+
+def test_council_command_runs_with_fakes(brief_path, tmp_path, capsys):
+    from types import SimpleNamespace
+
+    from tests.test_council import fake_chat_factory, fake_structurer
+
+    out = tmp_path / "runs"
+    (out / "test-idea").mkdir(parents=True)
+    (out / "test-idea" / "frame.json").write_text(json.dumps({"stage": "frame", "summary": "s"}))
+    code = cli.main(["council", "--idea", str(brief_path), "--out", str(out), "--rounds", "0"],
+                    client_factory=lambda s: SimpleNamespace(structure=fake_structurer),
+                    chat_factory=lambda keys: fake_chat_factory(["kimi", "openai"]))
+    assert code == 0
+    assert (out / "test-idea" / "council.json").exists()
+    assert "PIVOT" in capsys.readouterr().out

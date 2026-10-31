@@ -59,3 +59,14 @@ def test_load_output_and_prior_summaries(seeded_out_dir):
     assert load_output(seeded_out_dir, "market") is None
     ps = prior_summaries(seeded_out_dir, ("frame", "problem"))
     assert ps == {"frame": "summary for frame", "problem": "summary for problem"}
+
+
+def test_decision_prompt_includes_council_summary_when_present(brief_path, out_dir):
+    from pipeline.stages import STAGES
+
+    for s in STAGES[:-1]:
+        (out_dir / f"{s.id}.json").write_text(json.dumps({"stage": s.id, "summary": f"sum {s.id}"}))
+    (out_dir / "council.json").write_text(json.dumps({"summary": "COUNCIL SAID X"}))
+    client = FakeClient()
+    run_stage(get_stage("decision"), _ctx(brief_path, out_dir, client))
+    assert "COUNCIL SAID X" in client.prompts[0]

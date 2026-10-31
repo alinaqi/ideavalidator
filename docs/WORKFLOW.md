@@ -32,6 +32,7 @@ acquisition before unit economics are proven, first invoice before the first big
 | Founder | you | Writes the idea brief, runs every real-world test (interviews, pre-sales), makes the GO/PIVOT/KILL call |
 | Orchestrator | Claude Code in this repo | Runs the pipeline, challenges outputs, keeps the evidence ledger honest, drafts experiment protocols and outreach assets |
 | Researcher | Gemini (`gemini-3.1-pro-preview` with Google Search grounding; `gemini-3.8-flash` for JSON structuring; Deep Research agent for `--deep` runs) | Desk research with citations; produces the stage reports |
+| Sounding board | 6 framework-based personas on different models (OpenAI, Anthropic, Google, DeepSeek, Moonshot, xAI, Zhipu, Cerebras, Groq, MiniMax) + Red Team + Chair | Multi-perspective debate that enriches the idea and attacks the desk-research consensus; pattern from eduBITES soundingBoard |
 | Operating model | Palgu PDLC v5 (`palgu_pdlc_framework_2026_v5.xlsx`) | States, risk types, evidence quality labels, experiment router/protocol, bet record, kill conditions |
 | Frameworks | see `docs/FRAMEWORKS.md` | Lean Canvas, Mom Test, JTBD, Sequoia PMF (hair on fire), Crossing the Chasm beachhead, Disciplined Entrepreneurship segmentation, Dunford positioning, 7 Powers, Van Westendorp/Gabor-Granger, pretotyping, default-alive |
 
@@ -61,6 +62,11 @@ for a specific buyer. Running SWOT on "the whole market" produces generic bullet
 beachhead produces a price range too wide to test. The request order (idea → market → SWOT → WTP → ICP)
 is preserved in spirit: the `market` stage already does a first SWOT-like whitespace/threat scan, and
 `icp` can be rerun after `wtp` if pricing evidence changes the beachhead.
+
+**Sounding board (council).** A separate, optional step run with `python -m pipeline.cli council`.
+It is not a gate; it feeds the `decision` stage (which reads `council.json` when present) and the
+founder. Recommended moments: after `frame` (to enrich a thin idea before paying for research) and
+after `risks` (to attack the consensus before the memo). See §6b.
 
 ---
 
@@ -165,6 +171,33 @@ Gemini: 10-20 falsifiable assumptions with risk type, importance, evidence statu
 method, cost, decision-if-false; a two-week experiment plan with pre-registered success/kill signals;
 research-coverage gaps; explicit limits of desk research. Founder: this is your sprint backlog.
 
+### Stage 6b — Sounding board (council), optional but recommended before the memo
+Six personas, each anchored in named thinking frameworks and seated on a *different* model so they do
+not share one set of priors, read the brief, every finished stage summary and the labelled evidence
+ledger, then: (1) open with a framework-driven position and a GO/PIVOT/KILL vote, an "enrichment"
+(the one change that most improves the idea from their lens) and a "verify" item; (2) debate, turn by
+turn, each seeing the freshest rebuttals; (3) a Red Team seat builds the strongest case against the
+consensus and attacks the evidence ledger itself; (4) a Chair synthesises consensus, real disagreements,
+the Red Team verdict, an **enriched idea** (problem, ICP, offer, price, channel, wedge, each marked
+EVIDENCED or HYPOTHESIS), pivot options, claims to verify and votes.
+
+| Seat | Frameworks | Preferred models |
+|------|------------|------------------|
+| Bootstrapper | Cohen ideal bootstrapped business + "Is there a problem?", Walling stair-step, PG default alive | DeepSeek, Kimi, GLM |
+| Customer Anthropologist | Mom Test, JTBD, Torres opportunity tree, PDLC behaviour-over-stated | Claude Sonnet/Opus, Gemini |
+| Market Realist | Sequoia Arc, base rates / outside view, 7 Powers, Tringas 5x | GPT, Grok, GLM |
+| Pricing & Positioning Strategist | Van Westendorp / Gabor-Granger, value metric, services-line pricing, Dunford | Gemini, GPT, MiniMax |
+| Distribution Operator | Dixon wedge, Kazanjy founding sales, Isenberg community-first, channel arithmetic | Grok, Groq, Cerebras, Kimi |
+| Premortem Skeptic | Premortem, Inversion, second-order thinking, tarpit lists | Claude Opus, GPT, DeepSeek |
+| Red Team | argues against the consensus and the ledger | Claude Opus, GPT, DeepSeek |
+| Chair | synthesis to `schemas/council.json` | Claude Opus, GPT, Gemini |
+
+Personas live in `pipeline/personas.json`; any subset of provider keys works (seats fall back to
+available models, a failed seat is reported, not fatal). Rules the board must follow: cite ledger
+items, prefix anything new with HYPOTHESIS, never invent numbers; unanimity is a warning sign, not
+confidence. Founder: read the **Disagreements** and **Claims to verify** sections first; add the
+enrichments you accept to the brief under `## Evidence updates` and rerun the affected stages.
+
 ### Stage 9 — Decision memo (S3→S4)
 Gemini: verdict with rationale citing strongest behavioural and strongest contrary evidence; PDLC bet
 record with an observable, dated kill condition; pivot options; two-week plan; evidence ledger summary;
@@ -200,6 +233,7 @@ price, leading questions) is not weak evidence; it is no evidence.
 ideas/<slug>.md                 intake brief (hypotheses; append "## Evidence updates" after each loop)
 runs/<slug>/<stage>.json        structured output incl. evidence ledger, triangulation, gate
 runs/<slug>/<stage>.md          human-readable stage report
+runs/<slug>/council.json|.md    sounding-board transcript, debate, Red Team case and chair synthesis
 runs/<slug>/decision.md         decision memo + bet record (append "## Founder decision")
 docs/KILL_LOG.md                one line per killed/parked idea: date, reason, revisit trigger
 docs/FRAMEWORKS.md              the framework stack and when each applies
@@ -229,10 +263,18 @@ python -m pipeline.cli run --idea ideas/<slug>.md --stop-on-kill
 # slower, broader research using Gemini Deep Research (minutes per stage)
 python -m pipeline.cli run --idea ideas/<slug>.md --stages market,icp --deep
 
+# sounding board: multi-model debate on the brief + all finished stages (5-10 min)
+python -m pipeline.cli council --idea ideas/<slug>.md --rounds 1
+
 # decision memo roll-up
 python -m pipeline.cli report --idea <slug>
 python -m pipeline.cli stages
 ```
+
+Council keys: set `KEYS_FILE=/path/to/shared.env` in `.env` (any env file holding
+`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`, `MOONSHOT_API_KEY`, `XAI_API_KEY`,
+`GLM_API_KEY`, `CEREBRAS_API_KEY`, `GROQ_API_KEY`, `MINIMAX_API_KEY`) or put the keys in `.env`
+directly. `doctor` prints which council models are callable.
 
 Model routing: research passes use `GEMINI_MODEL` with Google Search grounding; structuring uses
 `GEMINI_STRUCTURE_MODEL` in JSON mode against `pipeline/schemas/<stage>.json`; `--deep` uses the
@@ -259,3 +301,4 @@ Deep Research agent through the Interactions API and then structures its report 
 ## 11. Change log
 
 - 1.0 (2026-10-31): initial workflow; nine stages; gates; evidence ledger; real-world loop.
+- 1.1 (2026-10-31): multi-model sounding board (council) with framework personas, debate, Red Team and chair synthesis; decision stage consumes it.

@@ -37,3 +37,8 @@ def test_resolve_unknown_raises():
         resolve("frame,bogus")
     with pytest.raises(KeyError):
         get_stage("bogus")
+
+
+def test_decision_optionally_consumes_council():
+    assert "council" in get_stage("decision").optional
+    assert all(not set(s.optional) & set(s.depends_on) for s in STAGES)

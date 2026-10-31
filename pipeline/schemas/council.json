@@ -1,0 +1,276 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence summary of the board's synthesis"
+    },
+    "consensus": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "point": {
+            "type": "string"
+          },
+          "evidence_strength": {
+            "type": "string",
+            "enum": [
+              "BEHAVIORAL",
+              "STATED",
+              "MIXED",
+              "NONE"
+            ]
+          }
+        },
+        "required": [
+          "point"
+        ]
+      }
+    },
+    "disagreements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "string",
+            "description": "who said what"
+          },
+          "evidence_favours": {
+            "type": "string"
+          },
+          "what_settles_it": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      }
+    },
+    "red_team_case": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "string"
+        },
+        "exposes_real_gap": {
+          "type": "boolean"
+        },
+        "shared_assumption": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "enriched_idea": {
+      "type": "object",
+      "properties": {
+        "problem_statement": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "EVIDENCED",
+                "HYPOTHESIS"
+              ]
+            }
+          }
+        },
+        "beachhead_icp": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "EVIDENCED",
+                "HYPOTHESIS"
+              ]
+            }
+          }
+        },
+        "offer_and_value_metric": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "EVIDENCED",
+                "HYPOTHESIS"
+              ]
+            }
+          }
+        },
+        "price_anchor": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "EVIDENCED",
+                "HYPOTHESIS"
+              ]
+            }
+          }
+        },
+        "channel": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "EVIDENCED",
+                "HYPOTHESIS"
+              ]
+            }
+          }
+        },
+        "wedge_and_next_segments": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "EVIDENCED",
+                "HYPOTHESIS"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "pivot_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "option": {
+            "type": "string"
+          },
+          "supporting_evidence": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "option"
+        ]
+      }
+    },
+    "claims_to_verify": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "cheapest_test": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "H",
+              "M",
+              "L"
+            ]
+          }
+        },
+        "required": [
+          "claim",
+          "cheapest_test"
+        ]
+      }
+    },
+    "votes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "vote": {
+            "type": "string",
+            "enum": [
+              "GO",
+              "PIVOT",
+              "KILL",
+              "UNKNOWN"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "vote"
+        ]
+      }
+    },
+    "recommendation": {
+      "type": "object",
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "GO",
+            "PIVOT",
+            "KILL"
+          ]
+        },
+        "pivot_to": {
+          "type": "string"
+        },
+        "strongest_objection": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "verdict",
+        "rationale"
+      ]
+    }
+  },
+  "required": [
+    "summary",
+    "consensus",
+    "disagreements",
+    "enriched_idea",
+    "claims_to_verify",
+    "votes",
+    "recommendation"
+  ]
+}

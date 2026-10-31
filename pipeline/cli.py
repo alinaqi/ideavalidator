@@ -6,8 +6,10 @@ import sys
 from pathlib import Path
 
 from .config import MissingKeyError, Settings
+from .council import CouncilContext, run_council
 from .gemini import GeminiClient
 from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
+from .providers import Chat, load_keys
 from .report import build_memo
 from .runner import MissingDependency, RunContext, run_stage
 from .stages import STAGES, resolve
@@ -28,9 +30,18 @@ def _parser() -> argparse.ArgumentParser:
     rep = sub.add_parser("report", help="print the decision memo for an idea slug")
     rep.add_argument("--idea", required=True, help="idea slug (runs/<slug>)")
     rep.add_argument("--out", default=str(ROOT / "runs"))
+    _add_council_parser(sub)
     sub.add_parser("stages", help="list stages in canonical order")
     sub.add_parser("doctor", help="check key, models, prompt templates and schemas")
     return parser
+
+
+def _add_council_parser(sub) -> None:
+    council = sub.add_parser("council", help="multi-model sounding board debate on an idea")
+    council.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
+    council.add_argument("--out", default=str(ROOT / "runs"))
+    council.add_argument("--rounds", type=int, default=1, help="debate rounds (0-2)")
+    council.add_argument("--no-red-team", action="store_true")
 
 
 def _make_client(factory):
@@ -61,8 +72,24 @@ def _cmd_doctor() -> int:
         print("api key: MISSING — set GEMINI_API_KEY in .env (copy .env.example)")
         return 1
     print(f"api key: present ({settings.api_key[:6]}…)\nresearch model:  {settings.research_model}"
-          f"\nstructure model: {settings.structure_model}\ndeep agent:      {settings.deep_agent}")
+          f"\nstructure model: {settings.structure_model}\ndeep agent:      {settings.deep_agent}"
+          f"\ncouncil models:  {', '.join(Chat(load_keys(ROOT)).available()) or 'none (optional)'}")
     return 0 if ok else 1
+
+
+def _cmd_council(args, factories: tuple) -> int:
+    brief = load_brief(Path(args.idea))
+    chat = (factories[1] or Chat)(load_keys(ROOT))
+    ctx = CouncilContext(brief=brief, out_dir=Path(args.out) / brief.slug, chat=chat,
+                         structurer=_make_client(factories[0]).structure,
+                         rounds=min(2, max(0, args.rounds)), red_team=not args.no_red_team)
+    print(f"→ council: {', '.join(chat.available()) or 'no models'} …", flush=True)
+    data = run_council(ctx)
+    rec = data["synthesis"].get("recommendation") or {}
+    votes = ", ".join(f"{v.get('role')}={v.get('vote')}" for v in data["synthesis"].get("votes") or [])
+    print(f"  {rec.get('verdict', 'UNKNOWN')} — {rec.get('rationale', '')[:200]}\n  votes: {votes}"
+          f"\n  → {ctx.out_dir / 'council.md'}")
+    return 0
 
 
 def _cmd_run(args, factory) -> int:
@@ -84,12 +111,14 @@ def _cmd_run(args, factory) -> int:
     return 0
 
 
-def main(argv=None, client_factory=None) -> int:
+def main(argv=None, client_factory=None, chat_factory=None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "stages":
         return _cmd_stages()
     if args.command == "doctor":
         return _cmd_doctor()
+    if args.command == "council":
+        return _cmd_council(args, (client_factory, chat_factory))
     if args.command == "report":
         print(build_memo(Path(args.out) / args.idea))
         return 0

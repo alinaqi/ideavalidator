@@ -11,6 +11,7 @@ class Stage:
     pdlc_state: str
     depends_on: tuple
     question: str
+    optional: tuple = ()
 
 
 _CORE = ("frame", "problem", "market", "icp", "swot", "wtp", "economics", "risks")
@@ -48,7 +49,7 @@ STAGES = (
     Stage("decision", "Decision memo and bet record", "S3→S4 SHAPE / Bet Portfolio",
           _CORE,
           "GO, PIVOT or KILL, with kill conditions and the next two weeks of "
-          "real-world tests?"),
+          "real-world tests?", optional=("council",)),
 )
 
 _BY_ID = {s.id: s for s in STAGES}

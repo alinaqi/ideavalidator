@@ -61,6 +61,23 @@ cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli run --idea ideas/<s
   depth or when a stage returned UNKNOWN.
 - A stage can be rerun alone: `--stages wtp,economics,risks,decision` after the brief changes.
 
+## Step 2b — Convene the sounding board (multi-model debate)
+
+Run it after `risks` has finished (or right after `frame` if the brief is thin and the user wants the
+idea enriched before paying for research):
+
+```bash
+cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli council --idea ideas/<slug>.md --rounds 1
+```
+It needs provider keys (`doctor` lists callable council models; any subset works). Six framework-based
+personas on different models debate, a Red Team attacks the consensus, a Chair synthesises. Read
+`runs/<slug>/council.md` and surface to the user: the votes, the 3-5 real disagreements, the Red Team
+position and whether the Chair thinks it exposes a real gap, the **enriched idea** (each element marked
+EVIDENCED or HYPOTHESIS) and the **claims to verify**. Offer to fold accepted enrichments into the
+brief under `## Evidence updates` and rerun `icp,wtp,economics,risks` before `decision` (the decision
+stage reads `council.json` automatically when it exists). Board output is opinion, not evidence: it
+never changes a gate on its own.
+
 ## Step 3 — Challenge the evidence before presenting it
 
 For every finished stage read `runs/<slug>/<stage>.json` and:
@@ -78,6 +95,7 @@ For every finished stage read `runs/<slug>/<stage>.json` and:
 After all stages: `.venv/bin/python -m pipeline.cli report --idea <slug>`. Present, in this order:
 - Overall verdict and the per-stage table (one line each: verdict, score, why).
 - The three strongest behavioural evidence items and the three strongest contrary items, with URLs.
+- The sounding board's recommendation, where it disagreed with the desk research, and the top claims to verify.
 - Beachhead ICP, price anchors, break-even customer count and the channel that reaches them.
 - The bet record's kill condition and the two-week plan (day one must be a revenue-seeking action).
 - What would change our mind.

@@ -30,11 +30,26 @@ below.
 - **Decisions:** `docs/adr/` — architecture decision records.
 - **Killed ideas:** `docs/KILL_LOG.md`.
 
+## Sounding board (multi-model debate)
+
+Six personas, each anchored in named thinking frameworks (Cohen, Mom Test/JTBD, Sequoia Arc + 7 Powers,
+Van Westendorp + Dunford, Dixon wedge + founding sales, Premortem/Inversion) and seated on different
+models (GPT, Claude, Gemini, DeepSeek, Kimi, Grok, GLM, Cerebras, Groq, MiniMax) read the brief and the
+evidence ledger, debate turn by turn, get attacked by a Red Team seat, and a Chair synthesises an
+**enriched idea**, the real disagreements, claims to verify and a recommendation. Pattern adapted from
+eduBITES soundingBoard.
+
+```bash
+# keys: point KEYS_FILE in .env at any env file with provider keys, or set them in .env (any subset works)
+.venv/bin/python -m pipeline.cli council --idea ideas/my-idea.md --rounds 1
+```
+
 ## CLI
 
 ```bash
 cp ideas/_template.md ideas/my-idea.md && $EDITOR ideas/my-idea.md
 .venv/bin/python -m pipeline.cli run --idea ideas/my-idea.md        # all nine stages (~20-40 min)
+.venv/bin/python -m pipeline.cli council --idea ideas/my-idea.md    # sounding board (optional)
 .venv/bin/python -m pipeline.cli report --idea my-idea              # decision memo
 .venv/bin/python -m pipeline.cli stages                             # stage list + dependencies
 ```
@@ -63,7 +78,8 @@ real-world test plan" (interviews, pre-sales, paid pilots), never "go build". De
 
 ```
 .claude/skills/      the /ideavalidator skill (install.sh copies it to ~/.claude/skills)
-pipeline/            config, stages, prompts, gemini client, evidence, gates, runner, report, cli
+pipeline/            config, stages, prompts, gemini client, evidence, gates, runner, report, cli,
+                     providers (multi-model chat), council + council_io (sounding board), personas.json
 pipeline/prompts/    one research prompt per stage (+ _common.md rules block)
 pipeline/schemas/    JSON output schema per stage
 ideas/               idea briefs (start from _template.md)

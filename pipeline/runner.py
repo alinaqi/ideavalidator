@@ -80,7 +80,7 @@ def write_outputs(out_dir: Path, stage_id: str, data: dict) -> None:
 
 def run_stage(stage, ctx: RunContext) -> dict:
     _check_deps(stage, ctx.out_dir)
-    prompt = render(stage, ctx.brief, prior_summaries(ctx.out_dir, stage.depends_on))
+    prompt = render(stage, ctx.brief, prior_summaries(ctx.out_dir, stage.depends_on + stage.optional))
     research = _investigate(ctx, prompt)
     data = _structure(ctx, stage, research)
     data = finalize(stage, data, research)
