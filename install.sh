@@ -13,7 +13,7 @@ if [ ! -f "$HERE/.env" ]; then
   echo "→ created .env — add your GEMINI_API_KEY (https://aistudio.google.com/apikey)"
 fi
 
-SKILL_SRC="$HERE/.claude/skills/ideavalidator/SKILL.md"
+SKILL_SRC="$HERE/skills/ideavalidator/SKILL.md"
 SKILL_DST="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}/ideavalidator"
 mkdir -p "$SKILL_DST"
 sed "s|__IDEAVALIDATOR_HOME__|$HERE|g" "$SKILL_SRC" > "$SKILL_DST/SKILL.md"

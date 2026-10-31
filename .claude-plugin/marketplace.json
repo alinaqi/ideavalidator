@@ -1,0 +1,12 @@
+{
+  "name": "ideavalidator",
+  "owner": { "name": "Ali Shaheen" },
+  "plugins": [
+    {
+      "name": "ideavalidator",
+      "source": "./",
+      "description": "Validate a business idea end to end: Gemini-grounded research, PDLC gates, a multi-model sounding board (with a Blue Ocean seat), and a GO/PIVOT/KILL memo. Flexible to business model, success definition and new-market/innovation ideas.",
+      "version": "1.0.0"
+    }
+  ]
+}

@@ -9,3 +9,8 @@ htmlcov/
 runs/*/
 !runs/.gitkeep
 *.xlsx
+
+# Never commit private idea briefs; keep only the template and examples
+ideas/*.md
+!ideas/_template.md
+!ideas/example-*.md

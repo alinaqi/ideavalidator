@@ -7,10 +7,13 @@ argument-hint: "<one-line idea> (optional; the skill will ask what it needs)"
 
 # /ideavalidator — validate a business idea in detail
 
-You are running the Idea Validator workflow. Repository root (`IDEAVALIDATOR_HOME`):
-`__IDEAVALIDATOR_HOME__`. If that placeholder is literally still present you are running the
-project-level copy of this skill: the repo root is three directories above this file. Every path
-below is relative to the repo root. Read `docs/WORKFLOW.md` once per session before starting.
+You are running the Idea Validator workflow. Resolve the repo root (`IDEAVALIDATOR_HOME`, the folder
+that contains `pipeline/` and `install.sh`) in this order: (1) the `CLAUDE_PLUGIN_ROOT` environment
+variable if it is set and contains `pipeline/cli.py` (set when installed as a plugin); (2) the literal
+path `__IDEAVALIDATOR_HOME__` if `install.sh` substituted it (not still the placeholder); (3) otherwise
+walk up from this skill file until you find the directory containing `pipeline/cli.py` (from
+`skills/ideavalidator/` that is two levels up). Use that as `IDEAVALIDATOR_HOME`; every path below is
+relative to it. Read `docs/WORKFLOW.md` there once per session before starting.
 
 Principles you must enforce (from the workflow): desk research never validates; behaviour beats
 stated intent; one beachhead, one offer, one channel; profitable from day one means break-even is

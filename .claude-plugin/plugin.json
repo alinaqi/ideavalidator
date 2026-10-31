@@ -1,0 +1,8 @@
+{
+  "name": "ideavalidator",
+  "version": "1.0.0",
+  "description": "Validate a business or product idea end to end (problem, market, ICP, SWOT, willingness to pay, day-one economics, risk map, GO/PIVOT/KILL) using Gemini-grounded desk research, Palgu PDLC gates and a multi-model sounding board.",
+  "author": { "name": "Ali Shaheen" },
+  "homepage": "https://github.com/alinaqi/ideavalidator",
+  "keywords": ["startup", "validation", "market-research", "icp", "pricing", "business-model", "blue-ocean", "pdlc", "go-to-market"]
+}

@@ -5,7 +5,19 @@ beachhead vertical → SWOT → willingness to pay → day-one economics → ris
 Gemini (Google-Search-grounded) does the desk research; deterministic gates and PDLC evidence-quality
 labels keep it honest; a Claude Code skill (`/ideavalidator`) interviews you and runs the whole thing.
 
-## Install (2 minutes)
+## Install as a Claude Code plugin
+
+```
+/plugin marketplace add alinaqi/ideavalidator
+/plugin install ideavalidator
+```
+
+Then run `cd` into the plugin directory once and `./install.sh` to create the Python venv and `.env`
+(the skill orchestrates a Python pipeline, so it needs the venv and a `GEMINI_API_KEY`). The command
+finds its home via `$CLAUDE_PLUGIN_ROOT` automatically. Add provider keys for the optional multi-model
+sounding board in the same `.env` (any subset works).
+
+## Install from source (2 minutes)
 
 ```bash
 git clone https://github.com/alinaqi/ideavalidator.git && cd ideavalidator
