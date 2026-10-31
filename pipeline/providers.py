@@ -1,7 +1,8 @@
 """Multi-provider chat over OpenAI-compatible endpoints (idea borrowed from eduBITES soundingBoard).
 
-Keys are read from the process environment, the repo .env, and an optional external env file
-(`KEYS_FILE=` in .env or `IDEAVALIDATOR_KEYS_FILE`), so one shared key file can serve many tools.
+Keys are read from the repo .env, then an optional external env file (`KEYS_FILE=` in .env or
+`IDEAVALIDATOR_KEYS_FILE`), then the process environment. Explicit config beats ambient shell exports,
+which are often stale.
 """
 from __future__ import annotations
 
@@ -54,12 +55,12 @@ def _keys_file(root: Path, root_env: dict) -> dict:
 
 
 def load_keys(root: Path) -> dict:
-    """Provider keys only; precedence: process env > repo .env > external keys file."""
+    """Provider keys only; precedence: repo .env > external keys file > process env."""
     root_env = load_env(root / ".env")
     external = _keys_file(root, root_env)
     keys = {}
     for name in PROVIDER_ENV_KEYS:
-        value = os.environ.get(name) or root_env.get(name) or external.get(name)
+        value = root_env.get(name) or external.get(name) or os.environ.get(name)
         if value:
             keys[name] = value
     return keys

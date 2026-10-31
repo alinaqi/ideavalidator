@@ -105,3 +105,38 @@ def test_member_failure_is_isolated(brief_path, seeded_out_dir):
     errors = [m for m in data["members"] if m.get("error")]
     assert errors and all(m["model"] == "openai" for m in errors)
     assert data["debate"] == [] and data["red_team"] is None
+
+
+def test_chair_and_red_team_fall_back_to_next_model_on_failure(brief_path, seeded_out_dir):
+    inner = fake_chat_factory(["anthropic-opus", "openai", "kimi"])
+
+    def flaky(alias, system, user):
+        if alias == "anthropic-opus":
+            raise RuntimeError("HTTP 401 invalid key")
+        return inner(alias, system, user)
+
+    flaky.available = inner.available
+    flaky.calls = inner.calls
+    ctx = CouncilContext(brief=load_brief(brief_path), out_dir=seeded_out_dir, chat=flaky,
+                         structurer=fake_structurer, rounds=0, red_team=True)
+    data = run_council(ctx)
+    assert data["red_team"]["model"] == "openai" and data["red_team"]["vote"] == "PIVOT"
+    assert data["chair_model"] == "openai"
+    assert data["synthesis"]["recommendation"]["verdict"] == "PIVOT"
+
+
+def test_council_survives_total_synthesis_failure(brief_path, seeded_out_dir):
+    inner = fake_chat_factory(["kimi"])
+
+    def no_chair(alias, system, user):
+        if system.startswith("You chair"):
+            raise RuntimeError("down")
+        return inner(alias, system, user)
+
+    no_chair.available = inner.available
+    no_chair.calls = inner.calls
+    ctx = CouncilContext(brief=load_brief(brief_path), out_dir=seeded_out_dir, chat=no_chair,
+                         structurer=fake_structurer, rounds=0, red_team=False)
+    data = run_council(ctx)
+    assert data["synthesis"] == {} and "down" in data["synthesis_error"]
+    assert (seeded_out_dir / "council.json").exists()

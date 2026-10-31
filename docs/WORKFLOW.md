@@ -274,7 +274,9 @@ python -m pipeline.cli stages
 Council keys: set `KEYS_FILE=/path/to/shared.env` in `.env` (any env file holding
 `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`, `MOONSHOT_API_KEY`, `XAI_API_KEY`,
 `GLM_API_KEY`, `CEREBRAS_API_KEY`, `GROQ_API_KEY`, `MINIMAX_API_KEY`) or put the keys in `.env`
-directly. `doctor` prints which council models are callable.
+directly. Precedence is repo `.env`, then `KEYS_FILE`, then the shell environment, so a stale
+`export ANTHROPIC_API_KEY` in your profile cannot override the file. `doctor` prints which council
+models are callable.
 
 Model routing: research passes use `GEMINI_MODEL` with Google Search grounding; structuring uses
 `GEMINI_STRUCTURE_MODEL` in JSON mode against `pipeline/schemas/<stage>.json`; `--deep` uses the

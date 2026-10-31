@@ -16,14 +16,16 @@ surface dissent before the decision memo. Provider keys already exist in a share
 
 - `pipeline/providers.py`: one OpenAI-compatible chat client over a registry of ten providers
   (OpenAI, Anthropic, Google, DeepSeek, Moonshot, xAI, Zhipu, Cerebras, Groq, MiniMax). Keys resolve
-  process env > repo `.env` > external `KEYS_FILE`; only provider keys are read from the external file.
+  repo `.env` > external `KEYS_FILE` > process env (explicit config beats stale shell exports); only
+  provider keys are read from the external file.
   stdlib `urllib` only; no `max_tokens` sent (provider-specific); failures isolated per seat.
 - `pipeline/personas.json`: six personas defined by frameworks, not adjectives, each with a model
   preference list so that no two seats default to the same provider; plus Red Team and Chair seats.
 - `pipeline/council.py` / `council_io.py`: dossier (brief + stage summaries + labelled evidence +
   unknowns) → parallel opening statements with a mandatory `Framework:` / `Vote:` / `Enrichment:` /
   `Verify:` footer → turn-based debate rounds (each member sees the freshest rebuttals) → Red Team →
-  Chair synthesis structured by Gemini into `schemas/council.json`.
+  Chair synthesis structured by Gemini into `schemas/council.json`. Red Team and Chair fall back
+  through their preference list, then any available model; a failed synthesis still writes the transcript.
 - The council is **not a gate**. It writes `runs/<slug>/council.*`; the `decision` stage lists it as an
   optional input and reads its summary when present. Board output is labelled opinion/HYPOTHESIS unless
   it cites the ledger.

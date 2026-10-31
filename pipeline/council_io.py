@@ -2,11 +2,26 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from .stages import STAGES
 
 MAX_EVIDENCE = 40
+VOTES = ("GO", "PIVOT", "KILL")
+
+
+def label(text: str, name: str) -> str:
+    """Value of a `Name: value` line anywhere in the text (case-insensitive)."""
+    match = re.search(rf"^\s*{name}:\s*(.+?)\s*$", text or "", re.IGNORECASE | re.MULTILINE)
+    return match.group(1).strip() if match else ""
+
+
+def parse_vote(text: str) -> dict:
+    vote = label(text, "Vote").upper().split()
+    return {"framework": label(text, "Framework"),
+            "vote": next((v for v in VOTES if vote and vote[0].startswith(v)), "UNKNOWN"),
+            "enrichment": label(text, "Enrichment"), "verify": label(text, "Verify")}
 
 
 def _evidence_lines(data: dict) -> list:

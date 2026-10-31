@@ -3,17 +3,17 @@ consensus, a chair synthesises. Pattern adapted from eduBITES soundingBoard's co
 from __future__ import annotations
 
 import json
-import re
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .council_io import board_dossier, write_council
+from .council_io import board_dossier, label, parse_vote, write_council
 from .prompts import PROMPT_DIR, SCHEMA_DIR
 
+__all__ = ["CouncilContext", "Persona", "Seat", "assemble_board", "board_dossier",
+           "load_personas", "parse_vote", "run_council"]
 PERSONAS_FILE = Path(__file__).parent / "personas.json"
-VOTES = ("GO", "PIVOT", "KILL")
 
 
 @dataclass(frozen=True)
@@ -49,6 +49,12 @@ def load_personas() -> tuple:
     return members, red, chair
 
 
+def _candidates(persona: Persona, available: list) -> list:
+    """Preferred models that are available, then every other available model."""
+    preferred = [m for m in persona.models if m in available]
+    return preferred + [m for m in available if m not in preferred]
+
+
 def assemble_board(personas: list, available: list) -> list:
     """Seat each persona on its first available preferred model, else round-robin fallback."""
     if not available:
@@ -60,18 +66,6 @@ def assemble_board(personas: list, available: list) -> list:
     return seats
 
 
-def _label(text: str, name: str) -> str:
-    match = re.search(rf"^\s*{name}:\s*(.+?)\s*$", text or "", re.IGNORECASE | re.MULTILINE)
-    return match.group(1).strip() if match else ""
-
-
-def parse_vote(text: str) -> dict:
-    vote = _label(text, "Vote").upper().split()
-    return {"framework": _label(text, "Framework"),
-            "vote": next((v for v in VOTES if vote and vote[0].startswith(v)), "UNKNOWN"),
-            "enrichment": _label(text, "Enrichment"), "verify": _label(text, "Verify")}
-
-
 def _ask(ctx: CouncilContext, seat: Seat, prompts: tuple) -> dict:
     """One isolated model call; failures become an error entry instead of aborting the board."""
     base = {"role": seat.persona.role, "model": seat.alias}
@@ -80,6 +74,16 @@ def _ask(ctx: CouncilContext, seat: Seat, prompts: tuple) -> dict:
     except Exception as exc:  # provider down, bad key, timeout
         return {**base, "error": str(exc)[:300]}
     return {**base, "text": text, **parse_vote(text)}
+
+
+def _ask_fallback(ctx: CouncilContext, seats: list, prompts: tuple) -> dict:
+    """Try each candidate seat in order until one answers; return the last error otherwise."""
+    out = {"error": "no candidate models"}
+    for seat in seats:
+        out = _ask(ctx, seat, prompts)
+        if not out.get("error"):
+            return out
+    return out
 
 
 def _opening(ctx: CouncilContext, board: list, dossier: str) -> list:
@@ -107,18 +111,22 @@ def _debate_round(ctx: CouncilContext, board: list, latest: dict) -> list:
     return entries
 
 
-def _red_team(ctx: CouncilContext, seat: Seat, latest: dict) -> dict:
+def _red_team(ctx: CouncilContext, seats: list, latest: dict) -> dict:
     digest = "\n\n".join(f"## {r}\n{t}" for r, t in latest.items())
-    out = _ask(ctx, seat, ((PROMPT_DIR / "council_redteam.md").read_text(),
-                           f"The board's positions:\n\n{digest}\n\nBuild the strongest case against them."))
-    return {**out, "position": _label(out.get("text", ""), "Red Team")}
+    prompts = ((PROMPT_DIR / "council_redteam.md").read_text(),
+               f"The board's positions:\n\n{digest}\n\nBuild the strongest case against them.")
+    out = _ask_fallback(ctx, seats, prompts)
+    return {**out, "position": label(out.get("text", ""), "Red Team")}
 
 
-def _synthesize(ctx: CouncilContext, seat: Seat, transcript: str) -> tuple:
-    system = (PROMPT_DIR / "council_synthesis.md").read_text()
-    markdown = ctx.chat(seat.alias, system, transcript)
+def _synthesize(ctx: CouncilContext, seats: list, transcript: str) -> dict:
+    out = _ask_fallback(ctx, seats, ((PROMPT_DIR / "council_synthesis.md").read_text(), transcript))
+    if out.get("error"):
+        return {"chair_model": out.get("model", ""), "synthesis_markdown": "", "synthesis": {},
+                "synthesis_error": out["error"]}
     schema = json.loads((SCHEMA_DIR / "council.json").read_text())
-    return markdown, ctx.structurer(markdown, schema)
+    return {"chair_model": out["model"], "synthesis_markdown": out["text"],
+            "synthesis": ctx.structurer(out["text"], schema), "synthesis_error": ""}
 
 
 def run_council(ctx: CouncilContext) -> dict:
@@ -131,13 +139,13 @@ def run_council(ctx: CouncilContext) -> dict:
     opening = _opening(ctx, board, dossier)
     latest = {m["role"]: m["text"] for m in opening if not m.get("error")}
     debate = [e for _ in range(max(0, ctx.rounds)) for e in _debate_round(ctx, board, latest)]
-    rt = _red_team(ctx, assemble_board([red], available)[0], latest) if ctx.red_team and latest else None
+    seats = lambda p: [Seat(p, a) for a in _candidates(p, available)]  # noqa: E731
+    rt = _red_team(ctx, seats(red), latest) if ctx.red_team and latest else None
     transcript = (f"{dossier}\n\n# Board transcript\n\n" + "\n\n".join(f"## {r}\n{t}" for r, t in latest.items())
                   + (f"\n\n# Red Team\n{rt.get('text', '')}" if rt else ""))
-    markdown, synthesis = _synthesize(ctx, assemble_board([chair], available)[0], transcript)
     data = {"idea": ctx.brief.slug, "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "models": sorted({s.alias for s in board}), "rounds": ctx.rounds, "members": opening,
-            "debate": debate, "red_team": rt, "synthesis_markdown": markdown, "synthesis": synthesis,
-            "summary": synthesis.get("summary", "")}
+            "debate": debate, "red_team": rt, **_synthesize(ctx, seats(chair), transcript)}
+    data["summary"] = data["synthesis"].get("summary", "")
     write_council(ctx.out_dir, data)
     return data

@@ -14,16 +14,17 @@ def test_registry_covers_expected_providers():
         assert spec.base_url.startswith("https://") and spec.env_key.endswith("_API_KEY")
 
 
-def test_load_keys_merges_env_file_keys_file_and_process_env(tmp_path, monkeypatch):
+def test_load_keys_precedence_repo_env_then_keys_file_then_process_env(tmp_path, monkeypatch):
     for k in ("OPENAI_API_KEY", "DEEPSEEK_API_KEY", "XAI_API_KEY", "IDEAVALIDATOR_KEYS_FILE"):
         monkeypatch.delenv(k, raising=False)
     keys_file = tmp_path / "other.env"
     keys_file.write_text("OPENAI_API_KEY=from-keys-file\nDEEPSEEK_API_KEY=ds\nDATABASE_URL=x\n")
     (tmp_path / ".env").write_text(f"KEYS_FILE={keys_file}\nOPENAI_API_KEY=from-root\n")
     monkeypatch.setenv("XAI_API_KEY", "from-process")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "stale-shell-export")
     keys = load_keys(tmp_path)
     assert keys["OPENAI_API_KEY"] == "from-root"
-    assert keys["DEEPSEEK_API_KEY"] == "ds"
+    assert keys["DEEPSEEK_API_KEY"] == "ds", "explicit keys file beats ambient shell env"
     assert keys["XAI_API_KEY"] == "from-process"
     assert "DATABASE_URL" not in keys
 
