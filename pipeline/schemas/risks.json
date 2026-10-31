@@ -1,0 +1,254 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "value_risk_coverage": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "viability_risk_coverage": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "feasibility_risk_coverage": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "test_cheapness": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "value_risk_coverage",
+        "viability_risk_coverage",
+        "feasibility_risk_coverage",
+        "test_cheapness"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "risk_type": {
+            "type": "string",
+            "enum": [
+              "VALUE",
+              "USABILITY",
+              "FEASIBILITY",
+              "VIABILITY"
+            ]
+          },
+          "importance": {
+            "type": "string",
+            "enum": [
+              "H",
+              "M",
+              "L"
+            ]
+          },
+          "evidence_status": {
+            "type": "string",
+            "enum": [
+              "SUPPORTED",
+              "MIXED",
+              "INVALIDATED",
+              "UNKNOWN",
+              "UNTESTED"
+            ]
+          },
+          "evidence_weakness": {
+            "type": "string",
+            "enum": [
+              "H",
+              "M",
+              "L"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "H",
+              "M",
+              "L"
+            ]
+          },
+          "test_method": {
+            "type": "string"
+          },
+          "test_cost": {
+            "type": "string"
+          },
+          "decision_if_false": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "statement",
+          "risk_type",
+          "importance",
+          "evidence_status"
+        ]
+      }
+    },
+    "experiment_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "when": {
+            "type": "string"
+          },
+          "experiment": {
+            "type": "string"
+          },
+          "assumption_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "method": {
+            "type": "string"
+          },
+          "success_signal": {
+            "type": "string"
+          },
+          "kill_signal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "experiment",
+          "method"
+        ]
+      }
+    },
+    "research_coverage_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "gap": {
+            "type": "string"
+          },
+          "how_to_recruit": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "limits_of_desk_research": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "assumptions",
+    "experiment_plan"
+  ]
+}

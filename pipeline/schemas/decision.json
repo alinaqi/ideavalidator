@@ -1,0 +1,269 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "evidence_strength": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "profitability_confidence": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "focus_clarity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "execution_readiness": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "evidence_strength",
+        "profitability_confidence",
+        "focus_clarity",
+        "execution_readiness"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "GO",
+        "PIVOT",
+        "KILL"
+      ]
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "bet_record": {
+      "type": "object",
+      "properties": {
+        "bet_title": {
+          "type": "string"
+        },
+        "target_outcome": {
+          "type": "string"
+        },
+        "opportunity": {
+          "type": "string"
+        },
+        "solution_thesis": {
+          "type": "string"
+        },
+        "risk_profile": {
+          "type": "string"
+        },
+        "evidence_strength": {
+          "type": "string"
+        },
+        "expected_impact": {
+          "type": "string"
+        },
+        "cost_envelope": {
+          "type": "string"
+        },
+        "kill_condition": {
+          "type": "string"
+        },
+        "next_evidence": {
+          "type": "string"
+        }
+      }
+    },
+    "pivot_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "option": {
+            "type": "string"
+          },
+          "supporting_evidence": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "option"
+        ]
+      }
+    },
+    "two_week_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "days",
+          "action"
+        ]
+      }
+    },
+    "evidence_ledger_summary": {
+      "type": "object",
+      "properties": {
+        "behavioral_count": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "stated_count": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "independent_sources": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "strongest": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "weakest": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "what_would_change_our_mind": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "positioning_draft": {
+      "type": "object",
+      "properties": {
+        "competitive_alternative": {
+          "type": "string"
+        },
+        "unique_attributes": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "best_fit_customer": {
+          "type": "string"
+        },
+        "market_category": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "verdict",
+    "rationale",
+    "bet_record",
+    "two_week_plan"
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "problem_evidence": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "frequency": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "severity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "existing_spend": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "urgency": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "problem_evidence",
+        "frequency",
+        "severity",
+        "existing_spend",
+        "urgency"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "problem_signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "signal": {
+            "type": "string"
+          },
+          "verbatim_quote": {
+            "type": "string"
+          },
+          "where_observed": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW"
+            ]
+          }
+        },
+        "required": [
+          "signal"
+        ]
+      }
+    },
+    "demand_proxies": {
+      "type": "object",
+      "properties": {
+        "search_terms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "communities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "job_posts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workarounds_and_templates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "paid_services": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status_quo_cost": {
+      "type": "object",
+      "properties": {
+        "estimate": {
+          "type": "string"
+        },
+        "arithmetic": {
+          "type": "string"
+        },
+        "inputs_sourced": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hair_on_fire_assessment": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "HAIR_ON_FIRE",
+            "HARD_FACT",
+            "FUTURE_VISION",
+            "UNKNOWN"
+          ]
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "who_feels_it_most": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contrary_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "interview_guide": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "problem_signals",
+    "hair_on_fire_assessment",
+    "interview_guide"
+  ]
+}

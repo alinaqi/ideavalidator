@@ -1,0 +1,277 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "strength_leverage": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "weakness_manageability": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "opportunity_size": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "threat_tolerance": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "strength_leverage",
+        "weakness_manageability",
+        "opportunity_size",
+        "threat_tolerance"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW"
+            ]
+          }
+        },
+        "required": [
+          "item"
+        ]
+      }
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW"
+            ]
+          }
+        },
+        "required": [
+          "item"
+        ]
+      }
+    },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW"
+            ]
+          }
+        },
+        "required": [
+          "item"
+        ]
+      }
+    },
+    "threats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW"
+            ]
+          }
+        },
+        "required": [
+          "item"
+        ]
+      }
+    },
+    "tows": {
+      "type": "object",
+      "properties": {
+        "so_strategies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "wo_strategies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "st_strategies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "wt_strategies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "defensibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "power": {
+            "type": "string"
+          },
+          "applies_within_12_months": {
+            "type": "boolean"
+          },
+          "rationale": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "power"
+        ]
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "strengths",
+    "weaknesses",
+    "opportunities",
+    "threats",
+    "tows"
+  ]
+}

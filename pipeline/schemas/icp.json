@@ -1,0 +1,274 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "beachhead_clarity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "pain_urgency": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "budget_authority": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "reachability": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "segment_homogeneity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "beachhead_clarity",
+        "pain_urgency",
+        "budget_authority",
+        "reachability",
+        "segment_homogeneity"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vertical_scorecard": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vertical": {
+            "type": "string"
+          },
+          "pain_urgency": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "budget_authority": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "reachability": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "wtp_comparables": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "competition_density": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "unfair_advantage": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "cycle_length": {
+            "type": "integer",
+            "description": "0-5 per rubric"
+          },
+          "total": {
+            "type": "integer",
+            "description": "sum"
+          },
+          "evidence_notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vertical",
+          "total"
+        ]
+      }
+    },
+    "beachhead": {
+      "type": "object",
+      "properties": {
+        "vertical": {
+          "type": "string"
+        },
+        "why": {
+          "type": "string"
+        },
+        "bowling_pin_next": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "vertical"
+      ]
+    },
+    "icp_profile": {
+      "type": "object",
+      "properties": {
+        "behavioral_label": {
+          "type": "string"
+        },
+        "firmographics": {
+          "type": "string"
+        },
+        "trigger_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "buyer_role": {
+          "type": "string"
+        },
+        "user_role": {
+          "type": "string"
+        },
+        "approver_role": {
+          "type": "string"
+        },
+        "current_workaround": {
+          "type": "string"
+        },
+        "disqualifiers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "watering_holes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trait_provenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "trait": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "OBSERVED",
+                  "INFERRED"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "excluded_segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "vertical_scorecard",
+    "beachhead",
+    "icp_profile"
+  ]
+}

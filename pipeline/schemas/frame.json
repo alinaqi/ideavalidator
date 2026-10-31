@@ -1,0 +1,353 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "actor_specificity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "job_clarity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "solution_independence": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "why_now": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "why_us": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "actor_specificity",
+        "job_clarity",
+        "solution_independence",
+        "why_now",
+        "why_us"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "opportunity_statement": {
+      "type": "string",
+      "description": "actor + need/problem + context + evidence"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "job": {
+      "type": "string",
+      "description": "desired progress in the user's words"
+    },
+    "context_triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "current_alternatives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "desired_outcomes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lean_canvas": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "customer_segments": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "unique_value_proposition": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "solution": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "channels": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "revenue_streams": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "cost_structure": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "key_metrics": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "unfair_advantage": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "type": "string"
+          },
+          "risk_type": {
+            "type": "string",
+            "enum": [
+              "VALUE",
+              "USABILITY",
+              "FEASIBILITY",
+              "VIABILITY"
+            ]
+          },
+          "importance": {
+            "type": "string",
+            "enum": [
+              "H",
+              "M",
+              "L"
+            ]
+          }
+        },
+        "required": [
+          "statement",
+          "risk_type"
+        ]
+      }
+    },
+    "tarpit_check": {
+      "type": "object",
+      "properties": {
+        "matches_tarpit_pattern": {
+          "type": "boolean"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "research_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "opportunity_statement",
+    "hypotheses",
+    "tarpit_check",
+    "research_questions"
+  ]
+}

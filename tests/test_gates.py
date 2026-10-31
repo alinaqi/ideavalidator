@@ -1,0 +1,54 @@
+from pipeline.gates import Gate, RULES, evaluate, rollup
+
+
+def _out(scores, flags=()):
+    return {"scores": scores, "kill_flags": list(flags)}
+
+
+def test_rules_exist_for_all_stages():
+    from pipeline.stages import stage_ids
+
+    assert set(RULES) == set(stage_ids())
+    for r in RULES.values():
+        assert r.criteria and set(r.critical) <= set(r.criteria)
+
+
+def test_go_when_all_criteria_strong():
+    crit = RULES["problem"].criteria
+    g = evaluate("problem", _out({c: 4 for c in crit}))
+    assert isinstance(g, Gate)
+    assert g.verdict == "GO"
+    assert g.score == 4.0
+
+
+def test_kill_flag_forces_kill():
+    crit = RULES["problem"].criteria
+    g = evaluate("problem", _out({c: 5 for c in crit}, ["tarpit"]))
+    assert g.verdict == "KILL"
+    assert "tarpit" in " ".join(g.reasons)
+
+
+def test_critical_criterion_below_two_kills():
+    rule = RULES["wtp"]
+    scores = {c: 4 for c in rule.criteria}
+    scores[rule.critical[0]] = 1
+    assert evaluate("wtp", _out(scores)).verdict == "KILL"
+
+
+def test_middling_scores_pivot():
+    crit = RULES["market"].criteria
+    assert evaluate("market", _out({c: 3 for c in crit})).verdict == "PIVOT"
+
+
+def test_missing_scores_unknown():
+    assert evaluate("market", {}).verdict == "UNKNOWN"
+    assert evaluate("market", _out({"nonsense": 5})).verdict == "UNKNOWN"
+
+
+def test_rollup_precedence():
+    mk = lambda v: Gate("x", v, 3.0, [])
+    assert rollup([mk("GO"), mk("GO")]).verdict == "GO"
+    assert rollup([mk("GO"), mk("PIVOT")]).verdict == "PIVOT"
+    assert rollup([mk("PIVOT"), mk("KILL")]).verdict == "KILL"
+    assert rollup([mk("GO"), mk("UNKNOWN")]).verdict == "UNKNOWN"
+    assert rollup([]).verdict == "UNKNOWN"

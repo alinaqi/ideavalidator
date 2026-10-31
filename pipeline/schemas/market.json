@@ -1,0 +1,300 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "market_pull": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "reachable_market_size": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "competitive_whitespace": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "trend_tailwind": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "regulatory_feasibility": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "market_pull",
+        "reachable_market_size",
+        "competitive_whitespace",
+        "trend_tailwind",
+        "regulatory_feasibility"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "adjacent",
+              "service",
+              "diy",
+              "status_quo"
+            ]
+          },
+          "pricing": {
+            "type": "string"
+          },
+          "positioning": {
+            "type": "string"
+          },
+          "target_segment": {
+            "type": "string"
+          },
+          "weaknesses": {
+            "type": "string"
+          },
+          "traction_signal": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      }
+    },
+    "market_pull": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "market_sizing": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "SOURCED",
+                  "ESTIMATE"
+                ]
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "sam": {
+          "type": "string"
+        },
+        "som_year1_bootstrapped": {
+          "type": "string"
+        },
+        "arithmetic": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "HIGH",
+            "MED",
+            "LOW"
+          ]
+        }
+      }
+    },
+    "trends": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trend": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "trend"
+        ]
+      }
+    },
+    "technology_frontier": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "regulation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "distribution_channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "founder_accessible": {
+            "type": "boolean"
+          },
+          "cost": {
+            "type": "string"
+          },
+          "effort": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "founder_accessible"
+        ]
+      }
+    },
+    "whitespace": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "learn_not_copy": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "alternatives",
+    "market_sizing",
+    "distribution_channels"
+  ]
+}

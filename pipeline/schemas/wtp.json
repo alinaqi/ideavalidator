@@ -1,0 +1,273 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "price_comparables": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "value_metric_clarity": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "budget_exists": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "behavioral_signal": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "margin_room": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "price_comparables",
+        "value_metric_clarity",
+        "budget_exists",
+        "behavioral_signal",
+        "margin_room"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "price_comparables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_or_service": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "value_metric": {
+            "type": "string"
+          },
+          "segment": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "product_or_service",
+          "price"
+        ]
+      }
+    },
+    "budget_source": {
+      "type": "object",
+      "properties": {
+        "budget_line": {
+          "type": "string"
+        },
+        "approver": {
+          "type": "string"
+        },
+        "typical_approval_threshold": {
+          "type": "string"
+        }
+      }
+    },
+    "value_metric_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "pros": {
+            "type": "string"
+          },
+          "cons": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric"
+        ]
+      }
+    },
+    "price_anchors": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "floor": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "ceiling": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "packaging_hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tier": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "includes": {
+            "type": "string"
+          },
+          "lead_tier": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "van_westendorp_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pre_sale_experiment": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string"
+        },
+        "assumption": {
+          "type": "string"
+        },
+        "prediction": {
+          "type": "string"
+        },
+        "population": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "primary_measure": {
+          "type": "string"
+        },
+        "guardrails": {
+          "type": "string"
+        },
+        "sample_stopping": {
+          "type": "string"
+        },
+        "decision_rule": {
+          "type": "string"
+        }
+      }
+    },
+    "stated_vs_behavioral_notes": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "price_comparables",
+    "price_anchors",
+    "pre_sale_experiment"
+  ]
+}

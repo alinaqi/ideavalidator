@@ -1,0 +1,307 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "breakeven_reachability": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "cac_payback": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "gross_margin": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "time_to_first_revenue": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "founder_capacity_fit": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "breakeven_reachability",
+        "cac_payback",
+        "gross_margin",
+        "time_to_first_revenue",
+        "founder_capacity_fit"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cost_floor_monthly": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "SOURCED",
+                  "ESTIMATE"
+                ]
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "total": {
+          "type": "number"
+        }
+      }
+    },
+    "unit_economics": {
+      "type": "object",
+      "properties": {
+        "price_per_customer_monthly": {
+          "type": "number"
+        },
+        "cost_to_serve_monthly": {
+          "type": "number"
+        },
+        "gross_margin_pct": {
+          "type": "number"
+        },
+        "cac_estimate": {
+          "type": "number"
+        },
+        "cac_method": {
+          "type": "string"
+        },
+        "payback_months": {
+          "type": "number"
+        },
+        "churn_assumption_monthly_pct": {
+          "type": "number"
+        },
+        "ltv_rough": {
+          "type": "number"
+        }
+      }
+    },
+    "breakeven": {
+      "type": "object",
+      "properties": {
+        "customers_to_cover_floor": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "customers_for_income_target": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "months_to_breakeven": {
+          "type": "number"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "channel_capacity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "weekly_reach": {
+            "type": "string"
+          },
+          "expected_conversion": {
+            "type": "string"
+          },
+          "customers_per_month": {
+            "type": "number"
+          },
+          "hours_per_week": {
+            "type": "number"
+          },
+          "benchmark_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      }
+    },
+    "day_one_plan": {
+      "type": "object",
+      "properties": {
+        "first_paid_offer": {
+          "type": "string"
+        },
+        "minimum_deliverable": {
+          "type": "string"
+        },
+        "how_to_get_paid_before_build": {
+          "type": "string"
+        }
+      }
+    },
+    "sensitivity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "variable": {
+            "type": "string"
+          },
+          "pessimistic": {
+            "type": "string"
+          },
+          "base": {
+            "type": "string"
+          },
+          "optimistic": {
+            "type": "string"
+          },
+          "kills_model_first": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "variable"
+        ]
+      }
+    },
+    "default_alive_check": {
+      "type": "object",
+      "properties": {
+        "cash_positive_by_month": {
+          "type": "string"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "DEFAULT_ALIVE",
+            "DEFAULT_DEAD",
+            "UNKNOWN"
+          ]
+        },
+        "single_change_that_fixes_it": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "cost_floor_monthly",
+    "unit_economics",
+    "breakeven",
+    "day_one_plan",
+    "default_alive_check"
+  ]
+}
