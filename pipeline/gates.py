@@ -61,10 +61,12 @@ def _usable_scores(output: dict, rule: GateRule) -> dict:
 
 
 def _effective_critical(stage_id: str, rule: GateRule, output: dict) -> tuple:
-    """Critical criteria after the objective's demotions (business-model flexibility)."""
-    from .objectives import demotions
+    """Critical criteria after objective + validation-mode demotions (flexibility axes)."""
+    from .modes import demotions as mode_demotions
+    from .objectives import demotions as obj_demotions
 
-    demoted = set(demotions(output.get("objective", ""), stage_id))
+    demoted = set(obj_demotions(output.get("objective", ""), stage_id))
+    demoted |= set(mode_demotions(output.get("validation_mode", ""), stage_id))
     return tuple(c for c in rule.critical if c not in demoted)
 
 

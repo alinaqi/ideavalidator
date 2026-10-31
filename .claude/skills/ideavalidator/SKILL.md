@@ -42,7 +42,7 @@ two or three calls maximum. Mandatory fields; everything else may stay a hypothe
    graph, a marketplace/network, usage/API, or a service? And what counts as success: cash now
    (services), a compounding/defensible product, a PLG/network, or venture-scale? If unsure, say so and
    let the `frame` stage classify it. This steers how every stage scores market size, WTP and economics
-   (a PLG/graph model is judged on its funnel and paying fraction, not outbound sales).
+   (a PLG/graph model is judged on its funnel and paying fraction, not outbound sales). Also ask whether this is an EXISTING-market idea or an out-of-the-box NEW-market/innovation (set validation_mode: new_market). For new-market ideas the regime differs: absence of competitors/search volume/existing spend is expected, not a kill, and the test is a designed demand-creation experiment (pretotype, fake door, landing+waitlist, Wizard-of-Oz, pre-order), not finding people already paying.
 8. **Day-one constraints** — monthly cost floor, founder hours per week, income target (optional).
 
 Rules: accept "don't know" (record it as UNKNOWN; the research will try to fill it). Offer concrete

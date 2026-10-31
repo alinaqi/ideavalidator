@@ -6,6 +6,7 @@ author:
 status: intake
 business_model:   # direct-sales SaaS | plg_freemium | directory_graph | marketplace_network | usage_api | services | hybrid (blank = let frame classify)
 success_definition:   # services_cash | compounding_product | plg_network | venture_scale (blank = default: profitable from day one)
+validation_mode:   # existing_market (default) | new_market  <- use new_market for out-of-the-box / category-creating ideas
 ---
 
 # Idea brief

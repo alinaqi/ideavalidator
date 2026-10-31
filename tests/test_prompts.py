@@ -78,3 +78,28 @@ def test_common_block_has_flexibility_rules(tmp_path):
     assert "substitute" in common and "complement" in common
     assert "already doing" in common or "incumbent" in common  # disconfirmation check
     assert "re-scope" in common or "rescope" in common or "narrow the thesis" in common
+
+
+def test_market_prompt_has_blue_ocean_and_noncustomers(tmp_path):
+    from pipeline.prompts import PROMPT_DIR
+    m = (PROMPT_DIR / "market.md").read_text().lower()
+    assert "errc" in m and ("blue ocean" in m or "value innovation" in m)
+    assert "noncustomer" in m or "non-customer" in m
+
+
+def test_market_schema_has_errc_and_noncustomer_fields():
+    from pipeline.prompts import load_schema
+    from pipeline.stages import get_stage
+    props = load_schema(get_stage("market"))["properties"]
+    assert "errc_grid" in props and "noncustomer_tiers" in props
+
+
+def test_render_injects_validation_mode(tmp_path):
+    from pipeline.prompts import load_brief
+    from pipeline.stages import get_stage
+    p = tmp_path / "i.md"
+    p.write_text("---\nslug: i\nvalidation_mode: new_market\n---\n# Idea brief\nbody\n")
+    b = load_brief(p)
+    assert b.validation_mode == "new_market"
+    txt = render(get_stage("problem"), b, {})
+    assert "new_market" in txt or "new market" in txt.lower()

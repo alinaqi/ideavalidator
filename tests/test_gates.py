@@ -75,3 +75,18 @@ def test_unknown_objective_behaves_like_default():
     scores = {c: 4 for c in rule.criteria}; scores["breakeven_reachability"] = 1
     out = _out(scores); out["objective"] = "bogus"
     assert evaluate("economics", out).verdict == "KILL"
+
+
+def test_validation_mode_demotes_problem_existing_spend():
+    rule = RULES["problem"]
+    scores = {c: 4 for c in rule.criteria}; scores["existing_spend"] = 1
+    assert evaluate("problem", _out(scores)).verdict == "KILL"
+    out = _out(scores); out["validation_mode"] = "new_market"
+    assert evaluate("problem", out).verdict == "PIVOT"
+
+
+def test_objective_and_mode_demotions_union():
+    rule = RULES["market"]
+    scores = {c: 4 for c in rule.criteria}; scores["market_pull"] = 1
+    out = _out(scores); out["validation_mode"] = "new_market"
+    assert evaluate("market", out).verdict == "PIVOT"  # market_pull demoted by mode

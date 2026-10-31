@@ -32,7 +32,18 @@ constraints and strategic options — it must not become a feature-copy list (PD
 7. **Whitespace**: underserved segments, unmet jobs, pricing gaps, delivery-model gaps found in reviews.
 8. **Learn, don't copy**: 3-5 principles from competitors' successes/failures.
 
+## Blue ocean / innovation lens (always do this; it is how we avoid red-ocean bias)
+- **ERRC grid** vs the industry's taken-for-granted factors: what to ELIMINATE, REDUCE, RAISE and
+  CREATE to break the value/cost trade-off (Kim & Mauborgne value innovation = differentiation AND low
+  cost at once). Be concrete per factor.
+- **Three tiers of noncustomers**: (1) soon-to-be/on-the-edge users of the current category, (2)
+  refusing noncustomers who looked and said no, (3) unexplored noncustomers in other markets who share
+  the job. What would convert each tier?
+- **The uncontested move**: state the single value-innovation move that would create new demand rather
+  than fight for existing demand, and what makes it hard to copy.
+
 ## Required sections
+blue_ocean, noncustomers,
 alternatives, market_pull, market_sizing, trends, technology_frontier, regulation,
 distribution_channels, whitespace, learn_not_copy
 

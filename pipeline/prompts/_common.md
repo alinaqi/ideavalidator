@@ -43,6 +43,8 @@ Ranked list of what we still do not know that would change the decision.
 This idea's **business model** is: {{business_model}}
 This idea's **success definition** is: {{success_definition}}
 Objective guidance: {{success_guidance}}
+This idea's **validation mode** is: {{validation_mode}}
+Validation-mode guidance: {{validation_guidance}}
 
 Honour these or you will reach the wrong verdict:
 
@@ -72,3 +74,12 @@ Honour these or you will reach the wrong verdict:
 5. **The riskiest assumption you select for testing must be the thesis's core mechanism**, not an
    incidental price point. If the whole idea depends on an acquisition loop or a graph/network, the
    first experiment tests that loop, not a generic pre-sale of something adjacent.
+
+6. **Match the validation regime to novelty (out-of-the-box ideas are validated differently).** If the
+   validation mode is a new market / innovation, do NOT treat the absence of competitors, search volume
+   or existing spend as evidence of no demand — that is expected for a created category. Judge the market
+   the idea could create, use analogies/proxies for evidence, and propose a cheap DESIGNED demand-creation
+   test (pretotype / XYZ hypothesis, fake door, landing + waitlist, Wizard-of-Oz, concierge, pre-order)
+   with a pre-registered signal, rather than hunting for people who already pay. Do not reward a red-ocean
+   (crowded, well-served) market as 'validated demand' while killing a blue-ocean one for having no
+   incumbents; name the uncontested move.

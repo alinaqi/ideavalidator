@@ -140,3 +140,12 @@ def test_council_survives_total_synthesis_failure(brief_path, seeded_out_dir):
     data = run_council(ctx)
     assert data["synthesis"] == {} and "down" in data["synthesis_error"]
     assert (seeded_out_dir / "council.json").exists()
+
+
+def test_blue_ocean_innovator_persona_exists():
+    members, _, _ = load_personas()
+    roles = " ".join(p.role.lower() for p in members)
+    assert "blue ocean" in roles or "innovat" in roles
+    bo = next(p for p in members if "blue ocean" in p.role.lower() or "innovat" in p.role.lower())
+    fw = " ".join(bo.frameworks).lower()
+    assert "blue ocean" in fw or "errc" in fw or "value innovation" in fw

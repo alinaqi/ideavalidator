@@ -52,3 +52,14 @@ needed to be flexible.
 
 - Supersedes: N/A
 - Related: 0001 (gates), 0003 (sounding board); the a real run run under runs/ that prompted this.
+
+## Addendum (2026-11-01): blue-ocean perspective + validation modes
+
+Added a third flexibility axis, `validation_mode` (`pipeline/modes.py`): `existing_market` (default) and
+`new_market`. For new-market/innovation ideas the regime changes — absence of competitors, search volume
+or existing spend is expected and no longer a hard-KILL (demotes problem.existing_spend and
+market.market_pull), and every stage is told to use analog/proxy evidence plus a designed demand-creation
+test (Savoia pretotype/XYZ, fake door, landing+waitlist, Wizard-of-Oz, concierge, pre-order) instead of
+hunting for existing payers. Gates union objective + mode demotions. Also added a "Blue Ocean Innovator"
+council persona and an ERRC-grid / three-tiers-of-noncustomers / uncontested-move block to the market
+stage, so the pipeline proposes the uncontested move rather than only grading the red ocean.

@@ -18,6 +18,7 @@ class Brief:
     meta: dict = field(default_factory=dict)
     business_model: str = ""
     success_definition: str = ""
+    validation_mode: str = ""
 
 
 def _split_frontmatter(text: str) -> tuple:
@@ -39,7 +40,8 @@ def load_brief(path: Path) -> Brief:
     slug = meta.get("slug") or path.stem
     return Brief(slug=slug, title=meta.get("title") or slug, body=body, meta=meta,
                  business_model=meta.get("business_model", ""),
-                 success_definition=meta.get("success_definition", ""))
+                 success_definition=meta.get("success_definition", ""),
+                 validation_mode=meta.get("validation_mode", ""))
 
 
 def prior_block(prior: dict) -> str:
@@ -49,14 +51,18 @@ def prior_block(prior: dict) -> str:
 
 
 def _replacements(stage, brief: Brief, prior: dict) -> dict:
+    from .modes import guidance as mode_guidance, resolve as mode_resolve
     from .objectives import guidance, resolve
 
     objective = resolve(brief)
+    mode = mode_resolve(brief)
     return {
         "{{common}}": (PROMPT_DIR / "_common.md").read_text().strip(),
         "{{business_model}}": brief.business_model or "UNKNOWN (classify it in this stage)",
         "{{success_definition}}": brief.success_definition or f"UNKNOWN -> treat as {objective.label}",
         "{{success_guidance}}": f"{objective.label}: {guidance(objective.key)}",
+        "{{validation_mode}}": brief.validation_mode or mode.key,
+        "{{validation_guidance}}": f"{mode.label}: {mode_guidance(mode.key)}",
         "{{title}}": brief.title,
         "{{brief}}": brief.body.strip(),
         "{{prior}}": prior_block(prior),

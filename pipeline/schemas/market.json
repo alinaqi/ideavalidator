@@ -285,6 +285,55 @@
       "items": {
         "type": "string"
       }
+    },
+    "errc_grid": {
+      "type": "object",
+      "properties": {
+        "eliminate": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reduce": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "raise": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "create": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "noncustomer_tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tier": {
+            "type": "string"
+          },
+          "who": {
+            "type": "string"
+          },
+          "what_would_convert": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "uncontested_move": {
+      "type": "string"
     }
   },
   "required": [
