@@ -13,15 +13,32 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
 /ideavalidator <your idea in one line>
 ```
 
+## Modes
+
+- **Idea text:** `/ideavalidator a tool that turns scans into a trust seal` — interview + validate.
+- **Website URL:** `/ideavalidator https://zenloop.com` — ingest the site and validate the company's
+  own business. `/ideavalidator https://zenloop.com — a free survey creator` (or `for zenloop.com, a
+  free survey creator`) — validate that NEW idea for that company, using the site as context/why-us.
+- **Output:** add `-output html|pdf|xlsx|md` (alias `--format`) to export the report; html/pdf include
+  Gemini-generated imagery and inline charts. Default is the markdown memo.
+- **Help:** `/ideavalidator -help` — show this usage and stop.
+
 ## Instructions
 
 1. **Resolve the home directory** `IDEAVALIDATOR_HOME` (the folder containing `pipeline/` and
    `install.sh`): use `$CLAUDE_PLUGIN_ROOT` if set and it contains `pipeline/cli.py`; otherwise the
    path `install.sh` wrote into the skill; otherwise walk up from the skill file to the dir holding
    `pipeline/cli.py`.
-2. **Load the skill**: read `skills/ideavalidator/SKILL.md` under that home and follow it exactly. It
-   owns the full workflow (environment check, intake interview, pipeline run, sounding board, citation
-   spot-checks, decision memo, recording the decision).
+2. **Help / parse the argument**: if it is `-help`/`--help`/`help`, print the Modes block above and
+   stop. Detect a URL (http/https or a bare domain like `zenloop.com`) and any angle after `—`, `-`,
+   `:` or `for <url>,`. Detect an output format from `-output`/`--output`/`--format`.
+3. **If a URL was given**, build the brief agentically first:
+   `cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli ingest --url <url> [--idea "<angle>"]`.
+   Read the generated `ideas/<slug>.md`, show the user its pitch and thesis spine in two lines, and skip
+   the interview unless a MANDATORY field is UNKNOWN (then ask only those).
+4. **Load the skill**: read `skills/ideavalidator/SKILL.md` and follow it for the full workflow
+   (environment check, pipeline run incl. the concrete willingness-to-pay heuristic, sounding board,
+   citation spot-checks, decision memo, recording the decision). Run it fully agentically.
 3. **Environment**: run `cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli doctor`. If there
    is no `.venv`, run `./install.sh` first. If `GEMINI_API_KEY` is missing, ask the user to put it in
    `$IDEAVALIDATOR_HOME/.env` (never paste a key into chat). Provider keys for the sounding board are
@@ -30,7 +47,10 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
    model, success definition and whether it is an existing-market or out-of-the-box new-market idea),
    write `ideas/<slug>.md`, run the stages, convene the sounding board, challenge the evidence, present
    the memo, and record the founder's decision.
-5. **Tell the user** where the outputs are (`runs/<slug>/`) and what the verdict and next test are.
+6. **Export** if a format was requested:
+   `.venv/bin/python -m pipeline.cli report --idea <slug> --format <fmt>` (html/pdf embed imagery).
+7. **Tell the user** the verdict, the next real-world test, and where outputs are (`runs/<slug>/` and any
+   exported `report.<ext>`).
 
 ## Example
 

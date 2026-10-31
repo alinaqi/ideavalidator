@@ -63,6 +63,19 @@ class GeminiClient:
         return Research(response.text or "", extract_sources(response),
                         search_queries(response), self.model)
 
+    def research_urls(self, prompt: str) -> Research:
+        """Grounded pass that reads page URLs (url_context) and fills gaps with search."""
+        tools = [types.Tool(url_context=types.UrlContext()),
+                 types.Tool(google_search=types.GoogleSearch())]
+        config = types.GenerateContentConfig(tools=tools, temperature=0.3)
+        try:
+            response = self.models.generate_content(
+                model=self.model, contents=prompt, config=config)
+        except Exception:
+            return self.research(prompt)
+        return Research(response.text or "", extract_sources(response),
+                        search_queries(response), self.model)
+
     def structure(self, text: str, schema: dict) -> dict:
         """Second pass: no tools, JSON mode, schema-constrained. One retry."""
         config = types.GenerateContentConfig(

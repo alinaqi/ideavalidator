@@ -89,6 +89,14 @@ class FakeClient:
     def deep_research(self, prompt):
         return self.research("DEEP:" + prompt)
 
+    def research_urls(self, prompt):
+        self.prompts.append(prompt)
+        from pipeline.gemini import Research
+
+        return Research(text="research text from site", sources=[
+            {"url": "https://zenloop.com", "title": "Zenloop"}
+        ], queries=["zenloop"])
+
     def structure(self, text, schema):
         assert "research text" in text
         assert isinstance(schema, dict)

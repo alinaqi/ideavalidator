@@ -29,6 +29,21 @@ cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli doctor
   as `GEMINI_API_KEY=...` (never paste a key into chat logs or files other than `.env`).
 - If `doctor` passes, continue. Do not run the pipeline when it fails.
 
+## Step 0b — URL ingestion (when given a website)
+
+If the user gives a website URL (optionally with an angle, e.g. `zenloop.com — a free survey creator`,
+or `for zenloop.com, a free survey creator`), do NOT run the manual interview. Instead build the brief
+agentically:
+
+```bash
+cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli ingest --url <url> [--idea "<angle>"]
+```
+
+This reads the site (Gemini url_context) + search and writes `ideas/<slug>.md`. With no angle it
+validates the company's own business; with an angle it validates that new idea FOR the company. Show the
+user the generated pitch and thesis spine in two lines, then go straight to Step 2. Only ask follow-ups
+if a MANDATORY field came back UNKNOWN.
+
 ## Step 1 — Intake interview (ask only what is missing)
 
 Read `ideas/_template.md`. Compare it with what the user already said (the argument, pasted notes,
@@ -97,6 +112,17 @@ For every finished stage read `runs/<slug>/<stage>.json` and:
    place the research contradicts the founder.
 4. Look for the anti-patterns in `docs/WORKFLOW.md` §10 (request counts as demand, top-down TAM,
    "what would you pay", single design partner, tarpits).
+
+## Step 3b — Export the report (if a format was requested)
+
+Default output is the markdown memo. If the user asked for a format (`-output`/`--format`
+`html|pdf|xlsx|md`), export it:
+
+```bash
+.venv/bin/python -m pipeline.cli report --idea <slug> --format <fmt>
+```
+`html` and `pdf` include inline SVG charts and a Gemini-generated hero image; `pdf` renders via headless
+Chrome or weasyprint, falling back to `report.html` if neither is present. Tell the user the file path.
 
 ## Step 4 — Present the result
 

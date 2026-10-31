@@ -7,10 +7,12 @@ from pathlib import Path
 
 from .config import MissingKeyError, Settings
 from .council import CouncilContext, run_council
+from .ingest import IngestRequest, build_brief
 from .gemini import GeminiClient
 from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
 from .providers import Chat, load_keys
 from .report import build_memo
+from .report_formats import cli_report
 from .runner import MissingDependency, RunContext, run_stage
 from .stages import STAGES, resolve
 
@@ -20,23 +22,35 @@ ROOT = Path(__file__).resolve().parents[1]
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pipeline", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    run = sub.add_parser("run", help="run validation stages for an idea brief")
-    run.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
-    run.add_argument("--stages", default="all", help="'all' or comma list of stage ids")
-    run.add_argument("--out", default=str(ROOT / "runs"), help="runs directory")
-    run.add_argument("--deep", action="store_true", help="use Gemini Deep Research")
-    run.add_argument("--stop-on-kill", action="store_true",
-                     help="halt after the first stage whose gate is KILL")
-    rep = sub.add_parser("report", help="print the decision memo for an idea slug")
-    rep.add_argument("--idea", required=True, help="idea slug (runs/<slug>)")
-    rep.add_argument("--out", default=str(ROOT / "runs"))
-    _add_council_parser(sub)
+    _add_run_report(sub)
+    _add_ingest_council(sub)
     sub.add_parser("stages", help="list stages in canonical order")
     sub.add_parser("doctor", help="check key, models, prompt templates and schemas")
     return parser
 
 
-def _add_council_parser(sub) -> None:
+def _add_run_report(sub) -> None:
+    run = sub.add_parser("run", help="run validation stages for an idea brief")
+    run.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
+    run.add_argument("--stages", default="all", help="'all' or comma list of stage ids")
+    run.add_argument("--out", default=str(ROOT / "runs"), help="runs directory")
+    run.add_argument("--deep", action="store_true", help="use Gemini Deep Research")
+    run.add_argument("--stop-on-kill", action="store_true", help="halt at first KILL gate")
+    rep = sub.add_parser("report", help="export the decision report for an idea slug")
+    rep.add_argument("--idea", required=True, help="idea slug (runs/<slug>)")
+    rep.add_argument("--out", default=str(ROOT / "runs"))
+    rep.add_argument("--format", "--output", "-output", dest="format", default="md",
+                     choices=["md", "html", "xlsx", "pdf"],
+                     help="md (stdout), html, xlsx, or pdf; html/pdf get Gemini imagery")
+
+
+def _add_ingest_council(sub) -> None:
+    ing = sub.add_parser("ingest", help="build a brief from a website URL (optionally for a new angle)")
+    ing.add_argument("--url", required=True, help="business website URL to read")
+    ing.add_argument("--idea", default="", help="optional angle/new idea FOR that company")
+    ing.add_argument("--slug", default="", help="optional slug (else derived from domain + angle)")
+    ing.add_argument("--ideas-dir", default=str(ROOT / "ideas"), help="where to write the brief")
+    ing.add_argument("--run", action="store_true", help="run the full pipeline after ingesting")
     council = sub.add_parser("council", help="multi-model sounding board debate on an idea")
     council.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
     council.add_argument("--out", default=str(ROOT / "runs"))
@@ -75,6 +89,21 @@ def _cmd_doctor() -> int:
           f"\nstructure model: {settings.structure_model}\ndeep agent:      {settings.deep_agent}"
           f"\ncouncil models:  {', '.join(Chat(load_keys(ROOT)).available()) or 'none (optional)'}")
     return 0 if ok else 1
+
+
+def _cmd_ingest(args, factory) -> int:
+    client = _make_client(factory)
+    slug, md = build_brief(client, IngestRequest(args.url, args.idea, args.slug))
+    path = Path(args.ideas_dir) / f"{slug}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(md)
+    print(f"ingested {args.url} -> {path}")
+    if args.run:
+        ns = argparse.Namespace(idea=str(path), stages="all", out=str(ROOT / "runs"),
+                                deep=False, stop_on_kill=False)
+        return _cmd_run(ns, factory)
+    print(f"next: python -m pipeline.cli run --idea {path}")
+    return 0
 
 
 def _cmd_council(args, factories: tuple) -> int:
@@ -119,8 +148,10 @@ def main(argv=None, client_factory=None, chat_factory=None) -> int:
         return _cmd_doctor()
     if args.command == "council":
         return _cmd_council(args, (client_factory, chat_factory))
+    if args.command == "ingest":
+        return _cmd_ingest(args, client_factory)
     if args.command == "report":
-        print(build_memo(Path(args.out) / args.idea))
+        print(cli_report(Path(args.out) / args.idea, args.format, ROOT))
         return 0
     try:
         return _cmd_run(args, client_factory)

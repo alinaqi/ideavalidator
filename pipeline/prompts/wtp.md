@@ -34,7 +34,21 @@ cheapest real-world test the founder runs next.
    rule, decision rule (continue / pivot price / pivot segment / stop).
 8. **Stated vs behavioural notes**: what in the evidence is merely stated and how much weight it got.
 
+## Concrete willingness-to-pay estimate (required — show the math)
+Produce a single concrete WTP figure (number or tight range) with an explicit derivation, not just a
+range of comparables. Use a BLENDED heuristic and reconcile the three:
+1. **Value-based:** WTP ≈ a defensible fraction (typically 10-30%) of the quantified value the customer
+   gets per period — revenue unblocked, cost saved, or hours saved × their loaded hourly cost. State the
+   value, the fraction and why.
+2. **Comparable-anchored:** what this exact segment already pays for the nearest substitute (from the
+   comparables above).
+3. **10x rule sanity check:** the price must deliver ≥10x its cost in value; flag if it doesn't.
+Show the arithmetic, label every input SOURCED or ESTIMATE, give a confidence (HIGH/MED/LOW), and state
+plainly that this is a desk estimate to be proven by the pre-sale, never treated as validated demand.
+Fill the `estimated_wtp` object {amount, period, method, basis, arithmetic, confidence}.
+
 ## Required sections
+estimated_wtp,
 price_comparables, budget_source, value_metric_options, price_anchors, packaging_hypotheses,
 van_westendorp_questions, pre_sale_experiment, stated_vs_behavioral_notes
 

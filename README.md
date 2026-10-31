@@ -44,6 +44,27 @@ below.
 - **Decisions:** `docs/adr/` — architecture decision records.
 - **Killed ideas:** `docs/KILL_LOG.md`.
 
+## Validate a website URL
+
+Point it at any business website and it extracts the context and runs the full cycle:
+
+```bash
+# validate the company's own business
+.venv/bin/python -m pipeline.cli ingest --url https://zenloop.com --run
+# validate a NEW idea for that company
+.venv/bin/python -m pipeline.cli ingest --url https://zenloop.com --idea "a free survey creator" --run
+```
+
+In Claude Code this is just `/ideavalidator https://zenloop.com — a free survey creator`.
+
+## Output formats
+
+```bash
+.venv/bin/python -m pipeline.cli report --idea <slug> --format md|html|xlsx|pdf
+```
+`md` prints the memo; `html`/`pdf` include inline charts and a Gemini-generated hero image; `xlsx` is a
+gate + evidence workbook; `pdf` renders via headless Chrome or weasyprint (falls back to html).
+
 ## Sounding board (multi-model debate)
 
 Six personas, each anchored in named thinking frameworks (Cohen, Mom Test/JTBD, Sequoia Arc + 7 Powers,

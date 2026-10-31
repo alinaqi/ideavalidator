@@ -73,3 +73,14 @@ def test_council_command_runs_with_fakes(brief_path, tmp_path, capsys):
     assert code == 0
     assert (out / "test-idea" / "council.json").exists()
     assert "PIVOT" in capsys.readouterr().out
+
+
+def test_ingest_command_writes_brief(tmp_path, capsys):
+    from tests.test_ingest import BRIEF
+    ideas = tmp_path / "ideas"; ideas.mkdir()
+    code = cli.main(["ingest", "--url", "https://zenloop.com", "--idea", "a free survey creator",
+                     "--ideas-dir", str(ideas)], client_factory=lambda s: FakeClient(structured=BRIEF))
+    assert code == 0
+    files = list(ideas.glob("*.md"))
+    assert files and "business_model:" in files[0].read_text()
+    assert "ingest" in capsys.readouterr().out.lower() or str(files[0]) in capsys.readouterr().out

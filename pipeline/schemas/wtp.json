@@ -258,6 +258,44 @@
       "items": {
         "type": "string"
       }
+    },
+    "estimated_wtp": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string",
+          "description": "concrete number or tight range"
+        },
+        "period": {
+          "type": "string",
+          "description": "per month / per deal / per response etc."
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "VALUE_BASED",
+            "COMPARABLE_ANCHORED",
+            "TEN_X_RULE",
+            "BLENDED"
+          ]
+        },
+        "basis": {
+          "type": "string",
+          "description": "the value created / cost saved / revenue unblocked it is a fraction of"
+        },
+        "arithmetic": {
+          "type": "string",
+          "description": "the shown calculation, inputs labelled SOURCED or ESTIMATE"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "HIGH",
+            "MED",
+            "LOW"
+          ]
+        }
+      }
     }
   },
   "required": [
@@ -268,6 +306,7 @@
     "unknowns",
     "price_comparables",
     "price_anchors",
-    "pre_sale_experiment"
+    "pre_sale_experiment",
+    "estimated_wtp"
   ]
 }

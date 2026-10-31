@@ -88,3 +88,16 @@ def test_deep_research_polls_until_complete(tmp_path, monkeypatch):
     r = c.deep_research("p")
     assert r.text == "deep text"
     assert r.model == "da"
+
+
+def test_research_urls_uses_url_context_tool(tmp_path):
+    from pipeline.config import Settings
+    from pipeline.gemini import GeminiClient
+    c = GeminiClient(Settings(api_key="k", research_model="rm", structure_model="sm",
+                              deep_agent="da", root=tmp_path))
+    from tests.test_gemini import FakeModels, _response
+    fake = FakeModels([_response("site findings", ["https://zenloop.com"])])
+    c._models = fake
+    r = c.research_urls("read https://zenloop.com")
+    assert r.text == "site findings"
+    assert fake.calls[0]["config"].tools  # url_context (+ search) tools present

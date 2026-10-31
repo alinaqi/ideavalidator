@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {"type": "string"},
+    "one_sentence_pitch": {"type": "string"},
+    "company_summary": {"type": "string", "description": "what the website says the company does"},
+    "business_model": {"type": "string", "description": "direct-sales SaaS | plg_freemium | directory_graph | marketplace_network | usage_api | services | hybrid"},
+    "success_definition": {"type": "string", "description": "services_cash | compounding_product | plg_network | venture_scale (blank ok)"},
+    "validation_mode": {"type": "string", "description": "existing_market | new_market"},
+    "thesis_spine": {"type": "object", "properties": {
+      "core_mechanism": {"type": "string"}, "moat_end_state": {"type": "string"},
+      "non_negotiables": {"type": "array", "items": {"type": "string"}}}},
+    "actor": {"type": "string"},
+    "job": {"type": "string"},
+    "current_workaround_and_cost": {"type": "string"},
+    "why_now": {"type": "string"},
+    "why_us": {"type": "string"},
+    "candidate_verticals": {"type": "array", "items": {"type": "string"}},
+    "value_metric": {"type": "string"},
+    "price_hypothesis": {"type": "string"},
+    "channel": {"type": "string"},
+    "risks": {"type": "array", "items": {"type": "string"}},
+    "out_of_scope": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["title", "one_sentence_pitch", "actor", "job", "thesis_spine"]
+}
