@@ -1,5 +1,7 @@
 # ideavalidator
 
+_This is the validation model [palgu.ai](https://palgu.ai) uses to validate specs._
+
 Validate a business idea in detail, toward **profitable from day one**: problem → market → ICP and
 beachhead vertical → SWOT → willingness to pay → day-one economics → risk map → GO/PIVOT/KILL memo.
 Gemini (Google-Search-grounded) does the desk research; deterministic gates and PDLC evidence-quality
@@ -108,3 +110,7 @@ runs/                per-idea outputs (gitignored)
 docs/                WORKFLOW.md, FRAMEWORKS.md, KILL_LOG.md, adr/
 tests/               pytest suite with fake Gemini client
 ```
+
+## License
+
+MIT © 2026 Ali Naqi Shaheen. See [LICENSE](LICENSE).
