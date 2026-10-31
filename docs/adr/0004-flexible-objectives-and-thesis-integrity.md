@@ -51,7 +51,7 @@ needed to be flexible.
 ## Links
 
 - Supersedes: N/A
-- Related: 0001 (gates), 0003 (sounding board); the a real run run under runs/ that prompted this.
+- Related: 0001 (gates), 0003 (sounding board)
 
 ## Addendum (2026-11-01): blue-ocean perspective + validation modes
 
