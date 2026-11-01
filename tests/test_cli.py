@@ -146,3 +146,22 @@ def test_run_no_signals_skips(brief_path, tmp_path, monkeypatch):
     cli.main(["run", "--idea", str(brief_path), "--stages", "frame", "--out", str(runs),
               "--no-signals"], client_factory=lambda s: FakeClient())
     assert not (runs / "test-idea" / "signals.json").exists()
+
+
+def test_run_writes_selfcheck(brief_path, tmp_path, monkeypatch):
+    from pipeline import signals_sources
+    monkeypatch.setattr(signals_sources, "default_fetchers", lambda: _FakeFetchers())
+    runs = tmp_path / "runs"
+    cli.main(["run", "--idea", str(brief_path), "--stages", "frame", "--out", str(runs)],
+             client_factory=lambda s: FakeClient())
+    assert (runs / "test-idea" / "selfcheck.md").exists()
+
+
+def test_selfcheck_command(brief_path, tmp_path, capsys):
+    runs = tmp_path / "runs"; (runs / "test-idea").mkdir(parents=True)
+    (runs / "test-idea" / "icp.json").write_text(json.dumps(
+        {"beachhead": {"vertical": "Healthcare AI startups"}}))
+    code = cli.main(["selfcheck", "--idea", str(brief_path), "--out", str(runs)])
+    assert code == 0
+    assert (runs / "test-idea" / "selfcheck.json").exists()
+    assert "self-validation" in capsys.readouterr().out.lower()

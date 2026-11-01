@@ -89,6 +89,11 @@ def _signals_block(out_dir) -> str:
             f"social: {soc or 'none'}. _Absence is not evidence against the idea._")
 
 
+def _selfcheck_block(out_dir) -> str:
+    path = out_dir / "selfcheck.md"
+    return "\n\n---\n\n" + path.read_text() if path.exists() else ""
+
+
 def build_memo(out_dir) -> str:
     rows, gates = _memo_rows(out_dir)
     overall = rollup(gates)
@@ -96,4 +101,5 @@ def build_memo(out_dir) -> str:
     tail = decision.read_text() if decision.exists() else "_Decision stage not yet run._"
     return (f"# Decision memo — {out_dir.name}\n\n**Overall verdict: {overall.verdict}** "
             f"(mean gate score {overall.score})\n\n| Stage | Verdict | Score | Summary |\n"
-            f"|---|---|---|---|\n" + "\n".join(rows) + _signals_block(out_dir) + "\n\n---\n\n" + tail)
+            f"|---|---|---|---|\n" + "\n".join(rows) + _signals_block(out_dir)
+            + _selfcheck_block(out_dir) + "\n\n---\n\n" + tail)

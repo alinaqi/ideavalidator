@@ -369,6 +369,28 @@
       "items": {
         "type": "string"
       }
+    },
+    "adjacent_opportunities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "idea": {
+            "type": "string"
+          },
+          "why_bigger": {
+            "type": "string"
+          },
+          "why_separate": {
+            "type": "string",
+            "description": "why this is a DIFFERENT business, not the one being validated"
+          }
+        },
+        "required": [
+          "idea"
+        ]
+      },
+      "description": "bigger/adjacent businesses this could become \u2014 recorded separately, NOT scored as the idea"
     }
   },
   "required": [

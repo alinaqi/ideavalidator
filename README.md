@@ -93,6 +93,10 @@ cp ideas/_template.md ideas/my-idea.md && $EDITOR ideas/my-idea.md
 Outputs land in `runs/<slug>/<stage>.json|.md`. Stages: frame → classify → problem → market → icp → swot → wtp → economics → risks → decision. `--stages a,b` runs a subset (dependencies must exist);
 `--deep` uses Gemini Deep Research; `--stop-on-kill` halts at the first KILL gate.
 
+## Self-validation (anti over-qualification)
+
+After a run, a self-validation layer (`pipeline.cli selfcheck`, and automatically at the end of `run`) audits the pipeline's own output for over-qualification / off-ICP drift (the idea quietly becoming a bigger business the brief never described), score/﻿content inconsistencies, KILLs built on weak evidence, and unreachable (fabricated) citations. Flags are advisory — verify or rerun. The validator scores the idea **as stated, for its stated ICP**; bigger adjacent businesses are recorded separately, never counted as the idea passing.
+
 ## Category & business model
 
 The `classify` stage (right after `frame`) names the business **category** from a built-in taxonomy (dev tools/API, AI action-layer/connector, marketplace, vertical SaaS, …) so every downstream stage compares to the *right* incumbents — not look-alikes from another category. It enumerates the category's candidate **business models** (so business-model innovation is explicit), fills a **Business Model Canvas**, and writes a **USP** + value-positioning map. `html`/`pdf` reports render the canvas and positioning map as visuals. `classify` is framing only — it never changes the GO/PIVOT/KILL verdict.

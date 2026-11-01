@@ -141,6 +141,10 @@ Default output is the markdown memo. If the user asked for a format (`-output`/`
 Chrome or weasyprint, falling back to `report.html` if neither is present. By default the file is written
 into `runs/<slug>/`; pass `--dest <dir>` (alias `--out-dir`) to save it elsewhere. `html`/`pdf` also render the Business Model Canvas (9-block grid) and the value-positioning map when the classify stage ran. Tell the user the file path.
 
+## Step 3c — Self-validation layer (don't over-qualify)
+
+`run` ends by writing `runs/<slug>/selfcheck.{md,json}` (also: `pipeline.cli selfcheck --idea ideas/<slug>.md`). It audits the pipeline's OWN output for: **over-qualification / off-ICP** (a beachhead or category the brief never named — the idea quietly morphing into a bigger business), **score inconsistencies** (a kill_flag or score that contradicts the stage's own numbers), **weak KILLs** (a KILL on one low-directness source), and **unreachable citations** (fabricated URLs). Treat every flag as must-verify: open the cited sources, and **rerun** any stage whose score contradicts its content before trusting it. Never report an over-qualified/adjacent business as the original idea passing — the scored subject is the founder's idea and ICP as stated.
+
 ## Step 4 — Present the result
 
 After all stages: `.venv/bin/python -m pipeline.cli report --idea <slug>`. Present, in this order:
@@ -150,6 +154,8 @@ After all stages: `.venv/bin/python -m pipeline.cli report --idea <slug>`. Prese
 - Beachhead ICP, price anchors, break-even customer count and the channel that reaches them.
 - The bet record's kill condition and the two-week plan (day one must be a revenue-seeking action).
 - What would change our mind.
+- The self-validation flags (Step 3c) and what you did about them.
+- Judge and present the idea AS STATED for its ICP. List any bigger/adjacent business separately as a DIFFERENT idea to validate on its own — never as the original idea passing.
 Keep it under ~400 words plus tables; the full detail is in `runs/<slug>/`.
 
 ## Step 5 — Record the decision and hand over

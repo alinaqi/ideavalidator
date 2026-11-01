@@ -75,6 +75,20 @@ Honour these or you will reach the wrong verdict:
    incidental price point. If the whole idea depends on an acquisition loop or a graph/network, the
    first experiment tests that loop, not a generic pre-sale of something adjacent.
 
+7. **Do NOT over-qualify the idea. Score it AS STATED, for its STATED actor/ICP and business model.**
+   When the idea-as-stated looks hard, the tempting failure is to quietly swap in a bigger, more
+   defensible, more "fundable" business — a different buyer, a regulated vertical the founder never
+   named (e.g. jumping a personal/consumer tool to "healthcare + HIPAA at $999/mo"), or an enterprise
+   model — and then score THAT. That is goal-substitution and it is wrong. Rules:
+   - The scored subject is the founder's idea + ICP + business model. Keep the ICP fixed; a personal/
+     consumer idea is judged as consumer, not re-sold as B2B infra to make the economics work.
+   - Any "this would work better as X" belongs in an `adjacent_opportunities` list as a SEPARATE idea
+     (with why it is bigger and why it is NOT the same business). It must NOT become the recommendation
+     and must NOT lift any score or gate.
+   - Never introduce a buyer, vertical, compliance regime or price tier the brief did not specify in
+     order to clear a gate. If the honest verdict for the idea-as-stated is PIVOT or KILL, say so.
+   - A harder, smaller, honestly-scored idea beats an inflated adjacent business that passes on paper.
+
 6. **Match the validation regime to novelty (out-of-the-box ideas are validated differently).** If the
    validation mode is a new market / innovation, do NOT treat the absence of competitors, search volume
    or existing spend as evidence of no demand — that is expected for a created category. Judge the market

@@ -34,9 +34,15 @@ Date: {{today}}
    (`value_positioning.axes.x_label`, `.y_label`), place this idea (`our_position`, x/y in 0-100) and the
    key incumbents (`competitors`, each x/y in 0-100) so the whitespace is visible.
 
+7. **Do not over-qualify.** Classify the idea AS STATED. If a *different* category or business model
+   would be bigger or more defensible (e.g. selling infra B2B instead of the stated consumer tool), put
+   it in `adjacent_opportunities` with why it is bigger and why it is a SEPARATE business — do not make
+   it the recommendation.
+
 ## Required sections
 primary_category, secondary_categories, category_rationale, incumbents, candidate_business_models,
-recommended_business_model, business_model_canvas, usp, positioning_statement, value_positioning
+recommended_business_model, business_model_canvas, usp, positioning_statement, value_positioning,
+adjacent_opportunities
 
 ## Scoring criteria (0-5)
 category_confidence (how clearly this maps to one category and the right incumbents),

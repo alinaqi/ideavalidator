@@ -35,7 +35,11 @@ Also required this stage:
 - **scope_drift**: state how far the recommended bet has moved from the founder's Thesis spine, whether
   the drift was forced by evidence or chosen for convenience, and whether it discards any stated asset/
   moat. If it does, say so plainly and present the un-narrowed thesis as a preserved option with its own
-  experiment, not just the narrow bet.
+  experiment, not just the narrow bet. **Over-qualification check**: if the earlier stages scored a
+  bigger/different business than the idea-as-stated (different buyer, a vertical or compliance regime the
+  brief never named, an enterprise model for a consumer idea), call it out HERE, give the honest verdict
+  for the idea AS STATED, and move the bigger business to `adjacent_opportunities` — do not report the
+  inflated version as the original idea passing.
 - Design the two-week plan for the ACTUAL business model: for a PLG/directory/network thesis the first
   tests are build-N-profiles / claim-rate / activation-funnel, NOT only a pre-sale of an adjacent service.
 

@@ -13,6 +13,7 @@ from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
 from .providers import Chat, load_keys
 from .report_export import ReportJob, cli_report
 from .runner import MissingDependency, RunContext, run_stage
+from .selfcheck_run import finish_selfcheck, run_selfcheck_cmd
 from .signals import SIGNAL_KEYS
 from .signals_run import prep_signals, run_signals_cmd
 from .stages import STAGES, resolve
@@ -60,6 +61,9 @@ def _add_ingest_council(sub) -> None:
     sig = sub.add_parser("signals", help="demand signals: search volume + Reddit/X validation")
     sig.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
     sig.add_argument("--out", default=str(ROOT / "runs"))
+    sc = sub.add_parser("selfcheck", help="self-validation audit of a completed run")
+    sc.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
+    sc.add_argument("--out", default=str(ROOT / "runs"))
     council = sub.add_parser("council", help="multi-model sounding board debate on an idea")
     council.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
     council.add_argument("--out", default=str(ROOT / "runs"))
@@ -152,6 +156,7 @@ def _cmd_run(args, factory) -> int:
         if args.stop_on_kill and gate["verdict"] == "KILL":
             print(f"stopped: {stage.id} gate is KILL ({'; '.join(gate['reasons'])})")
             return 3
+    finish_selfcheck(brief, ctx.out_dir)
     print(f"\nreport: python -m pipeline.cli report --idea {brief.slug} --out {args.out}")
     return 0
 
@@ -168,6 +173,8 @@ def main(argv=None, client_factory=None, chat_factory=None) -> int:
         return _cmd_ingest(args, client_factory)
     if args.command == "signals":
         return run_signals_cmd(args, ROOT)
+    if args.command == "selfcheck":
+        return run_selfcheck_cmd(args, ROOT)
     if args.command == "report":
         job = ReportJob(run_dir=Path(args.out) / args.idea, fmt=args.format,
                         dest=Path(args.dest) if args.dest else None, root=ROOT)

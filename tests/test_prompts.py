@@ -112,3 +112,19 @@ def test_classify_template_renders_with_catalog(tmp_path):
     text = render(get_stage("classify"), brief, {})
     assert "connector" in text.lower()  # category catalog injected
     assert "Business Model Canvas" in text or "business model canvas" in text.lower()
+
+
+def test_schemas_have_adjacent_opportunities_and_in_brief():
+    import json
+    from pipeline.prompts import SCHEMA_DIR
+    for stage in ("classify", "icp", "decision"):
+        props = json.loads((SCHEMA_DIR / f"{stage}.json").read_text())["properties"]
+        assert "adjacent_opportunities" in props, stage
+    icp = json.loads((SCHEMA_DIR / "icp.json").read_text())
+    assert "in_brief" in icp["properties"]["vertical_scorecard"]["items"]["properties"]
+
+
+def test_common_prompt_has_anti_over_qualification_rule():
+    from pipeline.prompts import PROMPT_DIR
+    text = (PROMPT_DIR / "_common.md").read_text().lower()
+    assert "over-qualif" in text and "adjacent_opportunities" in text

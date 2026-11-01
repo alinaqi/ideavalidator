@@ -14,6 +14,12 @@ Date: {{today}}
 Narrow to the segment we will validate first. Use Crossing the Chasm beachhead logic, Disciplined
 Entrepreneurship market segmentation, and PDLC Empathy & Personas rules (behavioural profiles over
 demographic personas; no invented inner life; every trait traceable to evidence).
+0. **Stay on the founder's ICP — do not over-qualify.** Candidates come from the brief's actor and
+   candidate verticals. Tag each candidate `in_brief: true/false`. You MAY propose a new segment, but if
+   the top-scoring one is NOT in the brief, treat it as a PROPOSAL and keep the beachhead within the
+   founder's stated ICP unless the brief clearly invites a new vertical. Never switch to a bigger/
+   regulated vertical the founder did not name (e.g. a personal/consumer tool → "healthcare + HIPAA")
+   just to make the numbers work — put any such bigger business in `adjacent_opportunities`, not here.
 1. Enumerate **6-10 candidate verticals/segments** (from the brief, problem stage "who feels it most",
    and market whitespace). Include at least two the founder did not list.
 2. Score each 0-5 in a **vertical scorecard** on: pain_urgency, budget_authority (does one person we
