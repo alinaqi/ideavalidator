@@ -47,6 +47,46 @@ def _stage_cards(run_dir: Path) -> str:
     return "".join(cards)
 
 
+_CANVAS_BLOCKS = ("customer_segments", "value_propositions", "channels", "customer_relationships",
+                  "revenue_streams", "key_resources", "key_activities", "key_partnerships",
+                  "cost_structure")
+
+
+def _canvas_grid(run_dir: Path) -> str:
+    canvas = _load(run_dir, "classify").get("business_model_canvas") or {}
+    if not canvas:
+        return ""
+    cells = []
+    for key in _CANVAS_BLOCKS:
+        b = canvas.get(key) or {}
+        cells.append(f'<div class="bmc"><h4>{key.replace("_", " ")}</h4>'
+                     f'<p>{b.get("text", "—")}</p></div>')
+    return ('<h2>Business Model Canvas</h2><div class="bmcgrid">' + "".join(cells) + "</div>")
+
+
+def _point(p: dict, color: str) -> str:
+    x = 40 + float(p.get("x") or 0) / 100 * 320
+    y = 240 - float(p.get("y") or 0) / 100 * 210
+    return (f'<circle cx="{x:.0f}" cy="{y:.0f}" r="6" fill="{color}"/>'
+            f'<text x="{x+9:.0f}" y="{y+4:.0f}" font-size="11" fill="currentColor">{p.get("label", "")}</text>')
+
+
+def _positioning_map(run_dir: Path) -> str:
+    vp = _load(run_dir, "classify").get("value_positioning") or {}
+    if not vp.get("our_position"):
+        return ""
+    ax = vp.get("axes") or {}
+    pts = _point(vp["our_position"], "#1b7a3d")
+    pts += "".join(_point(c, "#9c1b1b") for c in (vp.get("competitors") or []))
+    return (f'<h2>Value positioning</h2><svg viewBox="0 0 400 270" width="100%" role="img">'
+            f'<line x1="40" y1="240" x2="380" y2="240" stroke="#999"/>'
+            f'<line x1="40" y1="30" x2="40" y2="240" stroke="#999"/>'
+            f'<text x="200" y="265" font-size="11" text-anchor="middle" fill="currentColor">'
+            f'{ax.get("x_label", "")}</text>'
+            f'<text x="12" y="135" font-size="11" text-anchor="middle" fill="currentColor" '
+            f'transform="rotate(-90 12 135)">{ax.get("y_label", "")}</text>{pts}</svg>')
+
+
 def _hero(image_fn, slug: str) -> str:
     if not image_fn:
         return ""
@@ -61,13 +101,19 @@ def _html(run_dir: Path, image_fn) -> str:
     overall = _load(run_dir, "decision").get("gate", {}).get("verdict", "UNKNOWN")
     css = ("body{font-family:system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 16px;"
            "color:#1a1a1a;background:#fff}h1{color:#1f3a5f}.hero{width:100%;border-radius:10px;margin:1rem 0}"
-           "section{border-top:1px solid #eee;padding:.5rem 0}@media(prefers-color-scheme:dark)"
-           "{body{background:#111;color:#eee}h1{color:#9db8dd}section{border-color:#333}}")
+           "section{border-top:1px solid #eee;padding:.5rem 0}"
+           ".bmcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}"
+           ".bmc{border:1px solid #ddd;border-radius:8px;padding:8px}.bmc h4{margin:0 0 4px;font-size:12px;"
+           "text-transform:capitalize;color:#1f3a5f}.bmc p{margin:0;font-size:13px}"
+           "@media(max-width:560px){.bmcgrid{grid-template-columns:1fr}}@media(prefers-color-scheme:dark)"
+           "{body{background:#111;color:#eee}h1{color:#9db8dd}section{border-color:#333}"
+           ".bmc{border-color:#333}.bmc h4{color:#9db8dd}}")
     return (f"<!doctype html><html lang=en><head><meta charset=utf-8>"
             f"<meta name=viewport content='width=device-width,initial-scale=1'>"
             f"<title>{run_dir.name} — validation</title><style>{css}</style></head><body>"
             f"<h1>{run_dir.name}</h1><p><strong>Overall: {overall}</strong></p>"
             f"{_hero(image_fn, run_dir.name)}<h2>Gate scores</h2>{_svg_bars(run_dir)}"
+            f"{_canvas_grid(run_dir)}{_positioning_map(run_dir)}"
             f"<h2>Stages</h2>{_stage_cards(run_dir)}</body></html>")
 
 

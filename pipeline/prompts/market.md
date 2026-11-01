@@ -13,6 +13,12 @@ Date: {{today}}
 ## Your tasks for this stage
 Apply the PDLC Market & Competitor lenses. Market research clarifies alternatives, market pull,
 constraints and strategic options — it must not become a feature-copy list (PD-C019).
+
+**Use the category from the classify stage** (see `category_classification` in Prior stages). Compare
+ONLY to that category's real incumbents/substitutes. Do NOT score look-alikes from a different category
+as competitors — e.g. a standalone app the user talks to is NOT a substitute for a connector that gives
+an existing agent a new ability. If you introduce a competitor outside the identified category, justify
+why it is a true substitute or drop it.
 1. **Alternatives / status quo map**: everything the target actor does instead today — direct
    competitors, adjacent tools, agencies/freelancers, spreadsheets, "do nothing". For each: name,
    type (direct / adjacent / service / diy / status_quo), pricing (from their pricing page, with URL),

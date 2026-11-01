@@ -56,7 +56,7 @@ def test_doctor_reports_missing_key_then_ok(tmp_path, monkeypatch, capsys):
     (tmp_path / ".env").write_text("GEMINI_API_KEY=k\n")
     assert cli.main(["doctor"]) == 0
     out = capsys.readouterr().out
-    assert "9/9" in out and "gemini-3.1-pro-preview" in out
+    assert "10/10" in out and "gemini-3.1-pro-preview" in out
 
 
 def test_council_command_runs_with_fakes(brief_path, tmp_path, capsys):

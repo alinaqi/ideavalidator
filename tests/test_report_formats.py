@@ -109,3 +109,34 @@ def test_cli_report_xlsx_to_dest(tmp_path):
     dest = tmp_path / "x"
     cli_report(ReportJob(tmp_path / "idea", "xlsx", dest=dest))
     assert openpyxl.load_workbook(dest / "report.xlsx").worksheets
+
+
+def _seed_classify(run_dir):
+    (run_dir / "classify.json").write_text(json.dumps({
+        "primary_category": "ai_action_layer", "usp": "Cross-assistant calling connector",
+        "business_model_canvas": {
+            "customer_segments": {"text": "Indie hackers", "status": "HYPOTHESIS"},
+            "value_propositions": {"text": "Give your agent a phone", "status": "HYPOTHESIS"},
+            "revenue_streams": {"text": "Usage credits", "status": "HYPOTHESIS"}},
+        "value_positioning": {
+            "axes": {"x_label": "Breadth of agents", "y_label": "Reliability"},
+            "our_position": {"label": "Phrok", "x": 80, "y": 75},
+            "competitors": [{"label": "ClawCall", "x": 30, "y": 50},
+                            {"label": "Bland", "x": 40, "y": 70}]}}))
+
+
+def test_html_includes_canvas_and_positioning_when_classify_present(tmp_path):
+    _seed(tmp_path / "idea"); _seed_classify(tmp_path / "idea")
+    out = export(tmp_path / "idea", "html")
+    html = out.read_text()
+    assert "Business Model Canvas" in html
+    assert "Give your agent a phone" in html and "Usage credits" in html
+    assert "Value positioning" in html and "<svg" in html
+    assert "Phrok" in html and "ClawCall" in html
+    assert "Breadth of agents" in html  # axis label
+
+
+def test_html_without_classify_omits_canvas(tmp_path):
+    _seed(tmp_path / "idea")
+    html = export(tmp_path / "idea", "html").read_text()
+    assert "Business Model Canvas" not in html

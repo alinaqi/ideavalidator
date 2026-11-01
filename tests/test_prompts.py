@@ -103,3 +103,12 @@ def test_render_injects_validation_mode(tmp_path):
     assert b.validation_mode == "new_market"
     txt = render(get_stage("problem"), b, {})
     assert "new_market" in txt or "new market" in txt.lower()
+
+
+def test_classify_template_renders_with_catalog(tmp_path):
+    from pipeline.prompts import Brief, render
+    from pipeline.stages import get_stage
+    brief = Brief(slug="x", title="X", body="an idea", meta={})
+    text = render(get_stage("classify"), brief, {})
+    assert "connector" in text.lower()  # category catalog injected
+    assert "Business Model Canvas" in text or "business model canvas" in text.lower()

@@ -96,6 +96,10 @@ capped bonus (≤+0.5) to the market/problem/decision verdicts; **absent signals
 — genuinely new markets often have none. `doctor` lists which signal sources are configured. Surface the
 numbers to the user (search volume per keyword, notable threads) as supporting, not deciding, evidence.
 
+## Step 2c — Category, business model & USP (automatic, framing)
+
+The `classify` stage runs right after `frame`. It names the business **category** from the built-in taxonomy so later stages compare to the correct incumbents (not look-alikes from another category — e.g. a connector that gives an existing agent a phone is NOT a standalone calling app), lists candidate **business models** (incl. a model-innovation option), fills the **Business Model Canvas**, and writes a **USP** + a value-positioning map. It is framing only and never changes the verdict. Surface the category, chosen model, USP and the corrected incumbent set to the user.
+
 ## Step 2b — Convene the sounding board (multi-model debate)
 
 Run it after `risks` has finished (or right after `frame` if the brief is thin and the user wants the
@@ -135,7 +139,7 @@ Default output is the markdown memo. If the user asked for a format (`-output`/`
 ```
 `html` and `pdf` include inline SVG charts and a Gemini-generated hero image; `pdf` renders via headless
 Chrome or weasyprint, falling back to `report.html` if neither is present. By default the file is written
-into `runs/<slug>/`; pass `--dest <dir>` (alias `--out-dir`) to save it elsewhere. Tell the user the file path.
+into `runs/<slug>/`; pass `--dest <dir>` (alias `--out-dir`) to save it elsewhere. `html`/`pdf` also render the Business Model Canvas (9-block grid) and the value-positioning map when the classify stage ran. Tell the user the file path.
 
 ## Step 4 — Present the result
 

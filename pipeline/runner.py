@@ -83,10 +83,33 @@ def write_outputs(out_dir: Path, stage_id: str, data: dict) -> None:
     (out_dir / f"{stage_id}.md").write_text(render_stage(data))
 
 
+_CATEGORY_CONSUMERS = ("market", "icp", "swot", "wtp", "economics", "decision")
+
+
+def _classify_brief(out_dir: Path) -> str:
+    """Compact category context (category + real incumbents + USP) to anchor downstream comparisons."""
+    d = load_output(out_dir, "classify")
+    if not d:
+        return ""
+    inc = ", ".join(i.get("name", "") for i in (d.get("incumbents") or []) if i.get("name"))
+    parts = [f"Category: {d.get('primary_category', '?')}"]
+    if inc:
+        parts.append(f"Real incumbents/substitutes (compare only to these): {inc}")
+    if d.get("usp"):
+        parts.append(f"USP: {d['usp']}")
+    if d.get("summary"):
+        parts.append(str(d["summary"]))
+    return " | ".join(parts)
+
+
 def _prior_for(stage, ctx: RunContext) -> dict:
     prior = prior_summaries(ctx.out_dir, stage.depends_on + stage.optional)
     if ctx.signals_summary and stage.id in _BOOSTED:
         prior["demand_signals"] = ctx.signals_summary
+    if stage.id in _CATEGORY_CONSUMERS:
+        context = _classify_brief(ctx.out_dir)
+        if context:
+            prior["category_classification"] = context
     return prior
 
 

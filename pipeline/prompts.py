@@ -54,10 +54,13 @@ def _replacements(stage, brief: Brief, prior: dict) -> dict:
     from .modes import guidance as mode_guidance, resolve as mode_resolve
     from .objectives import guidance, resolve
 
+    from .categories import catalog_for_prompt
+
     objective = resolve(brief)
     mode = mode_resolve(brief)
     return {
         "{{common}}": (PROMPT_DIR / "_common.md").read_text().strip(),
+        "{{categories}}": catalog_for_prompt(),
         "{{business_model}}": brief.business_model or "UNKNOWN (classify it in this stage)",
         "{{success_definition}}": brief.success_definition or f"UNKNOWN -> treat as {objective.label}",
         "{{success_guidance}}": f"{objective.label}: {guidance(objective.key)}",

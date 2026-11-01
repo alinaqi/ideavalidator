@@ -1,0 +1,388 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "5-8 sentence executive summary of this stage"
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "category_confidence": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "incumbent_fit": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "model_fit": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        },
+        "usp_distinctiveness": {
+          "type": "integer",
+          "description": "0-5 per rubric"
+        }
+      },
+      "required": [
+        "category_confidence",
+        "incumbent_fit",
+        "model_fit",
+        "usp_distinctiveness"
+      ]
+    },
+    "kill_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "primary_category": {
+      "type": "string",
+      "description": "a category key from the taxonomy"
+    },
+    "secondary_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "category_rationale": {
+      "type": "string"
+    },
+    "incumbents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "what_they_are": {
+            "type": "string"
+          },
+          "overlap": {
+            "type": "string",
+            "description": "how/whether they truly substitute"
+          },
+          "is_true_substitute": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "candidate_business_models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "fit": {
+            "type": "string"
+          },
+          "is_innovation": {
+            "type": "boolean",
+            "description": "true if this is model innovation, not the category default"
+          }
+        },
+        "required": [
+          "model"
+        ]
+      }
+    },
+    "recommended_business_model": {
+      "type": "string"
+    },
+    "business_model_canvas": {
+      "type": "object",
+      "properties": {
+        "customer_segments": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "value_propositions": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "channels": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "customer_relationships": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "revenue_streams": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "key_resources": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "key_activities": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "key_partnerships": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        },
+        "cost_structure": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "HYPOTHESIS",
+                "EVIDENCED"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "usp": {
+      "type": "string",
+      "description": "one sentence; the defensible wedge, not a feature list"
+    },
+    "positioning_statement": {
+      "type": "string"
+    },
+    "value_positioning": {
+      "type": "object",
+      "properties": {
+        "axes": {
+          "type": "object",
+          "properties": {
+            "x_label": {
+              "type": "string"
+            },
+            "y_label": {
+              "type": "string"
+            }
+          }
+        },
+        "our_position": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
+        },
+        "competitors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "label"
+            ]
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string",
+            "description": "one factual claim"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "exact URL"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "forum",
+              "review",
+              "job_post",
+              "pricing_page",
+              "report",
+              "news",
+              "official_doc",
+              "competitor_site",
+              "search_data",
+              "academic",
+              "interview",
+              "sales_signal",
+              "other"
+            ]
+          },
+          "directness": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MED",
+              "LOW",
+              "UNKNOWN"
+            ]
+          },
+          "behavior_vs_stated": {
+            "type": "string",
+            "enum": [
+              "BEHAVIOR",
+              "STATED",
+              "MIXED",
+              "UNKNOWN"
+            ]
+          },
+          "recency": {
+            "type": "string",
+            "enum": [
+              "FRESH",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "independence_group": {
+            "type": "string",
+            "description": "source origin, e.g. domain or organisation"
+          }
+        },
+        "required": [
+          "claim",
+          "source_url"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "summary",
+    "scores",
+    "kill_flags",
+    "evidence",
+    "unknowns",
+    "primary_category",
+    "incumbents",
+    "candidate_business_models",
+    "business_model_canvas",
+    "usp",
+    "positioning_statement",
+    "value_positioning"
+  ]
+}

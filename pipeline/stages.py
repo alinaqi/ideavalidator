@@ -20,6 +20,9 @@ STAGES = (
     Stage("frame", "Frame the opportunity", "S1 FRAME", (),
           "Is this a solution-independent opportunity for a specific actor, "
           "and what must be true for it to work?"),
+    Stage("classify", "Classify category, business model and USP", "S1 FRAME", ("frame",),
+          "What business category is this (so we compare to the right incumbents), which business "
+          "models could it use, and what is the Business Model Canvas and USP?"),
     Stage("problem", "Validate the problem", "S1 FRAME", ("frame",),
           "Does the problem exist, recur, and already cost people money or "
           "behaviour change?"),

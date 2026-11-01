@@ -90,9 +90,12 @@ cp ideas/_template.md ideas/my-idea.md && $EDITOR ideas/my-idea.md
 .venv/bin/python -m pipeline.cli stages                             # stage list + dependencies
 ```
 
-Outputs land in `runs/<slug>/<stage>.json|.md`. Stages: frame → problem → market → icp → swot →
-wtp → economics → risks → decision. `--stages a,b` runs a subset (dependencies must exist);
+Outputs land in `runs/<slug>/<stage>.json|.md`. Stages: frame → classify → problem → market → icp → swot → wtp → economics → risks → decision. `--stages a,b` runs a subset (dependencies must exist);
 `--deep` uses Gemini Deep Research; `--stop-on-kill` halts at the first KILL gate.
+
+## Category & business model
+
+The `classify` stage (right after `frame`) names the business **category** from a built-in taxonomy (dev tools/API, AI action-layer/connector, marketplace, vertical SaaS, …) so every downstream stage compares to the *right* incumbents — not look-alikes from another category. It enumerates the category's candidate **business models** (so business-model innovation is explicit), fills a **Business Model Canvas**, and writes a **USP** + value-positioning map. `html`/`pdf` reports render the canvas and positioning map as visuals. `classify` is framing only — it never changes the GO/PIVOT/KILL verdict.
 
 ## Demand signals
 

@@ -104,3 +104,22 @@ def test_run_stage_no_bonus_field_on_frame(brief_path, out_dir):
     data = run_stage(get_stage("frame"), ctx)
     assert "signal_bonus" not in data  # frame is not a boosted stage
     assert "DEMAND-SIG-ZZZ" not in client.prompts[0]
+
+
+def test_classify_summary_injected_into_market(brief_path, seeded_out_dir):
+    import json as _json
+    (seeded_out_dir / "classify.json").write_text(_json.dumps(
+        {"summary": "CATEGORY: ai_action_layer. Incumbents: ClawCall, Bland."}))
+    (seeded_out_dir / "market.json").write_text("{}")  # ensure market has its deps (frame,problem seeded)
+    client = FakeClient()
+    run_stage(get_stage("market"), _ctx(brief_path, seeded_out_dir, client))
+    assert "ai_action_layer" in client.prompts[0]
+
+
+def test_classify_not_injected_into_frame(brief_path, out_dir):
+    import json as _json
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "classify.json").write_text(_json.dumps({"summary": "CATEGORY-XYZ"}))
+    client = FakeClient()
+    run_stage(get_stage("frame"), _ctx(brief_path, out_dir, client))
+    assert "CATEGORY-XYZ" not in client.prompts[0]

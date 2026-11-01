@@ -122,3 +122,21 @@ def test_signal_bonus_does_not_override_sub_two_floor():
     out = _out(scores)
     out["signal_bonus"] = 0.5
     assert evaluate("market", out).verdict == "PIVOT"
+
+
+def test_classify_rule_exists_and_has_no_critical():
+    assert "classify" in RULES
+    assert RULES["classify"].critical == ()
+
+
+def test_classify_excluded_from_rollup():
+    gates = [
+        Gate("classify", "KILL", 1.0, ["low confidence"]),
+        Gate("frame", "GO", 4.0, []),
+        Gate("problem", "GO", 4.0, []),
+    ]
+    assert rollup(gates).verdict == "GO"  # classify never drags the overall verdict
+
+
+def test_rollup_all_classify_is_unknown():
+    assert rollup([Gate("classify", "KILL", 1.0, [])]).verdict == "UNKNOWN"

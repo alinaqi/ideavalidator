@@ -27,6 +27,7 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
   xAI Grok). Present signals add a
   small, capped bonus to market/problem/decision; **absent signals never penalise** the idea. Add
   `--no-signals` to skip, or run them alone with `pipeline.cli signals --idea ideas/<slug>.md`.
+- **Category & canvas:** a `classify` stage identifies the business category (right incumbents), candidate business models, Business Model Canvas and USP; `html`/`pdf` reports visualize the canvas and a value-positioning map.
 - **Help:** `/ideavalidator -help` — show this usage and stop.
 
 ## Instructions

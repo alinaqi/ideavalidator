@@ -23,6 +23,8 @@ class Gate:
 RULES = {
     "frame": GateRule(("actor_specificity", "job_clarity", "solution_independence",
                        "why_now", "why_us"), ("actor_specificity",)),
+    "classify": GateRule(("category_confidence", "incumbent_fit", "model_fit",
+                          "usp_distinctiveness")),
     "problem": GateRule(("problem_evidence", "frequency", "severity",
                          "existing_spend", "urgency"),
                         ("problem_evidence", "existing_spend")),
@@ -116,7 +118,8 @@ def evaluate(stage_id: str, output: dict) -> Gate:
 
 
 def rollup(gates: list) -> Gate:
-    """Overall verdict: KILL > UNKNOWN > PIVOT > GO."""
+    """Overall verdict: KILL > UNKNOWN > PIVOT > GO. `classify` is framing, excluded from the verdict."""
+    gates = [g for g in gates if g.stage != "classify"]
     if not gates:
         return Gate("overall", "UNKNOWN", 0.0, ["no stages run"])
     verdicts = {g.verdict for g in gates}

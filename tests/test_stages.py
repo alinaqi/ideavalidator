@@ -2,7 +2,7 @@ import pytest
 
 from pipeline.stages import STAGES, get_stage, resolve, stage_ids
 
-EXPECTED = ["frame", "problem", "market", "icp", "swot",
+EXPECTED = ["frame", "classify", "problem", "market", "icp", "swot",
             "wtp", "economics", "risks", "decision"]
 
 
@@ -24,7 +24,9 @@ def test_dependencies_point_backwards_only():
 
 
 def test_decision_depends_on_everything_before_it():
-    assert set(get_stage("decision").depends_on) == set(EXPECTED[:-1])
+    # classify is framing and injected into decision, not a hard gate dependency
+    core = [s for s in EXPECTED if s not in ("classify", "decision")]
+    assert set(get_stage("decision").depends_on) == set(core)
 
 
 def test_resolve_all_and_subset_keeps_canonical_order():
@@ -42,3 +44,12 @@ def test_resolve_unknown_raises():
 def test_decision_optionally_consumes_council():
     assert "council" in get_stage("decision").optional
     assert all(not set(s.optional) & set(s.depends_on) for s in STAGES)
+
+
+def test_classify_stage_present_after_frame():
+    from pipeline.stages import STAGES, stage_ids
+    ids = stage_ids()
+    assert "classify" in ids
+    assert ids.index("classify") == ids.index("frame") + 1
+    classify = next(s for s in STAGES if s.id == "classify")
+    assert classify.depends_on == ("frame",)

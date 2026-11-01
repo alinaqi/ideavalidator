@@ -21,7 +21,11 @@ confidence (HIGH/MED/LOW).
 3. **Opportunities**: whitespace, trends, incumbent weaknesses from reviews, channel openings,
    regulatory changes.
 4. **Threats**: incumbents bundling the feature for free, platform dependence (API/marketplace
-   policy), substitutes, buyer budget cuts, AI commoditisation of the core function.
+   policy), substitutes, buyer budget cuts, AI commoditisation of the core function. Judge threats
+   against the **category incumbents from the classify stage** (`category_classification` in Prior
+   stages), and treat platform-bundling risk as **per-platform** (one host shipping it natively does not
+   mean all do) — not a blanket kill. A load-bearing threat must cite a URL that actually loads; do not
+   kill on a competitor you cannot verify.
 5. **TOWS**: SO (use strengths to seize opportunities), WO (fix weaknesses by using opportunities),
    ST (use strengths to blunt threats), WT (defensive moves / what to avoid). 2-4 concrete actions each.
 6. **Defensibility check** (Hamilton Helmer's 7 Powers): for each power — scale economies, network
