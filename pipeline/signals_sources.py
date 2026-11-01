@@ -1,6 +1,7 @@
 """Best-effort network clients for demand signals. Every function returns [] on a missing key or any
 error — signals are additive, so a dead source must never break a run. DataForSEO gives search volume;
-Apify and xAI Grok give Reddit/X listening. Parsing is kept separate from the pure scoring in `signals`.
+Reddit (official API, see reddit_source) is the primary social source with Apify as fallback, and xAI
+Grok covers X. Parsing is kept separate from the pure scoring in `signals`.
 """
 from __future__ import annotations
 
@@ -10,6 +11,7 @@ import re
 import urllib.request
 from dataclasses import dataclass
 
+from . import reddit_source
 from .signals import Signal
 
 TIMEOUT = 60
@@ -90,7 +92,8 @@ class _DefaultFetchers:
         return dataforseo_volume(keywords, keys)
 
     def social(self, query: str, keys: dict) -> list:
-        return apify_reddit(query, keys) + grok_x(query, keys)
+        reddit = reddit_source.reddit_api(query, keys) or apify_reddit(query, keys)
+        return reddit + grok_x(query, keys)
 
 
 def default_fetchers() -> _DefaultFetchers:

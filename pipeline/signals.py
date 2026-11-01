@@ -11,7 +11,8 @@ from dataclasses import asdict, dataclass, field
 
 # Keys read (via providers.load_keys) to power the sources. DataForSEO = search volume;
 # Apify/xAI = Reddit/X listening. Zernio is a publishing API, not a listening one — not used here.
-SIGNAL_KEYS = ("DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD", "APIFY_TOKEN", "XAI_API_KEY")
+SIGNAL_KEYS = ("DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD", "APIFY_TOKEN", "XAI_API_KEY",
+               "REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET", "REDDIT_USER_AGENT")
 MAX_BONUS = 0.5
 
 

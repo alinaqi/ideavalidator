@@ -89,8 +89,8 @@ cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli run --idea ideas/<s
 
 `run` begins by gathering demand signals (also runnable alone:
 `.venv/bin/python -m pipeline.cli signals --idea ideas/<slug>.md`). It checks **search volume**
-(DataForSEO — how the idea is actually searched) and **social validation** (Reddit via Apify, X via xAI
-Grok — is the problem discussed?), writing `runs/<slug>/signals.json` + `signals.md`. Every source is
+(DataForSEO — how the idea is actually searched) and **social validation** (Reddit via the official Reddit API with
+Apify as fallback, X via xAI Grok — is the problem discussed?), writing `runs/<slug>/signals.json` + `signals.md`. Every source is
 best-effort: a missing key or dead source yields no signal and no error. Present signals add a small,
 capped bonus (≤+0.5) to the market/problem/decision verdicts; **absent signals never penalise an idea**
 — genuinely new markets often have none. `doctor` lists which signal sources are configured. Surface the

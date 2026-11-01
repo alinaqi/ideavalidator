@@ -22,10 +22,13 @@ The founder named a "Zernio" API for social signals. On reading its docs, Zernio
 
 ## Decision
 
-- **Sources** (`signals_sources.py`, all best-effort — a missing key or any error returns `[]`, never
-  raises): DataForSEO Google-Ads search volume; Apify Reddit scraper; xAI Grok live X search. Keys are
-  read via `providers.load_keys(root, SIGNAL_KEYS)` with the existing precedence (repo .env > external
-  KEYS_FILE > process env). DataForSEO was verified live.
+- **Sources** (all best-effort — a missing key or any error returns `[]`, never raises): DataForSEO
+  Google-Ads search volume; **Reddit via the official app-only OAuth API** (`reddit_source.py`,
+  client-credentials grant with `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`/`REDDIT_USER_AGENT` from the
+  founder's ideaminer service) as the primary social source, with the Apify Reddit scraper as fallback;
+  xAI Grok live X search. Keys are read via `providers.load_keys(root, SIGNAL_KEYS)` with the existing
+  precedence (repo .env > external KEYS_FILE > process env). DataForSEO and the Reddit API were both
+  verified live (real search volumes and real threads with comment counts).
 - **Scoring** (`signals.py`, pure/deterministic): search volume and social chatter each contribute up to
   +0.25, capped at a total **+0.5**. No signal → 0, never negative.
 - **Application** (`gates.py`): the bonus is added to the *verdict* computation for `market`, `problem`

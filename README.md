@@ -97,10 +97,10 @@ wtp → economics → risks → decision. `--stages a,b` runs a subset (dependen
 ## Demand signals
 
 `run` first gathers demand signals (skip with `--no-signals`): **search volume** via DataForSEO (how the
-idea is searched) and **social validation** via Apify (Reddit) and xAI Grok (X). Present signals add a
+idea is searched) and **social validation** via the official Reddit API (Apify fallback) and xAI Grok (X). Present signals add a
 small, capped bonus (≤+0.5) to the market/problem/decision verdicts; **absent signals never penalise** an
 idea — new markets often have none. Every source is best-effort, so missing keys just mean no signal.
-Configure `DATAFORSEO_LOGIN`/`DATAFORSEO_PASSWORD`, `APIFY_TOKEN`, `XAI_API_KEY` (see `.env.example`);
+Configure `DATAFORSEO_LOGIN`/`DATAFORSEO_PASSWORD`, `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`/`REDDIT_USER_AGENT`, `APIFY_TOKEN`, `XAI_API_KEY` (see `.env.example`);
 `doctor` lists which are active.
 
 ## Development

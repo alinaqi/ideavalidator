@@ -53,3 +53,24 @@ def test_default_fetchers_combines_social(monkeypatch):
 def test_bad_json_degrades_to_empty(monkeypatch):
     monkeypatch.setattr(src, "_post_json", lambda u, h, p: None)
     assert src.dataforseo_volume(["k"], {"DATAFORSEO_LOGIN": "l", "DATAFORSEO_PASSWORD": "p"}) == []
+
+
+def test_social_prefers_reddit_api_over_apify(monkeypatch):
+    from pipeline import reddit_source
+    monkeypatch.setattr(reddit_source, "reddit_api",
+                        lambda q, k: [src.Signal("reddit", "social", "r", 3, "", "u")])
+    monkeypatch.setattr(src, "apify_reddit",
+                        lambda q, k: [src.Signal("apify", "social", "a", 1, "", "")])
+    monkeypatch.setattr(src, "grok_x", lambda q, k: [])
+    social = src.default_fetchers().social("q", {})
+    assert {s.source for s in social} == {"reddit"}  # apify is only a fallback
+
+
+def test_social_falls_back_to_apify_when_reddit_empty(monkeypatch):
+    from pipeline import reddit_source
+    monkeypatch.setattr(reddit_source, "reddit_api", lambda q, k: [])
+    monkeypatch.setattr(src, "apify_reddit",
+                        lambda q, k: [src.Signal("apify", "social", "a", 1, "", "")])
+    monkeypatch.setattr(src, "grok_x", lambda q, k: [])
+    social = src.default_fetchers().social("q", {})
+    assert {s.source for s in social} == {"apify"}

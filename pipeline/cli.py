@@ -96,7 +96,8 @@ def _cmd_doctor() -> int:
         return 1
     sk = load_keys(ROOT, SIGNAL_KEYS)
     srcs = [n for n, on in (("dataforseo", sk.get("DATAFORSEO_LOGIN") and sk.get("DATAFORSEO_PASSWORD")),
-                            ("apify-reddit", sk.get("APIFY_TOKEN")), ("grok-x", sk.get("XAI_API_KEY"))) if on]
+                            ("reddit", sk.get("REDDIT_CLIENT_ID") and sk.get("REDDIT_CLIENT_SECRET")),
+                            ("apify", sk.get("APIFY_TOKEN")), ("grok-x", sk.get("XAI_API_KEY"))) if on]
     print(f"api key: present ({settings.api_key[:6]}…)\nresearch model:  {settings.research_model}"
           f"\nstructure model: {settings.structure_model}\ndeep agent:      {settings.deep_agent}"
           f"\ncouncil models:  {', '.join(Chat(load_keys(ROOT)).available()) or 'none (optional)'}"
