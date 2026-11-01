@@ -84,14 +84,24 @@ eduBITES soundingBoard.
 ```bash
 cp ideas/_template.md ideas/my-idea.md && $EDITOR ideas/my-idea.md
 .venv/bin/python -m pipeline.cli run --idea ideas/my-idea.md        # all nine stages (~20-40 min)
+.venv/bin/python -m pipeline.cli signals --idea ideas/my-idea.md    # demand signals (also auto in run)
 .venv/bin/python -m pipeline.cli council --idea ideas/my-idea.md    # sounding board (optional)
-.venv/bin/python -m pipeline.cli report --idea my-idea              # decision memo
+.venv/bin/python -m pipeline.cli report --idea my-idea --format md  # decision memo (--dest <dir> to save)
 .venv/bin/python -m pipeline.cli stages                             # stage list + dependencies
 ```
 
 Outputs land in `runs/<slug>/<stage>.json|.md`. Stages: frame → problem → market → icp → swot →
 wtp → economics → risks → decision. `--stages a,b` runs a subset (dependencies must exist);
 `--deep` uses Gemini Deep Research; `--stop-on-kill` halts at the first KILL gate.
+
+## Demand signals
+
+`run` first gathers demand signals (skip with `--no-signals`): **search volume** via DataForSEO (how the
+idea is searched) and **social validation** via Apify (Reddit) and xAI Grok (X). Present signals add a
+small, capped bonus (≤+0.5) to the market/problem/decision verdicts; **absent signals never penalise** an
+idea — new markets often have none. Every source is best-effort, so missing keys just mean no signal.
+Configure `DATAFORSEO_LOGIN`/`DATAFORSEO_PASSWORD`, `APIFY_TOKEN`, `XAI_API_KEY` (see `.env.example`);
+`doctor` lists which are active.
 
 ## Development
 

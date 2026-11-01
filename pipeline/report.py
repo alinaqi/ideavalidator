@@ -77,6 +77,18 @@ def _memo_rows(out_dir) -> tuple:
     return rows, gates
 
 
+def _signals_block(out_dir) -> str:
+    path = out_dir / "signals.json"
+    if not path.exists():
+        return ""
+    d = json.loads(path.read_text())
+    vol = "; ".join(f"{s.get('label')}: {int(s.get('value') or 0)}/mo" for s in d.get("search") or [])
+    soc = "; ".join(f"{s.get('label')} ({s.get('source')})" for s in (d.get("social") or [])[:5])
+    return (f"\n\n## Demand signals (additive bonus +{d.get('bonus', 0):g})\n\n"
+            f"Query **{d.get('query', '')}** · search volume: {vol or 'none'} · "
+            f"social: {soc or 'none'}. _Absence is not evidence against the idea._")
+
+
 def build_memo(out_dir) -> str:
     rows, gates = _memo_rows(out_dir)
     overall = rollup(gates)
@@ -84,4 +96,4 @@ def build_memo(out_dir) -> str:
     tail = decision.read_text() if decision.exists() else "_Decision stage not yet run._"
     return (f"# Decision memo — {out_dir.name}\n\n**Overall verdict: {overall.verdict}** "
             f"(mean gate score {overall.score})\n\n| Stage | Verdict | Score | Summary |\n"
-            f"|---|---|---|---|\n" + "\n".join(rows) + "\n\n---\n\n" + tail)
+            f"|---|---|---|---|\n" + "\n".join(rows) + _signals_block(out_dir) + "\n\n---\n\n" + tail)

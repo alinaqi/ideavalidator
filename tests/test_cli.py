@@ -107,3 +107,42 @@ def test_ingest_run_honours_out_dir(tmp_path, monkeypatch):
                     client_factory=lambda s: FakeClient(structured=BRIEF))
     assert code == 0
     assert list(runs.glob("*/frame.json")), "stage output should land under --out"
+
+
+class _FakeFetchers:
+    def search_volume(self, keywords, keys):
+        from pipeline.signals import Signal
+        return [Signal("dataforseo", "search_volume", "survey creator", 5400, "", "")]
+
+    def social(self, query, keys):
+        from pipeline.signals import Signal
+        return [Signal("apify", "social", "best survey tool?", 14, "", "https://reddit.com/x")]
+
+
+def test_signals_command_writes_signals_json(brief_path, tmp_path, monkeypatch, capsys):
+    from pipeline import signals_sources
+    monkeypatch.setattr(signals_sources, "default_fetchers", lambda: _FakeFetchers())
+    runs = tmp_path / "runs"
+    code = cli.main(["signals", "--idea", str(brief_path), "--out", str(runs)])
+    assert code == 0
+    data = json.loads((runs / "test-idea" / "signals.json").read_text())
+    assert data["bonus"] > 0 and data["search"] and data["social"]
+    assert "bonus" in capsys.readouterr().out
+
+
+def test_run_default_gathers_signals(brief_path, tmp_path, monkeypatch):
+    from pipeline import signals_sources
+    monkeypatch.setattr(signals_sources, "default_fetchers", lambda: _FakeFetchers())
+    runs = tmp_path / "runs"
+    cli.main(["run", "--idea", str(brief_path), "--stages", "frame", "--out", str(runs)],
+             client_factory=lambda s: FakeClient())
+    assert (runs / "test-idea" / "signals.json").exists()
+
+
+def test_run_no_signals_skips(brief_path, tmp_path, monkeypatch):
+    from pipeline import signals_sources
+    monkeypatch.setattr(signals_sources, "default_fetchers", lambda: _FakeFetchers())
+    runs = tmp_path / "runs"
+    cli.main(["run", "--idea", str(brief_path), "--stages", "frame", "--out", str(runs),
+              "--no-signals"], client_factory=lambda s: FakeClient())
+    assert not (runs / "test-idea" / "signals.json").exists()

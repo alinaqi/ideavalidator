@@ -13,6 +13,8 @@ from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
 from .providers import Chat, load_keys
 from .report_export import ReportJob, cli_report
 from .runner import MissingDependency, RunContext, run_stage
+from .signals import SIGNAL_KEYS
+from .signals_run import prep_signals, run_signals_cmd
 from .stages import STAGES, resolve
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +37,8 @@ def _add_run_report(sub) -> None:
     run.add_argument("--out", default=str(ROOT / "runs"), help="runs directory")
     run.add_argument("--deep", action="store_true", help="use Gemini Deep Research")
     run.add_argument("--stop-on-kill", action="store_true", help="halt at first KILL gate")
+    run.add_argument("--no-signals", action="store_true",
+                     help="skip the demand-signal step (search volume + Reddit/X)")
     rep = sub.add_parser("report", help="export the decision report for an idea slug")
     rep.add_argument("--idea", required=True, help="idea slug (runs/<slug>)")
     rep.add_argument("--out", default=str(ROOT / "runs"))
@@ -53,6 +57,9 @@ def _add_ingest_council(sub) -> None:
     ing.add_argument("--ideas-dir", default=str(ROOT / "ideas"), help="where to write the brief")
     ing.add_argument("--out", default=str(ROOT / "runs"), help="runs directory for --run")
     ing.add_argument("--run", action="store_true", help="run the full pipeline after ingesting")
+    sig = sub.add_parser("signals", help="demand signals: search volume + Reddit/X validation")
+    sig.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
+    sig.add_argument("--out", default=str(ROOT / "runs"))
     council = sub.add_parser("council", help="multi-model sounding board debate on an idea")
     council.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
     council.add_argument("--out", default=str(ROOT / "runs"))
@@ -87,9 +94,13 @@ def _cmd_doctor() -> int:
     except MissingKeyError:
         print("api key: MISSING — set GEMINI_API_KEY in .env (copy .env.example)")
         return 1
+    sk = load_keys(ROOT, SIGNAL_KEYS)
+    srcs = [n for n, on in (("dataforseo", sk.get("DATAFORSEO_LOGIN") and sk.get("DATAFORSEO_PASSWORD")),
+                            ("apify-reddit", sk.get("APIFY_TOKEN")), ("grok-x", sk.get("XAI_API_KEY"))) if on]
     print(f"api key: present ({settings.api_key[:6]}…)\nresearch model:  {settings.research_model}"
           f"\nstructure model: {settings.structure_model}\ndeep agent:      {settings.deep_agent}"
-          f"\ncouncil models:  {', '.join(Chat(load_keys(ROOT)).available()) or 'none (optional)'}")
+          f"\ncouncil models:  {', '.join(Chat(load_keys(ROOT)).available()) or 'none (optional)'}"
+          f"\nsignal sources:  {', '.join(srcs) or 'none (optional)'}")
     return 0 if ok else 1
 
 
@@ -102,7 +113,7 @@ def _cmd_ingest(args, factory) -> int:
     print(f"ingested {args.url} -> {path}")
     if args.run:
         ns = argparse.Namespace(idea=str(path), stages="all", out=args.out,
-                                deep=False, stop_on_kill=False)
+                                deep=False, stop_on_kill=False, no_signals=False)
         return _cmd_run(ns, factory)
     print(f"next: python -m pipeline.cli run --idea {path}")
     return 0
@@ -127,6 +138,8 @@ def _cmd_run(args, factory) -> int:
     brief = load_brief(Path(args.idea))
     ctx = RunContext(brief=brief, out_dir=Path(args.out) / brief.slug,
                      client=_make_client(factory), deep=args.deep)
+    if not getattr(args, "no_signals", False):
+        prep_signals(ctx, load_keys(ROOT, SIGNAL_KEYS))
     for stage in resolve(args.stages):
         print(f"→ {stage.id}: {stage.name} …", flush=True)
         try:
@@ -152,6 +165,8 @@ def main(argv=None, client_factory=None, chat_factory=None) -> int:
         return _cmd_council(args, (client_factory, chat_factory))
     if args.command == "ingest":
         return _cmd_ingest(args, client_factory)
+    if args.command == "signals":
+        return run_signals_cmd(args, ROOT)
     if args.command == "report":
         job = ReportJob(run_dir=Path(args.out) / args.idea, fmt=args.format,
                         dest=Path(args.dest) if args.dest else None, root=ROOT)

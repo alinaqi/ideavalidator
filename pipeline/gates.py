@@ -78,6 +78,16 @@ def _kill_reasons(output: dict, scores: dict, critical: tuple) -> list:
     return reasons
 
 
+_BOOSTED = ("market", "problem", "decision")
+
+
+def _signal_bonus(stage_id: str, output: dict) -> float:
+    """Additive demand-signal bonus (0..0.5), only on market/problem/decision. Never negative."""
+    if stage_id not in _BOOSTED:
+        return 0.0
+    return max(0.0, min(0.5, float(output.get("signal_bonus") or 0)))
+
+
 def _verdict(avg: float, rule: GateRule, floor_ok: bool) -> str:
     if avg >= rule.go_threshold and floor_ok:
         return "GO"
@@ -95,8 +105,11 @@ def evaluate(stage_id: str, output: dict) -> Gate:
     if reasons:
         return Gate(stage_id, "KILL", avg, reasons)
     floor_ok = min(scores.values()) >= 2
-    verdict = _verdict(avg, rule, floor_ok)
+    bonus = _signal_bonus(stage_id, output)
+    verdict = _verdict(min(5.0, avg + bonus), rule, floor_ok)
     notes = [f"mean {avg:g} over {len(scores)} criteria"]
+    if bonus:
+        notes.append(f"demand-signal bonus +{bonus:g}")
     if not floor_ok:
         notes.append("a criterion scored below 2, capped at PIVOT")
     return Gate(stage_id, verdict, avg, notes)

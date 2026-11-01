@@ -86,3 +86,21 @@ def test_run_stage_tags_objective_and_softens_wtp_for_compounding(brief_path, ou
     data = run_stage(get_stage("wtp"), ctx)
     assert data["objective"] == "compounding_product"
     assert data["gate"]["verdict"] == "PIVOT"  # would be KILL under the default objective
+
+
+def test_run_stage_stamps_bonus_and_injects_signals_on_market(brief_path, seeded_out_dir):
+    client = FakeClient()
+    ctx = RunContext(brief=load_brief(brief_path), out_dir=seeded_out_dir, client=client,
+                     signal_bonus=0.5, signals_summary="DEMAND-SIG-SUMMARY")
+    data = run_stage(get_stage("market"), ctx)
+    assert data["signal_bonus"] == 0.5
+    assert "DEMAND-SIG-SUMMARY" in client.prompts[0]
+
+
+def test_run_stage_no_bonus_field_on_frame(brief_path, out_dir):
+    client = FakeClient()
+    ctx = RunContext(brief=load_brief(brief_path), out_dir=out_dir, client=client,
+                     signal_bonus=0.5, signals_summary="DEMAND-SIG-ZZZ")
+    data = run_stage(get_stage("frame"), ctx)
+    assert "signal_bonus" not in data  # frame is not a boosted stage
+    assert "DEMAND-SIG-ZZZ" not in client.prompts[0]

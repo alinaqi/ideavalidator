@@ -16,12 +16,17 @@ class MissingDependency(RuntimeError):
     """A stage was requested before the stages it builds on."""
 
 
+_BOOSTED = ("market", "problem", "decision")
+
+
 @dataclass
 class RunContext:
     brief: Brief
     out_dir: Path
     client: object
     deep: bool = False
+    signal_bonus: float = 0.0
+    signals_summary: str = ""
 
 
 def load_output(out_dir: Path, stage_id: str):
@@ -78,15 +83,24 @@ def write_outputs(out_dir: Path, stage_id: str, data: dict) -> None:
     (out_dir / f"{stage_id}.md").write_text(render_stage(data))
 
 
+def _prior_for(stage, ctx: RunContext) -> dict:
+    prior = prior_summaries(ctx.out_dir, stage.depends_on + stage.optional)
+    if ctx.signals_summary and stage.id in _BOOSTED:
+        prior["demand_signals"] = ctx.signals_summary
+    return prior
+
+
 def run_stage(stage, ctx: RunContext) -> dict:
     _check_deps(stage, ctx.out_dir)
-    prompt = render(stage, ctx.brief, prior_summaries(ctx.out_dir, stage.depends_on + stage.optional))
+    prompt = render(stage, ctx.brief, _prior_for(stage, ctx))
     research = _investigate(ctx, prompt)
     data = _structure(ctx, stage, research)
     from .modes import resolve as mode_resolve
     from .objectives import resolve
     data["objective"] = resolve(ctx.brief).key
     data["validation_mode"] = mode_resolve(ctx.brief).key
+    if stage.id in _BOOSTED:
+        data["signal_bonus"] = ctx.signal_bonus
     data = finalize(stage, data, research)
     data["idea"] = ctx.brief.slug
     data["model"] = research.model or getattr(ctx.client, "model", "")

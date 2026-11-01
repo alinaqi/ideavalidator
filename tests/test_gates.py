@@ -90,3 +90,35 @@ def test_objective_and_mode_demotions_union():
     scores = {c: 4 for c in rule.criteria}; scores["market_pull"] = 1
     out = _out(scores); out["validation_mode"] = "new_market"
     assert evaluate("market", out).verdict == "PIVOT"  # market_pull demoted by mode
+
+
+def test_signal_bonus_lifts_borderline_market_to_go():
+    crit = RULES["market"].criteria
+    out = _out({c: 3 for c in crit})  # avg 3.0 -> PIVOT without a bonus
+    out["signal_bonus"] = 0.5
+    g = evaluate("market", out)
+    assert g.verdict == "GO" and g.score == 3.0  # score stays measured; bonus only shifts verdict
+    assert any("bonus" in r for r in g.reasons)
+
+
+def test_signal_bonus_cannot_rescue_a_kill():
+    crit = RULES["problem"].criteria
+    out = _out({c: 5 for c in crit}, ["tarpit"])
+    out["signal_bonus"] = 0.5
+    assert evaluate("problem", out).verdict == "KILL"
+
+
+def test_signal_bonus_ignored_off_target_stage():
+    crit = RULES["icp"].criteria
+    out = _out({c: 3 for c in crit})
+    out["signal_bonus"] = 0.5
+    assert evaluate("icp", out).verdict == "PIVOT"  # icp is not boosted
+
+
+def test_signal_bonus_does_not_override_sub_two_floor():
+    crit = RULES["market"].criteria
+    scores = {c: 5 for c in crit}
+    scores["trend_tailwind"] = 1  # non-critical, but below the floor
+    out = _out(scores)
+    out["signal_bonus"] = 0.5
+    assert evaluate("market", out).verdict == "PIVOT"

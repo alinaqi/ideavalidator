@@ -54,12 +54,12 @@ def _keys_file(root: Path, root_env: dict) -> dict:
     return load_env(Path(path).expanduser()) if path else {}
 
 
-def load_keys(root: Path) -> dict:
-    """Provider keys only; precedence: repo .env > external keys file > process env."""
+def load_keys(root: Path, names=None) -> dict:
+    """Named keys (default: provider keys); precedence: repo .env > external keys file > process env."""
     root_env = load_env(root / ".env")
     external = _keys_file(root, root_env)
     keys = {}
-    for name in PROVIDER_ENV_KEYS:
+    for name in names or PROVIDER_ENV_KEYS:
         value = root_env.get(name) or external.get(name) or os.environ.get(name)
         if value:
             keys[name] = value

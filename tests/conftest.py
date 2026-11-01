@@ -101,3 +101,11 @@ class FakeClient:
         assert "research text" in text
         assert isinstance(schema, dict)
         return dict(self.structured)
+
+
+@pytest.fixture(autouse=True)
+def _block_signal_network(monkeypatch):
+    """No test may make a real demand-signal API call; individual tests stub responses explicitly."""
+    from pipeline import signals_sources
+    monkeypatch.setattr(signals_sources, "_post_json", lambda *a, **k: None, raising=False)
+    monkeypatch.setattr(signals_sources, "_get_json", lambda *a, **k: None, raising=False)

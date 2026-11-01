@@ -22,6 +22,10 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
 - **Output:** add `-output html|pdf|xlsx|md` (alias `--format`) to export the report; html/pdf include
   Gemini-generated imagery and inline charts. Default is the markdown memo. Add `-dest <dir>` (alias
   `--out-dir`) to save the exported file somewhere other than the run folder.
+- **Demand signals:** every run automatically checks how the idea is searched (DataForSEO search
+  volume) and whether people discuss the problem on Reddit/X (Apify + xAI Grok). Present signals add a
+  small, capped bonus to market/problem/decision; **absent signals never penalise** the idea. Add
+  `--no-signals` to skip, or run them alone with `pipeline.cli signals --idea ideas/<slug>.md`.
 - **Help:** `/ideavalidator -help` — show this usage and stop.
 
 ## Instructions
