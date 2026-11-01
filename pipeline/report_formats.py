@@ -104,25 +104,3 @@ def export(run_dir: Path, fmt: str, image_fn=None) -> Path:
         return html_path
     pdf_path = run_dir / "report.pdf"
     return pdf_path if _render_pdf(html_path, pdf_path) else html_path
-
-
-def export_with_images(run_dir: Path, fmt: str, root=None) -> Path:
-    """export(), wiring a Gemini hero image for html/pdf when a GEMINI_API_KEY is configured at `root`."""
-    from .config import MissingKeyError, Settings
-    from .images import generate_hero
-
-    settings = None
-    if root is not None and fmt in ("html", "pdf"):
-        try:
-            settings = Settings.from_env(Path(root))
-        except MissingKeyError:
-            settings = None
-    image_fn = (lambda slug: generate_hero(slug, settings=settings)) if settings else None
-    return export(run_dir, fmt, image_fn=image_fn)
-
-
-def cli_report(run_dir: Path, fmt: str, root=None) -> str:
-    """Return the text the CLI should print: the memo for md, else a 'wrote <path>' line."""
-    if fmt == "md":
-        return build_memo(run_dir)
-    return f"wrote {export_with_images(run_dir, fmt, root)}"

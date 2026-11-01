@@ -20,7 +20,8 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
   own business. `/ideavalidator https://zenloop.com — a free survey creator` (or `for zenloop.com, a
   free survey creator`) — validate that NEW idea for that company, using the site as context/why-us.
 - **Output:** add `-output html|pdf|xlsx|md` (alias `--format`) to export the report; html/pdf include
-  Gemini-generated imagery and inline charts. Default is the markdown memo.
+  Gemini-generated imagery and inline charts. Default is the markdown memo. Add `-dest <dir>` (alias
+  `--out-dir`) to save the exported file somewhere other than the run folder.
 - **Help:** `/ideavalidator -help` — show this usage and stop.
 
 ## Instructions
@@ -49,6 +50,7 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
    the memo, and record the founder's decision.
 6. **Export** if a format was requested:
    `.venv/bin/python -m pipeline.cli report --idea <slug> --format <fmt>` (html/pdf embed imagery).
+   Add `--dest <dir>` if the user named where to save it.
 7. **Tell the user** the verdict, the next real-world test, and where outputs are (`runs/<slug>/` and any
    exported `report.<ext>`).
 

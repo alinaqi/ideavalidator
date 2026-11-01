@@ -11,8 +11,7 @@ from .ingest import IngestRequest, build_brief
 from .gemini import GeminiClient
 from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
 from .providers import Chat, load_keys
-from .report import build_memo
-from .report_formats import cli_report
+from .report_export import ReportJob, cli_report
 from .runner import MissingDependency, RunContext, run_stage
 from .stages import STAGES, resolve
 
@@ -42,6 +41,8 @@ def _add_run_report(sub) -> None:
     rep.add_argument("--format", "--output", "-output", dest="format", default="md",
                      choices=["md", "html", "xlsx", "pdf"],
                      help="md (stdout), html, xlsx, or pdf; html/pdf get Gemini imagery")
+    rep.add_argument("--dest", "--out-dir", dest="dest", default="",
+                     help="directory to write the report file into (default: the run folder)")
 
 
 def _add_ingest_council(sub) -> None:
@@ -50,6 +51,7 @@ def _add_ingest_council(sub) -> None:
     ing.add_argument("--idea", default="", help="optional angle/new idea FOR that company")
     ing.add_argument("--slug", default="", help="optional slug (else derived from domain + angle)")
     ing.add_argument("--ideas-dir", default=str(ROOT / "ideas"), help="where to write the brief")
+    ing.add_argument("--out", default=str(ROOT / "runs"), help="runs directory for --run")
     ing.add_argument("--run", action="store_true", help="run the full pipeline after ingesting")
     council = sub.add_parser("council", help="multi-model sounding board debate on an idea")
     council.add_argument("--idea", required=True, help="path to ideas/<slug>.md")
@@ -99,7 +101,7 @@ def _cmd_ingest(args, factory) -> int:
     path.write_text(md)
     print(f"ingested {args.url} -> {path}")
     if args.run:
-        ns = argparse.Namespace(idea=str(path), stages="all", out=str(ROOT / "runs"),
+        ns = argparse.Namespace(idea=str(path), stages="all", out=args.out,
                                 deep=False, stop_on_kill=False)
         return _cmd_run(ns, factory)
     print(f"next: python -m pipeline.cli run --idea {path}")
@@ -151,7 +153,9 @@ def main(argv=None, client_factory=None, chat_factory=None) -> int:
     if args.command == "ingest":
         return _cmd_ingest(args, client_factory)
     if args.command == "report":
-        print(cli_report(Path(args.out) / args.idea, args.format, ROOT))
+        job = ReportJob(run_dir=Path(args.out) / args.idea, fmt=args.format,
+                        dest=Path(args.dest) if args.dest else None, root=ROOT)
+        print(cli_report(job))
         return 0
     try:
         return _cmd_run(args, client_factory)

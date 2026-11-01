@@ -66,13 +66,46 @@ def test_unknown_format_raises(tmp_path):
 
 
 def test_cli_report_md_returns_memo(tmp_path):
-    from pipeline.report_formats import cli_report
+    from pipeline.report_export import ReportJob, cli_report
     _seed(tmp_path / "idea")
-    assert "PIVOT" in cli_report(tmp_path / "idea", "md")
+    assert "PIVOT" in cli_report(ReportJob(tmp_path / "idea", "md"))
 
 
 def test_cli_report_nonmd_writes_and_reports_path(tmp_path):
-    from pipeline.report_formats import cli_report
+    from pipeline.report_export import ReportJob, cli_report
     _seed(tmp_path / "idea")
-    msg = cli_report(tmp_path / "idea", "html", root=None)
+    msg = cli_report(ReportJob(tmp_path / "idea", "html"))
     assert msg.startswith("wrote ") and msg.endswith(".html")
+
+
+def test_cli_report_writes_to_dest_dir(tmp_path):
+    from pipeline.report_export import ReportJob, cli_report
+    _seed(tmp_path / "idea")
+    dest = tmp_path / "deliverables"
+    msg = cli_report(ReportJob(tmp_path / "idea", "html", dest=dest))
+    assert msg.startswith("wrote ")
+    assert (dest / "report.html").exists()
+
+
+def test_cli_report_md_with_dest_writes_file(tmp_path):
+    from pipeline.report_export import ReportJob, cli_report
+    _seed(tmp_path / "idea")
+    dest = tmp_path / "out"
+    msg = cli_report(ReportJob(tmp_path / "idea", "md", dest=dest))
+    assert (dest / "report.md").exists() and "PIVOT" in (dest / "report.md").read_text()
+    assert msg.startswith("wrote ")
+
+
+def test_cli_report_md_no_dest_returns_memo(tmp_path):
+    from pipeline.report_export import ReportJob, cli_report
+    _seed(tmp_path / "idea")
+    assert "PIVOT" in cli_report(ReportJob(tmp_path / "idea", "md"))
+
+
+def test_cli_report_xlsx_to_dest(tmp_path):
+    import openpyxl
+    from pipeline.report_export import ReportJob, cli_report
+    _seed(tmp_path / "idea")
+    dest = tmp_path / "x"
+    cli_report(ReportJob(tmp_path / "idea", "xlsx", dest=dest))
+    assert openpyxl.load_workbook(dest / "report.xlsx").worksheets

@@ -119,10 +119,11 @@ Default output is the markdown memo. If the user asked for a format (`-output`/`
 `html|pdf|xlsx|md`), export it:
 
 ```bash
-.venv/bin/python -m pipeline.cli report --idea <slug> --format <fmt>
+.venv/bin/python -m pipeline.cli report --idea <slug> --format <fmt> [--dest <dir>]
 ```
 `html` and `pdf` include inline SVG charts and a Gemini-generated hero image; `pdf` renders via headless
-Chrome or weasyprint, falling back to `report.html` if neither is present. Tell the user the file path.
+Chrome or weasyprint, falling back to `report.html` if neither is present. By default the file is written
+into `runs/<slug>/`; pass `--dest <dir>` (alias `--out-dir`) to save it elsewhere. Tell the user the file path.
 
 ## Step 4 — Present the result
 
