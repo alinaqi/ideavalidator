@@ -1,6 +1,9 @@
 {
   "name": "ideavalidator",
-  "owner": { "name": "Ali Shaheen" },
+  "owner": {
+    "name": "Ali Shaheen"
+  },
+  "description": "Idea & business-model validation: Gemini-grounded research, PDLC gates, demand signals, a multi-model sounding board, category classification and a self-validation layer.",
   "plugins": [
     {
       "name": "ideavalidator",

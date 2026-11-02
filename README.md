@@ -9,15 +9,30 @@ labels keep it honest; a Claude Code skill (`/ideavalidator`) interviews you and
 
 ## Install as a Claude Code plugin
 
+The repo is a self-hosted marketplace (no central registry needed). In Claude Code:
+
 ```
+# one step (Claude Code 2.1.275+)
+/plugin install ideavalidator --marketplace alinaqi/ideavalidator
+
+# or two steps
 /plugin marketplace add alinaqi/ideavalidator
-/plugin install ideavalidator
+/plugin install ideavalidator@ideavalidator
 ```
 
-Then run `cd` into the plugin directory once and `./install.sh` to create the Python venv and `.env`
-(the skill orchestrates a Python pipeline, so it needs the venv and a `GEMINI_API_KEY`). The command
-finds its home via `$CLAUDE_PLUGIN_ROOT` automatically. Add provider keys for the optional multi-model
-sounding board in the same `.env` (any subset works).
+Terminal equivalents: `claude plugin marketplace add alinaqi/ideavalidator` then
+`claude plugin install ideavalidator@ideavalidator`.
+
+**One-time setup after install (required).** Installing copies the plugin but does **not** run any setup
+script, and the pipeline needs a Python venv + a `GEMINI_API_KEY`. The skill handles this for you: the
+first time you run `/ideavalidator`, its environment check sees there's no venv and runs `install.sh`
+in the plugin directory (found via `$CLAUDE_PLUGIN_ROOT`), then asks you to put
+`GEMINI_API_KEY=...` in that directory's `.env`. Add any optional provider keys (demand signals,
+sounding board) to the same `.env` — any subset works, missing keys are just skipped. New versions:
+`/plugin marketplace update ideavalidator` (third-party marketplaces don't auto-update).
+
+> If you'd rather not depend on the plugin cache, the **install from source** path below is the most
+> reliable — it clones the repo and installs the `/ideavalidator` skill globally.
 
 ## Install from source (2 minutes)
 

@@ -14,3 +14,7 @@ runs/*/
 ideas/*.md
 !ideas/_template.md
 !ideas/example-*.md
+
+# macOS
+.DS_Store
+**/.DS_Store
