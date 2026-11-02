@@ -45,3 +45,12 @@ def test_palgu_client_post_json_error_returns_none(monkeypatch):
         raise OSError("down")
     monkeypatch.setattr(urllib.request, "urlopen", boom)
     assert real_post("https://api.palgu.ai/v1/chat/completions", {}, {}) is None
+
+
+def test_palgu_client_post_json_402_warns_and_returns_none(monkeypatch, capsys):
+    def boom(*a, **k):
+        raise urllib.error.HTTPError("u", 402, "payment required", {}, None)
+    monkeypatch.setattr(urllib.request, "urlopen", boom)
+    assert real_post("https://api.palgu.ai/v1/research", {}, {"query": "x"}) is None
+    err = capsys.readouterr().err
+    assert "402" in err and "budget" in err.lower() and "palgu.ai/billing" in err

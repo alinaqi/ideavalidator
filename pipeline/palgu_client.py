@@ -9,10 +9,12 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import sys
+import urllib.error
 import urllib.request
 
 from .gemini import Research
-from .palgu import PALGU_V1
+from .palgu import PALGU_BILLING, PALGU_V1
 
 
 def _post_json(url: str, headers: dict, body: dict) -> object:
@@ -22,6 +24,11 @@ def _post_json(url: str, headers: dict, body: dict) -> object:
     try:
         with urllib.request.urlopen(req, timeout=240) as resp:
             return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as exc:
+        if exc.code == 402:
+            print(f"Palgu billing: the org is out of budget (402). Top up at {PALGU_BILLING} — "
+                  "this research call returned no evidence.", file=sys.stderr)
+        return None
     except Exception:
         return None
 
