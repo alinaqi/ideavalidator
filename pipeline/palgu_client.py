@@ -33,6 +33,12 @@ def _post_json(url: str, headers: dict, body: dict) -> object:
         return None
 
 
+def _model_name(model: object, fallback: str) -> str:
+    if isinstance(model, dict):
+        return model.get("alias") or model.get("model_id") or fallback
+    return model or fallback
+
+
 def _map_sources(items: object) -> list:
     out = []
     for item in items or []:
@@ -79,7 +85,8 @@ class PalguClient:
         headers = {"Authorization": f"Bearer {self.key}", "Idempotency-Key": idem}
         data = self._post(self.base + "/research", headers, {"query": prompt}) or {}
         return Research(text=data.get("text") or "", sources=_map_sources(data.get("sources")),
-                        queries=list(data.get("queries") or []), model=data.get("model") or self.model)
+                        queries=list(data.get("queries") or []),
+                        model=_model_name(data.get("model"), self.model))
 
     def research_urls(self, prompt: str) -> Research:
         return self.research(prompt)

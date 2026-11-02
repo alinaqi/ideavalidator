@@ -43,6 +43,14 @@ def test_structure_returns_parsed_json():
     assert out["summary"] == "s" and out["scores"]["a"] == 4
 
 
+def test_research_maps_model_dict_to_alias_string():
+    def post(url, headers, body):
+        return {"text": "t", "sources": [], "queries": [],
+                "model": {"alias": "gemini-3.7-flash", "model_id": "gemini-3.7-flash"}}
+    r = PalguClient(_settings(), post=post).research("x")
+    assert r.model == "gemini-3.7-flash"
+
+
 def test_research_degrades_on_empty_response():
     c = PalguClient(_settings(), post=lambda u, h, b: None)
     r = c.research("x")
