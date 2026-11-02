@@ -41,17 +41,40 @@ class Settings:
     structure_model: str
     deep_agent: str
     root: Path
+    provider: str = "gemini"      # "gemini" (own key) or "palgu" (single Palgu key)
+    palgu_base: str = ""
+
+    @classmethod
+    def _gemini(cls, key: str, values: dict, root: Path) -> "Settings":
+        return cls(api_key=key, research_model=_lookup("GEMINI_MODEL", values),
+                   structure_model=_lookup("GEMINI_STRUCTURE_MODEL", values),
+                   deep_agent=_lookup("GEMINI_DEEP_RESEARCH_AGENT", values), root=root)
+
+    @classmethod
+    def _palgu(cls, key: str, values: dict, root: Path) -> "Settings":
+        return cls(api_key=key, provider="palgu",
+                   palgu_base=_lookup("PALGU_GATEWAY", values) or "https://api.palgu.ai/v1",
+                   research_model=_lookup("PALGU_MODEL", values) or "gemini-3.8-flash",
+                   structure_model=_lookup("PALGU_STRUCTURE_MODEL", values) or "gemini-3.8-flash",
+                   deep_agent="", root=root)
 
     @classmethod
     def from_env(cls, root: Path) -> "Settings":
+        """Prefer an explicit GEMINI_API_KEY (full grounding); else a Palgu key (single-key easy mode)."""
         values = load_env(root / ".env")
-        key = _lookup("GEMINI_API_KEY", values)
-        if not key:
-            raise MissingKeyError("GEMINI_API_KEY is not set (.env or environment)")
-        return cls(
-            api_key=key,
-            research_model=_lookup("GEMINI_MODEL", values),
-            structure_model=_lookup("GEMINI_STRUCTURE_MODEL", values),
-            deep_agent=_lookup("GEMINI_DEEP_RESEARCH_AGENT", values),
-            root=root,
-        )
+        gemini = _lookup("GEMINI_API_KEY", values)
+        if gemini:
+            return cls._gemini(gemini, values, root)
+        palgu = _lookup("PALGU_API_KEY", values)
+        if palgu:
+            return cls._palgu(palgu, values, root)
+        raise MissingKeyError("set GEMINI_API_KEY or PALGU_API_KEY (or run `palgu login`)")
+
+
+def make_client(settings: Settings):
+    """Return the pipeline client for the configured provider."""
+    if settings.provider == "palgu":
+        from .palgu_client import PalguClient
+        return PalguClient(settings)
+    from .gemini import GeminiClient
+    return GeminiClient(settings)

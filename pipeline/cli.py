@@ -5,10 +5,10 @@ import argparse
 import sys
 from pathlib import Path
 
-from .config import MissingKeyError, Settings
+from .config import MissingKeyError, Settings, make_client
 from .council import CouncilContext, run_council
 from .ingest import IngestRequest, build_brief
-from .gemini import GeminiClient
+from .palgu_run import run_palgu_cmd
 from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
 from .providers import Chat, load_keys
 from .report_export import ReportJob, cli_report
@@ -26,6 +26,8 @@ def _parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     _add_run_report(sub)
     _add_ingest_council(sub)
+    pg = sub.add_parser("palgu", help="sign up / sign in to Palgu and run on a single key")
+    pg.add_argument("action", nargs="?", default="help", help="login | status | upgrade")
     sub.add_parser("stages", help="list stages in canonical order")
     sub.add_parser("doctor", help="check key, models, prompt templates and schemas")
     return parser
@@ -78,7 +80,7 @@ def _make_client(factory):
         if factory is None:
             raise
         settings = None
-    return (factory or GeminiClient)(settings)
+    return factory(settings) if factory else make_client(settings)
 
 
 def _cmd_stages() -> int:
@@ -96,8 +98,9 @@ def _cmd_doctor() -> int:
     try:
         settings = Settings.from_env(ROOT)
     except MissingKeyError:
-        print("api key: MISSING — set GEMINI_API_KEY in .env (copy .env.example)")
+        print("api key: MISSING — set GEMINI_API_KEY in .env, or run `palgu login` for a single Palgu key")
         return 1
+    print(f"provider: {settings.provider}" + (" (Palgu gateway)" if settings.provider == "palgu" else ""))
     sk = load_keys(ROOT, SIGNAL_KEYS)
     srcs = [n for n, on in (("dataforseo", sk.get("DATAFORSEO_LOGIN") and sk.get("DATAFORSEO_PASSWORD")),
                             ("reddit", sk.get("REDDIT_CLIENT_ID") and sk.get("REDDIT_CLIENT_SECRET")),
@@ -163,6 +166,8 @@ def _cmd_run(args, factory) -> int:
 
 def main(argv=None, client_factory=None, chat_factory=None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "palgu":
+        return run_palgu_cmd(args, ROOT)
     if args.command == "stages":
         return _cmd_stages()
     if args.command == "doctor":

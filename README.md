@@ -34,6 +34,23 @@ sounding board) to the same `.env` — any subset works, missing keys are just s
 > If you'd rather not depend on the plugin cache, the **install from source** path below is the most
 > reliable — it clones the repo and installs the `/ideavalidator` skill globally.
 
+## Sign in with Palgu (one key, no setup)
+
+Don't want to collect a Gemini key (and optional provider keys)? Sign up with Palgu and run on a
+single key — the same device sign-in [mixture-of-models](https://github.com/alinaqi/mixture-of-models-claude-mod) uses:
+
+```bash
+.venv/bin/python -m pipeline.cli palgu login     # opens a code to approve at palgu.ai (sign up there if new)
+.venv/bin/python -m pipeline.cli palgu status    # who is signed in, on which plan
+```
+
+It mints a per-device key, saves it to `.env` as `PALGU_API_KEY`, and the pipeline then runs the
+research + JSON structuring on Palgu's gateway — no `GEMINI_API_KEY` needed. If both keys are set,
+the explicit `GEMINI_API_KEY` wins (full Google-Search grounding). Notes: grounded web search is a
+Gemini-native feature we're exposing through Palgu (tracked in a srooter issue) — until then Palgu
+research is model-native; and the demand-signal data APIs (DataForSEO/Reddit) aren't model calls, so
+they stay optional separate keys. `doctor` shows the active provider.
+
 ## Install from source (2 minutes)
 
 ```bash

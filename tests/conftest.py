@@ -111,3 +111,5 @@ def _block_signal_network(monkeypatch):
     monkeypatch.setattr(signals_sources, "_get_json", lambda *a, **k: None, raising=False)
     monkeypatch.setattr(reddit_source, "_token", lambda keys: None, raising=False)
     monkeypatch.setattr(selfcheck_run, "reachable", lambda url: True, raising=False)
+    from pipeline import palgu_client
+    monkeypatch.setattr(palgu_client, "_post_json", lambda *a, **k: None, raising=False)

@@ -165,3 +165,27 @@ def test_selfcheck_command(brief_path, tmp_path, capsys):
     assert code == 0
     assert (runs / "test-idea" / "selfcheck.json").exists()
     assert "self-validation" in capsys.readouterr().out.lower()
+
+
+def test_palgu_status_not_signed_in(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    assert cli.main(["palgu", "status"]) == 0
+    assert "not signed in" in capsys.readouterr().out
+
+
+def test_palgu_help_default(capsys):
+    assert cli.main(["palgu"]) == 0
+    assert "palgu login" in capsys.readouterr().out
+
+
+def test_run_uses_palgu_provider_when_only_palgu_key(brief_path, tmp_path, monkeypatch):
+    # with only PALGU_API_KEY set, make_client builds a PalguClient; stub its network
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    (tmp_path / ".env").write_text("PALGU_API_KEY=srt_test\n")
+    from pipeline import palgu_client
+    monkeypatch.setattr(palgu_client, "_post_json",
+                        lambda u, h, b: {"choices": [{"message": {"content": '{"summary":"s","scores":{"actor_specificity":4}}'}}]})
+    runs = tmp_path / "runs"
+    code = cli.main(["run", "--idea", str(brief_path), "--stages", "frame", "--out", str(runs), "--no-signals"])
+    assert code == 0 and (runs / "test-idea" / "frame.json").exists()

@@ -25,7 +25,7 @@ reachable through channels the founder already has, with no paid acquisition and
 cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli doctor
 ```
 - No `.venv`: run `./install.sh` (creates the venv, installs deps, copies `.env.example`).
-- Key missing: ask the user for their Google AI Studio key and tell them to put it in `.env`
+- Key missing: the easiest path is Palgu — tell the user to run `palgu login` (sign up at palgu.ai, approve the code) and the pipeline runs on that single key, no Gemini key needed. Otherwise ask for their Google AI Studio key and tell them to put it in `.env`
   as `GEMINI_API_KEY=...` (never paste a key into chat logs or files other than `.env`).
 - If `doctor` passes, continue. Do not run the pipeline when it fails.
 
