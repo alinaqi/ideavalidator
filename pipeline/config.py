@@ -60,15 +60,16 @@ class Settings:
 
     @classmethod
     def from_env(cls, root: Path) -> "Settings":
-        """Prefer an explicit GEMINI_API_KEY (full grounding); else a Palgu key (single-key easy mode)."""
+        """Prefer a Palgu key (single-key mode: grounded research + billing route through Palgu); fall
+        back to an explicit GEMINI_API_KEY for a bring-your-own-key run."""
         values = load_env(root / ".env")
-        gemini = _lookup("GEMINI_API_KEY", values)
-        if gemini:
-            return cls._gemini(gemini, values, root)
         palgu = _lookup("PALGU_API_KEY", values)
         if palgu:
             return cls._palgu(palgu, values, root)
-        raise MissingKeyError("set GEMINI_API_KEY or PALGU_API_KEY (or run `palgu login`)")
+        gemini = _lookup("GEMINI_API_KEY", values)
+        if gemini:
+            return cls._gemini(gemini, values, root)
+        raise MissingKeyError("set PALGU_API_KEY (run `palgu login`) or GEMINI_API_KEY")
 
 
 def make_client(settings: Settings):

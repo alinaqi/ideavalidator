@@ -45,11 +45,12 @@ single key — the same device sign-in [mixture-of-models](https://github.com/al
 ```
 
 It mints a per-device key, saves it to `.env` as `PALGU_API_KEY`, and the pipeline then runs the
-research + JSON structuring on Palgu's gateway — no `GEMINI_API_KEY` needed. If both keys are set,
-the explicit `GEMINI_API_KEY` wins (full Google-Search grounding). Notes: grounded web search is a
-Gemini-native feature we're exposing through Palgu (tracked in a srooter issue) — until then Palgu
-research is model-native; and the demand-signal data APIs (DataForSEO/Reddit) aren't model calls, so
-they stay optional separate keys. `doctor` shows the active provider.
+**grounded** research (real Google-Search citations via Palgu's `/v1/research`) + JSON structuring on
+Palgu's gateway — no `GEMINI_API_KEY` needed. If both keys are set, the `PALGU_API_KEY` wins (single-key
+mode: research and billing route through Palgu); set only `GEMINI_API_KEY` for a bring-your-own-key run.
+Notes: report hero images aren't on Palgu yet, so HTML/PDF imagery stays Gemini-only; and the
+demand-signal data APIs (DataForSEO/Reddit) aren't model calls, so they stay optional separate keys.
+`doctor` shows the active provider.
 
 ## Install from source (2 minutes)
 

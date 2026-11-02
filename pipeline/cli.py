@@ -188,8 +188,8 @@ def main(argv=None, client_factory=None, chat_factory=None) -> int:
     try:
         return _cmd_run(args, client_factory)
     except MissingKeyError as exc:
-        print(f"error: {exc}. Copy .env.example to .env and set GEMINI_API_KEY.",
-              file=sys.stderr)
+        print(f"error: {exc}. Run `palgu login` for a single Palgu key, or copy .env.example to .env "
+              f"and set GEMINI_API_KEY.", file=sys.stderr)
         return 1
 
 

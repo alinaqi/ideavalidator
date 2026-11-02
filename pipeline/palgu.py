@@ -5,6 +5,7 @@ your own GEMINI_API_KEY + council provider keys. The key is only ever sent to ap
 from __future__ import annotations
 
 CLIENT_ID = "ideavalidator"
+CLIENT_VERSION = "0.1.0"
 PALGU_ORIGIN = "https://api.palgu.ai"
 PALGU_V1 = PALGU_ORIGIN + "/v1"
 PALGU_WEB = "https://www.palgu.ai"
@@ -42,8 +43,17 @@ def new_install_id(random) -> str:
     return f"{hx(8)}-{hx(4)}-4{hx(3)}-{variant}{hx(3)}-{hx(12)}"
 
 
-def device_body(name: str, install_id: str) -> dict:
-    return {"client_id": CLIENT_ID, "device": {"name": name, "install_id": install_id}}
+def platform_tag(sys_platform: str) -> str:
+    tag = str(sys_platform or "").lower()
+    if tag.startswith("darwin"):
+        return "darwin"
+    return "win32" if tag.startswith("win") else "linux"
+
+
+def device_body(name: str, install_id: str, platform: str) -> dict:
+    device = {"name": name, "platform": platform_tag(platform),
+              "client_version": CLIENT_VERSION, "install_id": install_id}
+    return {"client_id": CLIENT_ID, "device": device}
 
 
 def token_body(device_code: str) -> dict:
@@ -68,23 +78,3 @@ def token_step(res: dict, interval: int) -> dict:
     if err == "slow_down":
         return {"state": "wait", "interval": interval + 5}
     return {"state": "stop", "reason": _STOPS.get(err, f"Palgu answered {res.get('status')}")}
-
-
-def start_text(start: dict) -> str:
-    minutes = round((int(start.get("expires_in") or 600)) / 60)
-    code = start.get("user_code", "")
-    return (f"Open {PALGU_WEB}/connect?code={code} and approve code {code} (new to Palgu? sign up there). "
-            f"The code expires in {minutes} minutes; this run picks up the key once you approve.")
-
-
-def signed_in_text(s: dict) -> str:
-    tail = f" ({s['org']}{', plan ' + s['plan'] if s.get('plan') else ''})" if s.get("org") else ""
-    return f"Signed in to Palgu as {s['email']}{tail}. ideavalidator now runs on Palgu."
-
-
-def status_text(me) -> str:
-    if not me:
-        return "Palgu: not signed in. Run `palgu login` to sign up or sign in from here."
-    acc, org = me.get("account") or {}, me.get("org") or {}
-    return (f"Palgu: signed in as {acc.get('email', '?')} ({org.get('name', '?')}, "
-            f"plan {org.get('plan', '?')}) · upgrade: {PALGU_BILLING}")

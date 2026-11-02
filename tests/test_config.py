@@ -34,5 +34,22 @@ def test_settings_process_env_wins_over_file(tmp_path, monkeypatch):
 
 def test_settings_missing_key_raises(tmp_path, monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("PALGU_API_KEY", raising=False)
     with pytest.raises(MissingKeyError):
         Settings.from_env(tmp_path)
+
+
+def test_palgu_key_wins_over_gemini(tmp_path, monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("PALGU_API_KEY", raising=False)
+    (tmp_path / ".env").write_text("GEMINI_API_KEY=g\nPALGU_API_KEY=srt_p\n")
+    s = Settings.from_env(tmp_path)
+    assert s.provider == "palgu" and s.api_key == "srt_p"
+
+
+def test_gemini_used_when_no_palgu_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("PALGU_API_KEY", raising=False)
+    (tmp_path / ".env").write_text("GEMINI_API_KEY=g\n")
+    s = Settings.from_env(tmp_path)
+    assert s.provider == "gemini" and s.api_key == "g"

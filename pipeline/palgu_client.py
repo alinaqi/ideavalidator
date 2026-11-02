@@ -1,11 +1,12 @@
-"""A drop-in replacement for GeminiClient that runs the pipeline on Palgu's OpenAI-compatible /v1 gateway,
-so a signed-in user needs no GEMINI_API_KEY. research/structure are chat completions; the model is pinned
-with the `x-srooter-pin` header. NOTE: grounded web search is a Gemini-native feature — until Palgu exposes
-a grounded-research endpoint (tracked in a srooter issue) research here is model-native, so sources are
-empty. Network is injected (`post`) for testing; it is best-effort and returns "" / {} on any failure.
+"""A drop-in replacement for GeminiClient that runs the pipeline on Palgu's single-key gateway, so a
+signed-in user needs no GEMINI_API_KEY. research/deep_research/research_urls call Palgu's grounded
+`/v1/research` endpoint (real citations via Google Search, srooter#2063); structure uses OpenAI-compatible
+`/v1/chat/completions` with a json_schema response_format, pinned with the `x-srooter-pin` header. Network
+is injected (`post`) for testing; it is best-effort and returns "" / [] / {} on any failure.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import urllib.request
@@ -23,6 +24,16 @@ def _post_json(url: str, headers: dict, body: dict) -> object:
             return json.loads(resp.read().decode())
     except Exception:
         return None
+
+
+def _map_sources(items: object) -> list:
+    out = []
+    for item in items or []:
+        if isinstance(item, dict):
+            out.append({"url": item.get("url", ""), "title": item.get("title", "")})
+        elif isinstance(item, str):
+            out.append({"url": item, "title": ""})
+    return out
 
 
 def _extract_json(text: str) -> dict:
@@ -57,8 +68,11 @@ class PalguClient:
         return (((data.get("choices") or [{}])[0].get("message") or {}).get("content")) or ""
 
     def research(self, prompt: str) -> Research:
-        text = self._chat(self.model, [{"role": "user", "content": prompt}])
-        return Research(text=text, sources=[], queries=[], model=self.model)
+        idem = hashlib.sha256(prompt.encode()).hexdigest()[:32]
+        headers = {"Authorization": f"Bearer {self.key}", "Idempotency-Key": idem}
+        data = self._post(self.base + "/research", headers, {"query": prompt}) or {}
+        return Research(text=data.get("text") or "", sources=_map_sources(data.get("sources")),
+                        queries=list(data.get("queries") or []), model=data.get("model") or self.model)
 
     def research_urls(self, prompt: str) -> Research:
         return self.research(prompt)

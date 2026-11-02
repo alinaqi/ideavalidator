@@ -1,4 +1,4 @@
-from pipeline import palgu
+from pipeline import palgu, palgu_text
 
 
 def test_client_id_is_ideavalidator():
@@ -14,10 +14,25 @@ def test_parse_arg():
 
 
 def test_device_and_token_bodies():
-    d = palgu.device_body("Claude Code on mac", "iid-1")
-    assert d["client_id"] == "ideavalidator" and d["device"]["install_id"] == "iid-1"
+    d = palgu.device_body("Claude Code on mac", "iid-1", "darwin")
+    dev = d["device"]
+    assert d["client_id"] == "ideavalidator" and dev["install_id"] == "iid-1"
+    assert dev["name"] == "Claude Code on mac" and dev["platform"] == "darwin"
+    assert dev["client_version"] == palgu.CLIENT_VERSION
     t = palgu.token_body("devcode")
     assert t["device_code"] == "devcode" and t["grant_type"].endswith("device_code")
+
+
+def test_platform_tag_maps_known_and_defaults_linux():
+    assert palgu.platform_tag("darwin") == "darwin"
+    assert palgu.platform_tag("win32") == "win32"
+    assert palgu.platform_tag("linux") == "linux"
+    assert palgu.platform_tag("linux2") == "linux"
+    assert palgu.platform_tag("freebsd13") == "linux"
+
+
+def test_client_version_is_a_string():
+    assert isinstance(palgu.CLIENT_VERSION, str) and palgu.CLIENT_VERSION
 
 
 def test_device_name_sanitises_and_caps():
@@ -51,11 +66,11 @@ def test_token_step_expired_stops():
 
 
 def test_start_text_has_connect_url_and_code():
-    t = palgu.start_text({"user_code": "WDJB-MJHT", "expires_in": 600})
+    t = palgu_text.start_text({"user_code": "WDJB-MJHT", "expires_in": 600})
     assert "www.palgu.ai/connect?code=WDJB-MJHT" in t and "WDJB-MJHT" in t
 
 
 def test_status_text_states():
-    assert "not signed in" in palgu.status_text(None)
+    assert "not signed in" in palgu_text.status_text(None)
     me = {"account": {"email": "a@b.com"}, "org": {"name": "Acme", "plan": "pro"}}
-    assert "a@b.com" in palgu.status_text(me) and "Acme" in palgu.status_text(me)
+    assert "a@b.com" in palgu_text.status_text(me) and "Acme" in palgu_text.status_text(me)

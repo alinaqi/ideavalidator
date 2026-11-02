@@ -5,9 +5,10 @@ from pipeline import palgu_run
 
 class _FakeHttp:
     def __init__(self, posts, me=None):
-        self._posts = list(posts); self._me = me
+        self._posts = list(posts); self._me = me; self.bodies = []
 
     def post(self, path, body):
+        self.bodies.append((path, body))
         return self._posts.pop(0)
 
     def get(self, path, key):
@@ -25,6 +26,22 @@ def test_login_writes_key(tmp_path):
     code = palgu_run.login(tmp_path, http=_FakeHttp(posts), sleep=lambda s: None)
     assert code == 0
     assert "PALGU_API_KEY=srt_live" in (tmp_path / ".env").read_text()
+
+
+def test_login_sends_full_device_body(tmp_path):
+    posts = [
+        {"ok": True, "status": 200, "body": {"device_code": "dc", "user_code": "WX",
+                                             "interval": 1, "expires_in": 600}},
+        {"ok": True, "status": 200, "body": {"access_token": "srt_live",
+                                             "account": {"email": "a@b.com"}, "org": {"name": "Acme", "plan": "free"}}},
+    ]
+    http = _FakeHttp(posts)
+    palgu_run.login(tmp_path, http=http, sleep=lambda s: None)
+    _, body = http.bodies[0]
+    dev = body["device"]
+    assert body["client_id"] == "ideavalidator"
+    assert dev["platform"] in ("darwin", "win32", "linux")
+    assert dev["client_version"] and dev["name"] and dev["install_id"]
 
 
 def test_login_stops_on_denied(tmp_path):

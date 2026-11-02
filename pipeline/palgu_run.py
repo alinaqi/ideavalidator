@@ -6,11 +6,12 @@ from __future__ import annotations
 import json
 import random
 import socket
+import sys
 import time
 import urllib.request
 from pathlib import Path
 
-from . import palgu
+from . import palgu, palgu_text
 from .config import load_env
 
 
@@ -51,17 +52,18 @@ def write_key(root: Path, key: str) -> None:
 
 def login(root: Path, http=None, sleep=None) -> int:
     http, sleep = http or _Http(), sleep or time.sleep
-    body = palgu.device_body(palgu.device_name(socket.gethostname()), palgu.new_install_id(random.random))
+    body = palgu.device_body(palgu.device_name(socket.gethostname()),
+                             palgu.new_install_id(random.random), sys.platform)
     start = (http.post("/auth/device/code", body).get("body")) or {}
     if not start.get("device_code"):
         print("Palgu sign-in could not start; paste PALGU_API_KEY into .env instead.")
         return 1
-    print(palgu.start_text(start))
+    print(palgu_text.start_text(start))
     interval, waited, deadline = int(start.get("interval") or 5), 0, int(start.get("expires_in") or 600)
     while waited < deadline:
         step = palgu.token_step(http.post("/auth/token", palgu.token_body(start["device_code"])), interval)
         if step["state"] == "ok":
-            write_key(root, step["key"]); print(palgu.signed_in_text(step)); return 0
+            write_key(root, step["key"]); print(palgu_text.signed_in_text(step)); return 0
         if step["state"] == "stop":
             print("Palgu: " + step["reason"]); return 1
         interval = step["interval"]; sleep(interval); waited += interval
@@ -72,9 +74,9 @@ def login(root: Path, http=None, sleep=None) -> int:
 def status(root: Path, http=None) -> int:
     key = load_env(root / ".env").get("PALGU_API_KEY")
     if not key:
-        print(palgu.status_text(None)); return 0
+        print(palgu_text.status_text(None)); return 0
     res = (http or _Http()).get("/me", key)
-    print(palgu.status_text(res.get("body") if res.get("ok") else None))
+    print(palgu_text.status_text(res.get("body") if res.get("ok") else None))
     return 0
 
 

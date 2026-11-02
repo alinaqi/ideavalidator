@@ -17,24 +17,35 @@ turns through Palgu's gateway. We want the same easy path here.
   mixture-of-models: `POST https://api.palgu.ai/auth/device/code` → approve at
   `https://www.palgu.ai/connect?code=…` → poll `POST /auth/token` → store the minted key in `.env` as
   `PALGU_API_KEY` (gitignored, mode 600). `GET /me` for `palgu status`. client_id = `ideavalidator`.
-- **PalguClient** (`pipeline/palgu_client.py`) implements the same interface as GeminiClient over Palgu's
-  OpenAI-compatible `/v1/chat/completions`: research/deep_research/research_urls are chat completions,
-  structure uses `response_format: json_schema`, the model is pinned with `x-srooter-pin`. Built to the
-  mixture-of-models-documented contract.
-- **Provider selection** (`config.Settings.from_env` + `make_client`): an explicit `GEMINI_API_KEY` wins
-  (full Google-Search grounding); otherwise a `PALGU_API_KEY` selects Palgu; otherwise `MissingKeyError`.
-  The CLI (`_make_client`) uses `make_client`, so `run`/`council`/`ingest`/`signals` all honour it.
+  The device object sends all four fields the live contract requires: `name`, `platform`
+  (darwin/win32/linux via `platform_tag`), `client_version` (`palgu.CLIENT_VERSION`) and a v4 UUID
+  `install_id`.
+- **PalguClient** (`pipeline/palgu_client.py`) implements the same interface as GeminiClient.
+  research/deep_research/research_urls call Palgu's **grounded** `POST /v1/research` (`{"query": …}`,
+  Bearer + `Idempotency-Key`), returning real `text` + `sources` (Google-Search citations) + `queries`
+  (srooter#2063, live on prod). `structure` uses the OpenAI-compatible `/v1/chat/completions` with
+  `response_format: json_schema`, pinned with `x-srooter-pin`. Human-readable sign-in strings live in
+  `pipeline/palgu_text.py` (keeps `palgu.py` within the functions-per-file gate).
+- **Provider selection** (`config.Settings.from_env` + `make_client`): a `PALGU_API_KEY` wins
+  (single-key mode — grounded research and billing route through Palgu); otherwise an explicit
+  `GEMINI_API_KEY` selects Gemini (bring-your-own-key); otherwise `MissingKeyError`. The CLI
+  (`_make_client`) uses `make_client`, so `run`/`council`/`ingest`/`signals` all honour it.
 - **CLI**: `palgu login | status | upgrade`; `doctor` prints the active provider.
 
 ## Known limits (tracked, not hidden)
 
-- **Grounded web search** (Gemini `google_search` / `url_context`) is Gemini-native; a plain
-  OpenAI-compatible `/v1` call can't do it, so Palgu research is currently model-native (empty `sources`).
-  Exposing grounded research through Palgu is requested in a `github.com/alinaqi/srooter` issue; until
-  then, users who want full evidence quality set `GEMINI_API_KEY`.
+- **Report hero images** (`/v1/images/generations`, srooter#2070) do not exist on Palgu yet, so HTML/PDF
+  imagery stays Gemini-only; reports still render without images in Palgu mode.
 - **Demand-signal data APIs** (DataForSEO/Reddit/Apify) are not model calls — Palgu does not proxy them;
   they remain optional separate keys and degrade gracefully.
 - **Council on Palgu** (multi-model seats via `/v1` + pins) is a follow-up; the single-key core run works now.
+
+## Update (2026-11-03)
+
+srooter#2063 shipped (grounded `/v1/research` live on `api.palgu.ai`, verified on prod), closing the
+original "grounded web search is Gemini-native, sources empty" limitation. Research through Palgu now
+carries citations, so the provider default flipped to Palgu-wins. The device body gained the two
+newly-required fields (`platform`, `client_version`). Only the images endpoint (#2070) remains Gemini-only.
 
 ## Consequences
 

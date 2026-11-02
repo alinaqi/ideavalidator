@@ -14,18 +14,25 @@ def test_extract_json_plain_and_fenced():
     assert _extract_json("not json at all") == {}
 
 
-def test_research_calls_chat_completions_with_pin():
+def test_research_calls_grounded_endpoint_and_maps_sources():
     captured = {}
     def post(url, headers, body):
         captured["url"] = url; captured["headers"] = headers; captured["body"] = body
-        return {"choices": [{"message": {"content": "research text"}}]}
+        return {"text": "grounded answer", "searched": True, "model": "gemini-3.8-flash",
+                "queries": ["q1", "q2"],
+                "sources": [{"url": "https://a.test", "title": "A"},
+                            {"url": "https://b.test"}, "https://c.test"]}
     c = PalguClient(_settings(), post=post)
     r = c.research("find evidence")
-    assert r.text == "research text" and r.model == "gemini-3.8-flash"
-    assert captured["url"].endswith("/v1/chat/completions")
-    assert captured["headers"]["x-srooter-pin"] == "gemini-3.8-flash"
+    assert r.text == "grounded answer" and r.model == "gemini-3.8-flash"
+    assert captured["url"].endswith("/v1/research")
+    assert captured["body"] == {"query": "find evidence"}
     assert captured["headers"]["Authorization"] == "Bearer srt_k"
-    assert captured["body"]["messages"][0]["content"] == "find evidence"
+    assert captured["headers"].get("Idempotency-Key")
+    assert r.queries == ["q1", "q2"]
+    assert r.sources[0] == {"url": "https://a.test", "title": "A"}
+    assert r.sources[1] == {"url": "https://b.test", "title": ""}
+    assert r.sources[2] == {"url": "https://c.test", "title": ""}
 
 
 def test_structure_returns_parsed_json():
@@ -38,9 +45,10 @@ def test_structure_returns_parsed_json():
 
 def test_research_degrades_on_empty_response():
     c = PalguClient(_settings(), post=lambda u, h, b: None)
-    assert c.research("x").text == ""
+    r = c.research("x")
+    assert r.text == "" and r.sources == [] and r.queries == []
 
 
 def test_deep_and_urls_aliases_work():
-    c = PalguClient(_settings(), post=lambda u, h, b: {"choices": [{"message": {"content": "t"}}]})
+    c = PalguClient(_settings(), post=lambda u, h, b: {"text": "t", "sources": [], "queries": []})
     assert c.deep_research("x").text == "t" and c.research_urls("x").text == "t"
