@@ -46,6 +46,8 @@ srooter#2063 shipped (grounded `/v1/research` live on `api.palgu.ai`, verified o
 original "grounded web search is Gemini-native, sources empty" limitation. Research through Palgu now
 carries citations, so the provider default flipped to Palgu-wins. The device body gained the two
 newly-required fields (`platform`, `client_version`). Only the images endpoint (#2070) remains Gemini-only.
+A `402 Payment Required` from Palgu now surfaces a "top up at palgu.ai" message on stderr instead of
+degrading silently, so an out-of-budget org can't be mistaken for "no evidence found".
 
 ## Consequences
 

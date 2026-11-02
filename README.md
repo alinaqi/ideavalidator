@@ -50,7 +50,8 @@ Palgu's gateway — no `GEMINI_API_KEY` needed. If both keys are set, the `PALGU
 mode: research and billing route through Palgu); set only `GEMINI_API_KEY` for a bring-your-own-key run.
 Notes: report hero images aren't on Palgu yet, so HTML/PDF imagery stays Gemini-only; and the
 demand-signal data APIs (DataForSEO/Reddit) aren't model calls, so they stay optional separate keys.
-`doctor` shows the active provider.
+If the Palgu org runs out of budget, the run prints a clear top-up-at-palgu.ai message instead of a
+silent empty result. `doctor` shows the active provider.
 
 ## Install from source (2 minutes)
 
