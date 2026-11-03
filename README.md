@@ -1,15 +1,62 @@
+<div align="center">
+
 # ideavalidator
 
-_This is the validation model [palgu.ai](https://palgu.ai) uses to validate specs._
+**Validate a business idea end to end — toward _profitable from day one_ — from inside Claude Code.**
 
-Validate a business idea in detail, toward **profitable from day one**: problem → market → ICP and
-beachhead vertical → SWOT → willingness to pay → day-one economics → risk map → GO/PIVOT/KILL memo.
-Gemini (Google-Search-grounded) does the desk research; deterministic gates and PDLC evidence-quality
-labels keep it honest; a Claude Code skill (`/ideavalidator`) interviews you and runs the whole thing.
+Problem → market → ICP & beachhead → SWOT → willingness to pay → day-one economics → risk map → a GO / PIVOT / KILL memo, backed by grounded research and deterministic, evidence-quality gates.
 
-## Install as a Claude Code plugin
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-8A63D2.svg)](https://docs.claude.com/en/docs/claude-code)
+[![Tests](https://img.shields.io/badge/tests-224%20passing-brightgreen.svg)](#development)
+[![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen.svg)](#development)
 
-The repo is a self-hosted marketplace (no central registry needed). In Claude Code:
+<sub>The validation model <a href="https://palgu.ai">palgu.ai</a> uses to validate specs.</sub>
+
+</div>
+
+---
+
+In Claude Code you just type `/ideavalidator <your idea or a website URL>`. It interviews you for only
+what's missing, runs a ten-stage pipeline of **grounded** desk research (real source citations), keeps
+contrary evidence and UNKNOWNs visible, and hands you a decision memo with a two-week real-world test
+plan. It is built not to flatter: desk research can only justify **GO → test** (interviews, pre-sales,
+paid pilots), never **GO → build**.
+
+## Table of contents
+
+- [Why ideavalidator](#why-ideavalidator)
+- [Quick start](#quick-start)
+- [How it works](#how-it-works)
+- [Using it well in Claude Code](#using-it-well-in-claude-code)
+- [Configuration (keys)](#configuration-keys)
+- [CLI reference](#cli-reference)
+- [Output formats](#output-formats)
+- [Advanced features](#advanced-features)
+- [Development](#development)
+- [Project layout](#project-layout)
+- [License](#license)
+
+## Why ideavalidator
+
+- **Grounded, not guessed.** Every stage runs a search-grounded research pass and normalises each piece
+  of evidence with PDLC quality labels (directness, behaviour-vs-stated, recency, source independence).
+- **Deterministic gates.** GO / PIVOT / KILL comes from scored criteria, not vibes — kill flags and weak
+  critical criteria force a KILL; the math is in [`pipeline/gates.py`](pipeline/gates.py).
+- **Won't over-qualify.** It scores the idea **as stated, for your ICP**. A self-validation layer flags
+  off-ICP drift, inconsistent scores, weak KILLs and unreachable (fabricated) citations.
+- **Fits the business model.** PLG/freemium, marketplace, usage/API, services or direct-sales SaaS are
+  each judged on their own terms (a PLG funnel isn't scored like outbound sales).
+- **One key, or your own.** Sign in with Palgu to run on a single key, or bring your own `GEMINI_API_KEY`.
+- **Agentic end to end.** It interviews, researches, spot-checks its own citations, and records your
+  decision — you can walk away while it runs.
+
+## Quick start
+
+### 1. Install the Claude Code plugin
+
+The repo is a self-hosted marketplace — no central registry needed. In Claude Code:
 
 ```
 # one step (Claude Code 2.1.275+)
@@ -20,68 +67,78 @@ The repo is a self-hosted marketplace (no central registry needed). In Claude Co
 /plugin install ideavalidator@ideavalidator
 ```
 
-Terminal equivalents: `claude plugin marketplace add alinaqi/ideavalidator` then
+Terminal equivalent: `claude plugin marketplace add alinaqi/ideavalidator` then
 `claude plugin install ideavalidator@ideavalidator`.
 
-**One-time setup after install (required).** Installing copies the plugin but does **not** run any setup
-script, and the pipeline needs a Python venv + a `GEMINI_API_KEY`. The skill handles this for you: the
-first time you run `/ideavalidator`, its environment check sees there's no venv and runs `install.sh`
-in the plugin directory (found via `$CLAUDE_PLUGIN_ROOT`), then asks you to put
-`GEMINI_API_KEY=...` in that directory's `.env`. Add any optional provider keys (demand signals,
-sounding board) to the same `.env` — any subset works, missing keys are just skipped. New versions:
-`/plugin marketplace update ideavalidator` (third-party marketplaces don't auto-update).
+> **One-time setup (required).** Installing copies the plugin but does **not** run any setup script, and
+> the pipeline needs a Python venv + a provider key. The skill handles it: the first time you run
+> `/ideavalidator`, it detects there's no venv, runs `install.sh` in the plugin directory, and prompts
+> you to sign in with Palgu or add a `GEMINI_API_KEY`. Update later with
+> `/plugin marketplace update ideavalidator` (third-party marketplaces don't auto-update).
 
-> If you'd rather not depend on the plugin cache, the **install from source** path below is the most
-> reliable — it clones the repo and installs the `/ideavalidator` skill globally.
+### 2. Pick a key path
 
-## Sign in with Palgu (one key, no setup)
-
-Don't want to collect a Gemini key (and optional provider keys)? Sign up with Palgu and run on a
-single key — the same device sign-in [mixture-of-models](https://github.com/alinaqi/mixture-of-models-claude-mod) uses:
+**Easiest — sign in with Palgu (one key):**
 
 ```bash
-.venv/bin/python -m pipeline.cli palgu login     # opens a code to approve at palgu.ai (sign up there if new)
-.venv/bin/python -m pipeline.cli palgu status    # who is signed in, on which plan
+.venv/bin/python -m pipeline.cli palgu login     # approve the code at palgu.ai (sign up there if new)
+.venv/bin/python -m pipeline.cli palgu status    # who's signed in, on which plan
 ```
 
-It mints a per-device key, saves it to `.env` as `PALGU_API_KEY`, and the pipeline then runs the
-**grounded** research (real Google-Search citations via Palgu's `/v1/research`) + JSON structuring on
-Palgu's gateway — no `GEMINI_API_KEY` needed. If both keys are set, the `PALGU_API_KEY` wins (single-key
-mode: research and billing route through Palgu); set only `GEMINI_API_KEY` for a bring-your-own-key run.
-Notes: report hero images aren't on Palgu yet, so HTML/PDF imagery stays Gemini-only; and the
-demand-signal data APIs (DataForSEO/Reddit) aren't model calls, so they stay optional separate keys.
-If the Palgu org runs out of budget, the run prints a clear top-up-at-palgu.ai message instead of a
-silent empty result. `doctor` shows the active provider.
+This mints a per-device key, saves it to `.env` as `PALGU_API_KEY`, and runs the **grounded** research
+(real Google-Search citations via Palgu's `/v1/research`) + JSON structuring on Palgu's gateway — no
+`GEMINI_API_KEY` needed. If the org runs out of budget the run prints a clear top-up message instead of a
+silent empty result.
 
-## Install from source (2 minutes)
+**Or bring your own Gemini key:**
 
 ```bash
 git clone https://github.com/alinaqi/ideavalidator.git && cd ideavalidator
-./install.sh                      # venv, deps, .env, installs the /ideavalidator skill globally
+./install.sh                      # venv, deps, .env; installs the /ideavalidator skill globally
 $EDITOR .env                      # GEMINI_API_KEY=... from https://aistudio.google.com/apikey
 .venv/bin/python -m pipeline.cli doctor
 ```
 
-Then in Claude Code, from any directory:
+If both keys are set, `PALGU_API_KEY` wins (single-key mode routes research + billing through Palgu);
+set only `GEMINI_API_KEY` for a bring-your-own-key run. `doctor` shows the active provider.
+
+### 3. Run it
+
+From any directory in Claude Code:
 
 ```
 /ideavalidator SMS waitlist that fills last-minute cancellations for dental clinics
 ```
 
-The skill asks only for what the brief is missing (actor, job, current workaround, why you, candidate
-verticals, price and channel guess, cost floor), writes `ideas/<slug>.md`, runs the nine stages,
-spot-checks citations, presents the memo and records your decision. Without Claude Code, use the CLI
-below.
+It asks only for the missing brief fields, writes `ideas/<slug>.md`, runs the ten stages, spot-checks
+citations, presents the memo, and records your decision. Prefer the terminal? See the [CLI](#cli-reference).
 
-- **Start here:** `docs/WORKFLOW.md` — the procedure we follow for every idea.
-- **Frameworks:** `docs/FRAMEWORKS.md` — which idea/validation frameworks we use and when.
-- **Decisions:** `docs/adr/` — architecture decision records.
-- **Killed ideas:** `docs/KILL_LOG.md`.
+## How it works
+
+Each stage runs a grounded research pass → schema-constrained JSON → evidence normalised with PDLC labels
+→ a deterministic gate. **Kill flags and any critical criterion below 2 force KILL; mean ≥ 3.5 is GO;
+otherwise PIVOT.** Present demand signals add a small capped bonus (≤ +0.5); absent signals never penalise.
+
+| # | Stage | Question it answers |
+|---|-------|---------------------|
+| 1 | `frame` | Is this a solution-independent opportunity for a specific actor? (writes the fixed thesis spine) |
+| 2 | `classify` | What **category** is this (so we compare to the right incumbents), which business models fit, + Business Model Canvas & USP |
+| 3 | `problem` | Does the problem exist, recur, and already cost money or behaviour? |
+| 4 | `market` | What do buyers do today, who competes, how big is the **reachable** market, what's shifting? |
+| 5 | `icp` | Which narrow beachhead has the most urgent, best-funded, most reachable version? |
+| 6 | `swot` | For that beachhead, where are we strong/weak — what to exploit or defend? |
+| 7 | `wtp` | What do comparable buyers already pay, for which value metric, how to test it behaviourally? |
+| 8 | `economics` | How many customers, at what price/CAC, make it profitable from month one? |
+| 9 | `risks` | Which assumptions are important and weakly evidenced — what's the smallest test? |
+| 10 | `decision` | GO / PIVOT / KILL, with kill conditions and the next two weeks of real-world tests |
+
+`classify` feeds incumbent/model context into later stages but is excluded from the overall verdict.
+GO means "go run the two-week real-world test plan," never "go build." Full procedure:
+[`docs/WORKFLOW.md`](docs/WORKFLOW.md) · frameworks: [`docs/FRAMEWORKS.md`](docs/FRAMEWORKS.md).
 
 ## Using it well in Claude Code
 
-The tool is **agentic** — you talk to it in Claude Code and it drives the whole pipeline for you. Three
-ways to start:
+The tool is **agentic** — you talk to it and it drives the whole pipeline. Three ways to start:
 
 ```
 /ideavalidator a tool that turns website scans into a trust seal      # an idea in words
@@ -90,144 +147,155 @@ ways to start:
 /ideavalidator -help                                                  # show all options
 ```
 
-**What Claude Code does for you, end to end:** interviews you for only the missing brief fields → writes
-`ideas/<slug>.md` → runs the ten stages in the background and streams each gate verdict → gathers demand
-signals (search volume + Reddit/X) → opens the strongest citations to spot-check them → runs the
-self-validation audit → presents the memo → records your decision. You can walk away while it runs; it
-reports verdicts as they land and never fabricates a result it hasn't computed.
+**What it does end to end:** interviews you for only the missing brief fields → writes `ideas/<slug>.md`
+→ runs the ten stages in the background and streams each gate verdict → gathers demand signals (search
+volume + Reddit/X) → opens the strongest citations to spot-check them → runs the self-validation audit →
+presents the memo → records your decision. It reports verdicts as they land and never fabricates a result
+it hasn't computed.
 
 **To get the most out of it:**
 
 1. **Be specific about the ICP and the "why you".** Name the exact actor (role, company type, geography),
-   what they do today, and the one channel you can already reach them through. The more real the brief,
-   the less the research has to guess.
-2. **State the business model and the market regime.** Say whether it's direct-sales SaaS, PLG/freemium,
-   a marketplace, a connector/action-layer, usage/API, or a service — and whether it's an existing market
-   or a new/emerging one. This changes how market size, pricing and economics are scored (a PLG/network is
-   judged on its funnel, not outbound sales; a new market isn't killed for lacking competitors).
-3. **Let it stay focused — it won't over-qualify.** It scores the idea **as stated, for your ICP**. If the
-   honest answer is PIVOT/KILL it says so, and any "this is bigger as X" goes in `adjacent_opportunities`
-   as a *separate* idea. After each run, skim the **Self-validation** section of the memo (or
-   `runs/<slug>/selfcheck.md`): it flags off-ICP drift, inconsistent scores, weak KILLs and unreachable
-   citations — verify or ask it to rerun those stages before you trust the verdict.
+   what they do today, and the one channel you can already reach them through.
+2. **State the business model and the market regime.** SaaS, PLG/freemium, marketplace, connector/
+   action-layer, usage/API, or service — and whether it's an existing or new/emerging market. This
+   changes how market size, pricing and economics are scored.
+3. **Let it stay focused — it won't over-qualify.** It scores the idea as stated, for your ICP. Skim the
+   **Self-validation** section of the memo (or `runs/<slug>/selfcheck.md`): it flags off-ICP drift,
+   inconsistent scores, weak KILLs and unreachable citations — verify or rerun before you trust a verdict.
 4. **Ask for the format you want.** Add `-output html|pdf|xlsx` (and `-dest <dir>` to choose where it
-   saves). `html`/`pdf` include the Business Model Canvas, a value-positioning map and gate charts — the
-   best way to read a full result.
-5. **Use the sounding board to enrich a thin idea.** Ask it to "convene the council" for a multi-model
-   debate that surfaces disagreements and an enriched thesis (opinion, not evidence — it never moves a gate).
+   saves). `html`/`pdf` include the Business Model Canvas, a value-positioning map and gate charts.
+5. **Use the sounding board to enrich a thin idea.** "Convene the council" for a multi-model debate that
+   surfaces disagreements and an enriched thesis (opinion, not evidence — it never moves a gate).
 6. **Treat GO as "go run the two-week real-world test," not "go build."** Ask for the GO kit (interview
-   guide, prospect list + outreach, pre-sale page + pricing, experiment sheet). Only interviews, deposits
-   and paid pilots count as validation.
-7. **Come back with results.** After interviews or pre-sales, tell it what happened; it appends them to the
-   brief and reruns `wtp,economics,risks,decision` so you can compare against the first run.
+   guide, prospect list + outreach, pre-sale page + pricing, experiment sheet).
+7. **Come back with results.** After interviews or pre-sales, tell it what happened; it appends them to
+   the brief and reruns `wtp,economics,risks,decision` so you can compare against the first run.
 
-**Keys:** `GEMINI_API_KEY` is required (set it in `.env`). The demand-signal sources (DataForSEO, Reddit,
-Apify, xAI) and the sounding-board models are all optional — add any subset to `.env` or a `KEYS_FILE`;
-`doctor` shows what's active. Nothing breaks if a key is missing — that source is simply skipped.
+## Configuration (keys)
 
-## Validate a website URL
+You need **one** provider key — either sign in with Palgu (`palgu login`) or set `GEMINI_API_KEY` in
+`.env`. Everything else is optional and degrades gracefully: a missing key just means that source is
+skipped. `doctor` shows what's active.
 
-Point it at any business website and it extracts the context and runs the full cycle:
+| Key | Purpose | Required? |
+|-----|---------|-----------|
+| `PALGU_API_KEY` | Single-key mode: grounded research + structuring via Palgu (set by `palgu login`) | one of these two |
+| `GEMINI_API_KEY` | Bring-your-own-key: grounded research + structuring via Gemini | one of these two |
+| `DATAFORSEO_LOGIN` / `DATAFORSEO_PASSWORD` | Demand signal: search-volume | optional |
+| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` / `REDDIT_USER_AGENT` | Demand signal: Reddit validation | optional |
+| `APIFY_TOKEN` | Demand signal: Reddit fallback | optional |
+| `XAI_API_KEY` | Demand signal: X/Twitter via Grok | optional |
+| Council provider keys | Multi-model sounding board (any subset) | optional |
+
+See [`.env.example`](.env.example) for the full list. Keys can live in `.env` or a `KEYS_FILE` it points to.
+
+## CLI reference
 
 ```bash
-# validate the company's own business
-.venv/bin/python -m pipeline.cli ingest --url https://typeform.com --run
-# validate a NEW idea for that company
-.venv/bin/python -m pipeline.cli ingest --url https://typeform.com --idea "a free survey creator" --run
+cp ideas/_template.md ideas/my-idea.md && $EDITOR ideas/my-idea.md
+.venv/bin/python -m pipeline.cli run     --idea ideas/my-idea.md   # all ten stages (~20–40 min)
+.venv/bin/python -m pipeline.cli ingest  --url https://typeform.com --run   # build a brief from a site, then run
+.venv/bin/python -m pipeline.cli signals --idea ideas/my-idea.md   # demand signals (also auto in run)
+.venv/bin/python -m pipeline.cli council --idea ideas/my-idea.md   # sounding board (optional)
+.venv/bin/python -m pipeline.cli selfcheck --idea ideas/my-idea.md # self-validation audit (also auto in run)
+.venv/bin/python -m pipeline.cli report  --idea my-idea --format md # decision memo (--dest <dir> to save)
+.venv/bin/python -m pipeline.cli stages                            # stage list + dependencies
+.venv/bin/python -m pipeline.cli doctor                            # check keys, models, active provider
 ```
 
-In Claude Code this is just `/ideavalidator https://typeform.com — a free survey creator`.
+Outputs land in `runs/<slug>/<stage>.json|.md`. `--stages a,b` runs a subset (dependencies must exist);
+`--deep` uses Gemini Deep Research; `--stop-on-kill` halts at the first KILL gate; `--no-signals` skips
+the demand-signal step.
 
 ## Output formats
 
 ```bash
-.venv/bin/python -m pipeline.cli report --idea <slug> --format md|html|xlsx|pdf
+.venv/bin/python -m pipeline.cli report --idea <slug> --format md|html|xlsx|pdf [--dest <dir>]
 ```
-`md` prints the memo; `html`/`pdf` include inline charts and a Gemini-generated hero image; `xlsx` is a
-gate + evidence workbook; `pdf` renders via headless Chrome or weasyprint (falls back to html).
 
-## Sounding board (multi-model debate)
+`md` prints the memo; `html`/`pdf` include inline charts, the Business Model Canvas, a value-positioning
+map and a hero image; `xlsx` is a gate + evidence workbook; `pdf` renders via headless Chrome or
+weasyprint (falls back to html).
+
+## Advanced features
+
+<details>
+<summary><strong>Demand signals</strong> (additive, never a penalty)</summary>
+
+`run` first gathers demand signals (skip with `--no-signals`): **search volume** via DataForSEO and
+**social validation** via the official Reddit API (Apify fallback) and xAI Grok (X). Present signals add a
+small, capped bonus (≤ +0.5) to the market/problem/decision verdicts; **absent signals never penalise** —
+new markets often have none. Every source is best-effort.
+</details>
+
+<details>
+<summary><strong>Category &amp; business model</strong> (classify stage)</summary>
+
+The `classify` stage names the business **category** from a built-in taxonomy (dev tools/API, AI
+action-layer/connector, marketplace, vertical SaaS, …) so every downstream stage compares to the *right*
+incumbents. It enumerates candidate **business models**, fills a **Business Model Canvas**, and writes a
+**USP** + value-positioning map (rendered as visuals in `html`/`pdf`). It never changes the verdict.
+</details>
+
+<details>
+<summary><strong>Self-validation</strong> (anti over-qualification)</summary>
+
+After a run, `selfcheck` (automatic at the end of `run`) audits the pipeline's own output for
+over-qualification / off-ICP drift, score/content inconsistencies, KILLs built on weak evidence, and
+unreachable (fabricated) citations. Flags are advisory — verify or rerun. Bigger adjacent businesses are
+recorded separately, never counted as the idea passing.
+</details>
+
+<details>
+<summary><strong>Sounding board</strong> (multi-model debate)</summary>
 
 Six personas, each anchored in named thinking frameworks (Cohen, Mom Test/JTBD, Sequoia Arc + 7 Powers,
 Van Westendorp + Dunford, Dixon wedge + founding sales, Premortem/Inversion) and seated on different
-models (GPT, Claude, Gemini, DeepSeek, Kimi, Grok, GLM, Cerebras, Groq, MiniMax) read the brief and the
-evidence ledger, debate turn by turn, get attacked by a Red Team seat, and a Chair synthesises an
-**enriched idea**, the real disagreements, claims to verify and a recommendation. Pattern adapted from
-eduBITES soundingBoard.
+models (GPT, Claude, Gemini, DeepSeek, Kimi, Grok, GLM, …) read the brief and the evidence ledger, debate
+turn by turn, get attacked by a Red Team seat, and a Chair synthesises an **enriched idea**, the real
+disagreements, claims to verify and a recommendation.
 
 ```bash
-# keys: point KEYS_FILE in .env at any env file with provider keys, or set them in .env (any subset works)
 .venv/bin/python -m pipeline.cli council --idea ideas/my-idea.md --rounds 1
 ```
+</details>
 
-## CLI
-
-```bash
-cp ideas/_template.md ideas/my-idea.md && $EDITOR ideas/my-idea.md
-.venv/bin/python -m pipeline.cli run --idea ideas/my-idea.md        # all nine stages (~20-40 min)
-.venv/bin/python -m pipeline.cli signals --idea ideas/my-idea.md    # demand signals (also auto in run)
-.venv/bin/python -m pipeline.cli council --idea ideas/my-idea.md    # sounding board (optional)
-.venv/bin/python -m pipeline.cli report --idea my-idea --format md  # decision memo (--dest <dir> to save)
-.venv/bin/python -m pipeline.cli stages                             # stage list + dependencies
-```
-
-Outputs land in `runs/<slug>/<stage>.json|.md`. Stages: frame → classify → problem → market → icp → swot → wtp → economics → risks → decision. `--stages a,b` runs a subset (dependencies must exist);
-`--deep` uses Gemini Deep Research; `--stop-on-kill` halts at the first KILL gate.
-
-## Self-validation (anti over-qualification)
-
-After a run, a self-validation layer (`pipeline.cli selfcheck`, and automatically at the end of `run`) audits the pipeline's own output for over-qualification / off-ICP drift (the idea quietly becoming a bigger business the brief never described), score/﻿content inconsistencies, KILLs built on weak evidence, and unreachable (fabricated) citations. Flags are advisory — verify or rerun. The validator scores the idea **as stated, for its stated ICP**; bigger adjacent businesses are recorded separately, never counted as the idea passing.
-
-## Category & business model
-
-The `classify` stage (right after `frame`) names the business **category** from a built-in taxonomy (dev tools/API, AI action-layer/connector, marketplace, vertical SaaS, …) so every downstream stage compares to the *right* incumbents — not look-alikes from another category. It enumerates the category's candidate **business models** (so business-model innovation is explicit), fills a **Business Model Canvas**, and writes a **USP** + value-positioning map. `html`/`pdf` reports render the canvas and positioning map as visuals. `classify` is framing only — it never changes the GO/PIVOT/KILL verdict.
-
-## Demand signals
-
-`run` first gathers demand signals (skip with `--no-signals`): **search volume** via DataForSEO (how the
-idea is searched) and **social validation** via the official Reddit API (Apify fallback) and xAI Grok (X). Present signals add a
-small, capped bonus (≤+0.5) to the market/problem/decision verdicts; **absent signals never penalise** an
-idea — new markets often have none. Every source is best-effort, so missing keys just mean no signal.
-Configure `DATAFORSEO_LOGIN`/`DATAFORSEO_PASSWORD`, `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`/`REDDIT_USER_AGENT`, `APIFY_TOKEN`, `XAI_API_KEY` (see `.env.example`);
-`doctor` lists which are active.
-
-## Development
-
-```bash
-pytest --cov=pipeline --cov-report=term-missing      # 80% minimum coverage
-```
-
-Code limits: ≤20 lines per function, ≤3 parameters, nesting ≤2, ≤200 lines and ≤10 functions per
-file. Tests are written first (RED → GREEN → VALIDATE).
-
-## Flexible to the business model
+<details>
+<summary><strong>Flexible to the business model</strong></summary>
 
 Set `business_model` and `success_definition` in the brief (or let `frame` classify them). The objective
 (`services_cash` / `compounding_product` / `plg_network` / `venture_scale` / default) reweights the gates:
 a PLG/directory/network thesis is sized by its funnel and a small paying fraction of a large free base,
-not as outbound per-customer sales, and is not hard-killed on low per-user willingness-to-pay. Every stage
+not as outbound per-customer sales, and isn't hard-killed on low per-user willingness-to-pay. Every stage
 also refuses to silently re-scope the thesis, classifies competitors as substitute/complement/adjacent,
-and runs a disconfirmation + source-grading check before any KILL-level blocker. See `docs/WORKFLOW.md` §1b.
+and runs a disconfirmation + source-grading check before any KILL-level blocker. See
+[`docs/WORKFLOW.md`](docs/WORKFLOW.md) §1b.
+</details>
 
-## How it judges
+## Development
 
-Each stage: grounded research pass → schema-constrained JSON → evidence normalised with PDLC labels
-(directness, behaviour vs stated, recency, source independence) → gate. Kill flags and critical
-criteria below 2 force KILL; mean ≥3.5 is GO; otherwise PIVOT. GO means "go run the two-week
-real-world test plan" (interviews, pre-sales, paid pilots), never "go build". Details: `docs/WORKFLOW.md`.
+```bash
+pytest --cov=pipeline --cov-report=term-missing      # 80% minimum coverage (currently 97%)
+```
 
-## Layout
+Tests are written first (RED → GREEN → VALIDATE). Code limits: ≤ 20 lines per function, ≤ 3 parameters,
+nesting ≤ 2, ≤ 200 lines and ≤ 10 functions per file. Architecture decisions are recorded in
+[`docs/adr/`](docs/adr/); killed ideas in [`docs/KILL_LOG.md`](docs/KILL_LOG.md).
+
+## Project layout
 
 ```
 .claude/skills/      the /ideavalidator skill (install.sh copies it to ~/.claude/skills)
-pipeline/            config, stages, prompts, gemini client, evidence, gates, runner, report, cli,
+commands/            the /ideavalidator slash command
+pipeline/            config, stages, prompts, gemini + palgu clients, evidence, gates, runner, report, cli,
                      providers (multi-model chat), council + council_io (sounding board), personas.json
 pipeline/prompts/    one research prompt per stage (+ _common.md rules block)
 pipeline/schemas/    JSON output schema per stage
 ideas/               idea briefs (start from _template.md)
 runs/                per-idea outputs (gitignored)
 docs/                WORKFLOW.md, FRAMEWORKS.md, KILL_LOG.md, adr/
-tests/               pytest suite with fake Gemini client
+tests/               pytest suite with fake clients (no real network)
 ```
 
 ## License
