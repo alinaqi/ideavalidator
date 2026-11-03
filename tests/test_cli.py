@@ -78,7 +78,7 @@ def test_council_command_runs_with_fakes(brief_path, tmp_path, capsys):
 def test_ingest_command_writes_brief(tmp_path, capsys):
     from tests.test_ingest import BRIEF
     ideas = tmp_path / "ideas"; ideas.mkdir()
-    code = cli.main(["ingest", "--url", "https://zenloop.com", "--idea", "a free survey creator",
+    code = cli.main(["ingest", "--url", "https://typeform.com", "--idea", "a free survey creator",
                      "--ideas-dir", str(ideas)], client_factory=lambda s: FakeClient(structured=BRIEF))
     assert code == 0
     files = list(ideas.glob("*.md"))
@@ -102,7 +102,7 @@ def test_ingest_run_honours_out_dir(tmp_path, monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     ideas = tmp_path / "ideas"; ideas.mkdir()
     runs = tmp_path / "myruns"
-    code = cli.main(["ingest", "--url", "https://zenloop.com", "--idea", "a survey tool",
+    code = cli.main(["ingest", "--url", "https://typeform.com", "--idea", "a survey tool",
                      "--ideas-dir", str(ideas), "--out", str(runs), "--run"],
                     client_factory=lambda s: FakeClient(structured=BRIEF))
     assert code == 0

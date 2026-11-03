@@ -8,7 +8,7 @@ from pipeline.signals import (
 
 
 def _brief():
-    return Brief(slug="zenloop-survey", title="Zenloop — free survey creator",
+    return Brief(slug="typeform-survey", title="Typeform — free survey creator",
                  body="## Candidate verticals\n- ecommerce\n- SaaS\n", meta={})
 
 

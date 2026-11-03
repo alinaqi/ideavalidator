@@ -16,8 +16,8 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
 ## Modes
 
 - **Idea text:** `/ideavalidator a tool that turns scans into a trust seal` — interview + validate.
-- **Website URL:** `/ideavalidator https://zenloop.com` — ingest the site and validate the company's
-  own business. `/ideavalidator https://zenloop.com — a free survey creator` (or `for zenloop.com, a
+- **Website URL:** `/ideavalidator https://typeform.com` — ingest the site and validate the company's
+  own business. `/ideavalidator https://typeform.com — a free survey creator` (or `for typeform.com, a
   free survey creator`) — validate that NEW idea for that company, using the site as context/why-us.
 - **Output:** add `-output html|pdf|xlsx|md` (alias `--format`) to export the report; html/pdf include
   Gemini-generated imagery and inline charts. Default is the markdown memo. Add `-dest <dir>` (alias
@@ -37,7 +37,7 @@ Validate the idea the user gives (or asks about) through the Idea Validator pipe
    path `install.sh` wrote into the skill; otherwise walk up from the skill file to the dir holding
    `pipeline/cli.py`.
 2. **Help / parse the argument**: if it is `-help`/`--help`/`help`, print the Modes block above and
-   stop. Detect a URL (http/https or a bare domain like `zenloop.com`) and any angle after `—`, `-`,
+   stop. Detect a URL (http/https or a bare domain like `typeform.com`) and any angle after `—`, `-`,
    `:` or `for <url>,`. Detect an output format from `-output`/`--output`/`--format`.
 3. **If a URL was given**, build the brief agentically first:
    `cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli ingest --url <url> [--idea "<angle>"]`.

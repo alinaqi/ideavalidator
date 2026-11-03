@@ -31,8 +31,8 @@ cd "$IDEAVALIDATOR_HOME" && .venv/bin/python -m pipeline.cli doctor
 
 ## Step 0b — URL ingestion (when given a website)
 
-If the user gives a website URL (optionally with an angle, e.g. `zenloop.com — a free survey creator`,
-or `for zenloop.com, a free survey creator`), do NOT run the manual interview. Instead build the brief
+If the user gives a website URL (optionally with an angle, e.g. `typeform.com — a free survey creator`,
+or `for typeform.com, a free survey creator`), do NOT run the manual interview. Instead build the brief
 agentically:
 
 ```bash

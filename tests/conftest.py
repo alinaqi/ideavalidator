@@ -94,8 +94,8 @@ class FakeClient:
         from pipeline.gemini import Research
 
         return Research(text="research text from site", sources=[
-            {"url": "https://zenloop.com", "title": "Zenloop"}
-        ], queries=["zenloop"])
+            {"url": "https://typeform.com", "title": "Typeform"}
+        ], queries=["typeform"])
 
     def structure(self, text, schema):
         assert "research text" in text

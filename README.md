@@ -85,8 +85,8 @@ ways to start:
 
 ```
 /ideavalidator a tool that turns website scans into a trust seal      # an idea in words
-/ideavalidator https://zenloop.com                                    # validate a company's own business
-/ideavalidator https://zenloop.com — a free survey creator            # a new idea FOR that company
+/ideavalidator https://typeform.com                                    # validate a company's own business
+/ideavalidator https://typeform.com — a free survey creator            # a new idea FOR that company
 /ideavalidator -help                                                  # show all options
 ```
 
@@ -131,12 +131,12 @@ Point it at any business website and it extracts the context and runs the full c
 
 ```bash
 # validate the company's own business
-.venv/bin/python -m pipeline.cli ingest --url https://zenloop.com --run
+.venv/bin/python -m pipeline.cli ingest --url https://typeform.com --run
 # validate a NEW idea for that company
-.venv/bin/python -m pipeline.cli ingest --url https://zenloop.com --idea "a free survey creator" --run
+.venv/bin/python -m pipeline.cli ingest --url https://typeform.com --idea "a free survey creator" --run
 ```
 
-In Claude Code this is just `/ideavalidator https://zenloop.com — a free survey creator`.
+In Claude Code this is just `/ideavalidator https://typeform.com — a free survey creator`.
 
 ## Output formats
 
