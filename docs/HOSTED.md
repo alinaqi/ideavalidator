@@ -11,8 +11,13 @@ session (`palgu_login`) and the pipeline runs on their key — they pay Palgu di
 | `palgu_login` | — | Returns a palgu.ai approve URL + code; polls in the background and stores your key for the session. |
 | `palgu_status` | — | Whether this session is signed in, and on which plan. |
 | `validate_idea` | `pitch` | Starts a validation from a one-sentence pitch; returns a `run_id`. |
-| `get_status` | `run_id` | Progress + per-stage GO/PIVOT/KILL verdicts as they land. |
+| `get_status` | `run_id` | Progress + per-stage GO/PIVOT/KILL verdicts, plus `next_poll_seconds` (how long to wait before polling again). |
+| `list_runs` | — | This Palgu account's runs — works in a new session. |
+| `cancel_run` | `run_id` | Request cancellation of a running validation. |
 | `get_report` | `run_id` | The decision memo once the run is done. |
+
+Runs are persisted under `IV_STORE`, keyed to your **Palgu account**, so `get_status` / `get_report` /
+`list_runs` keep working in a brand-new session (important for agents that span many turns).
 
 A full run is ten grounded stages (~20–40 min), so `validate_idea` is async: it returns a `run_id` you
 poll with `get_status`, then read with `get_report`.
@@ -41,8 +46,8 @@ with your pitch.
 
 ## v0.1 limitations (tracked)
 
-- **Session state is in-memory** — a server restart drops sign-ins and the job list (runs on `/data`
-  persist). Redis/Postgres persistence is a follow-up.
+- **Runs persist** to `IV_STORE` per Palgu account; the **key/sign-in cache is in-memory**, so after a
+  restart a caller signs in again with `palgu_login` (their past runs are still there via `list_runs`).
 - **No server-level OAuth** — the server is open; access to actually *run* a validation is gated by
   Palgu sign-in. Directory listing + OAuth is a follow-up.
 - **No image generation** — report hero images need Palgu `/v1/images` (srooter#2070), not yet available.
