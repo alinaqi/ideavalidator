@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from pipeline import palgu, palgu_run, palgu_text
 from .keystore import KeyStore
+from .store import account_id
 
 
 @dataclass
@@ -37,6 +38,7 @@ class DeviceLogin:
             step = palgu.token_step(http.post("/auth/token", palgu.token_body(start["device_code"])), interval)
             if step["state"] == "ok":
                 self.keystore.set(session_id, step["key"])
+                self._store_account(session_id, step["key"])
                 return True
             if step["state"] == "stop":
                 return False
@@ -57,3 +59,8 @@ class DeviceLogin:
             return palgu_text.status_text(None)
         res = self._client().get("/me", key)
         return palgu_text.status_text(res.get("body") if res.get("ok") else None)
+
+    def _store_account(self, session_id: str, key: str) -> None:
+        res = self._client().get("/me", key)
+        email = ((res.get("body") or {}).get("account") or {}).get("email", "")
+        self.keystore.set_account(session_id, account_id(email))

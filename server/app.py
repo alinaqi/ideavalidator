@@ -1,7 +1,7 @@
-"""The hosted ideavalidator remote MCP server (streamable HTTP). Thin transport layer only: tools bind to
-the tested pure modules (handlers, tools, palgu_session). Bring-your-own-Palgu — a caller runs
-`palgu_login`, then `validate_idea` runs the pipeline on their own key. State is per MCP session
-(`ctx.session_id`), in-memory for v0.1. Add as a connector in claude.ai / ChatGPT / Grok (URL: /mcp).
+"""The hosted ideavalidator remote MCP server (streamable HTTP). Thin transport layer: tools bind to the
+tested pure modules (handlers, tools, palgu_session). Bring-your-own-Palgu — a caller runs `palgu_login`,
+then validations run on their own key and are persisted per Palgu account, so get_status/get_report/
+list_runs work across sessions. Add as a connector in claude.ai / ChatGPT / Grok (URL: /mcp).
 """
 from __future__ import annotations
 
@@ -12,22 +12,22 @@ from mcp.server.mcpserver import Context, MCPServer
 
 from . import handlers, tools
 from .handlers import Deps
-from .jobs import JobRegistry
 from .keystore import KeyStore
 from .palgu_session import DeviceLogin
+from .store import RunStore
 
 ROOT = Path(__file__).resolve().parents[1]
 STORE = Path(os.environ.get("IV_STORE") or (ROOT / "server_runs"))
 
 _keys = KeyStore()
-_jobs = JobRegistry()
+_store = RunStore(STORE)
 _login = DeviceLogin(_keys)
-_deps = Deps(keys=_keys, jobs=_jobs, store=STORE, root=ROOT)
+_deps = Deps(keys=_keys, store=_store, root=ROOT)
 
 mcp = MCPServer("ideavalidator", instructions=(
     "Validate a business idea end to end (problem, market, ICP, SWOT, pricing, day-one economics, "
     "risks, GO/PIVOT/KILL). Run `palgu_login` once to sign in with your own Palgu key, then "
-    "`validate_idea`, poll `get_status`, and read `get_report`."))
+    "`validate_idea`, poll `get_status` (respect next_poll_seconds), and read `get_report`."))
 
 
 def _sid(ctx) -> str:
@@ -48,14 +48,26 @@ def palgu_status(ctx: Context) -> str:
 
 @mcp.tool()
 def validate_idea(pitch: str, ctx: Context) -> str:
-    """Start validating a business idea from a one-sentence pitch. Returns a run_id to poll."""
+    """Start validating a business idea from a one-sentence pitch. Returns a run_id to poll (~20-40 min)."""
     return handlers.start_validation(_deps, _sid(ctx), pitch)
 
 
 @mcp.tool()
-def get_status(run_id: str, ctx: Context) -> str:
-    """Check progress and per-stage verdicts of a validation run."""
-    return tools.progress_text(_jobs.get(run_id))
+def get_status(run_id: str, ctx: Context) -> dict:
+    """Progress of a run: state, completed/total stages, per-stage verdicts, and next_poll_seconds."""
+    return handlers.status_for(_deps, _sid(ctx), run_id)
+
+
+@mcp.tool()
+def list_runs(ctx: Context) -> str:
+    """List this Palgu account's validation runs (works across sessions)."""
+    return handlers.list_for(_deps, _sid(ctx))
+
+
+@mcp.tool()
+def cancel_run(run_id: str, ctx: Context) -> str:
+    """Request cancellation of a running validation."""
+    return handlers.cancel_for(_deps, _sid(ctx), run_id)
 
 
 @mcp.tool()

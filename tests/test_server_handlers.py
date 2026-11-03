@@ -1,7 +1,7 @@
 from pipeline.gemini import Research
-from server.handlers import Deps, report_for, start_validation
-from server.jobs import JobRegistry
+from server.handlers import Deps, cancel_for, list_for, report_for, start_validation, status_for
 from server.keystore import KeyStore
+from server.store import RunStore
 from server import tools
 
 
@@ -24,25 +24,48 @@ class FakeClient:
 
 
 def _deps(tmp_path):
-    return Deps(keys=KeyStore(), jobs=JobRegistry(), store=tmp_path, root=tmp_path,
+    keys = KeyStore()
+    keys.set("sess", "srt_live")
+    keys.set_account("sess", "acct1")
+    return Deps(keys=keys, store=RunStore(tmp_path / "store"), root=tmp_path,
                 spawn=lambda fn, *a: fn(*a), client_for=lambda key, root: FakeClient())
 
 
 def test_start_validation_requires_sign_in(tmp_path):
-    deps = _deps(tmp_path)
+    deps = Deps(keys=KeyStore(), store=RunStore(tmp_path), root=tmp_path)
     assert start_validation(deps, "sess", "an idea") == tools.NOT_SIGNED_IN
 
 
-def test_start_validation_runs_and_reports(tmp_path):
+def test_start_runs_persists_and_reports(tmp_path):
     deps = _deps(tmp_path)
-    deps.keys.set("sess", "srt_live")
     out = start_validation(deps, "sess", "SMS waitlist for dental clinics")
-    jobs = deps.jobs.for_session("sess")
-    assert len(jobs) == 1 and jobs[0].id in out
-    assert jobs[0].state == "done" and len(jobs[0].stages) == 10
-    memo = report_for(deps, "sess", jobs[0].id)
+    runs = deps.store.list("acct1")
+    assert len(runs) == 1 and runs[0]["run_id"] in out
+    rid = runs[0]["run_id"]
+    status = status_for(deps, "sess", rid)
+    assert status["state"] == "done" and status["completed"] == 10
+    assert status["next_poll_seconds"] == 0 and status["total"] == 10
+    memo = report_for(deps, "sess", rid)
     assert memo and "No such run_id" not in memo
 
 
-def test_report_for_unknown_run(tmp_path):
-    assert "No such run_id" in report_for(_deps(tmp_path), "sess", "nope")
+def test_status_report_cross_session(tmp_path):
+    deps = _deps(tmp_path)
+    out = start_validation(deps, "sess", "an idea for devs")
+    rid = deps.store.list("acct1")[0]["run_id"]
+    # a NEW session/keystore, same account id, sharing the store on disk
+    keys2 = KeyStore(); keys2.set("s2", "srt_live"); keys2.set_account("s2", "acct1")
+    deps2 = Deps(keys=keys2, store=deps.store, root=tmp_path)
+    assert status_for(deps2, "s2", rid)["run_id"] == rid
+    assert "No such run_id" not in report_for(deps2, "s2", rid)
+    assert rid in list_for(deps2, "s2")
+
+
+def test_cancel_and_unknown(tmp_path):
+    deps = _deps(tmp_path)
+    start_validation(deps, "sess", "an idea")
+    rid = deps.store.list("acct1")[0]["run_id"]
+    assert "Cancellation requested" in cancel_for(deps, "sess", rid)
+    assert "No such run_id" in cancel_for(deps, "sess", "nope")
+    assert status_for(deps, "sess", "nope")["error"] == "No such run_id."
+    assert list_for(deps, "sess")  # non-empty listing
