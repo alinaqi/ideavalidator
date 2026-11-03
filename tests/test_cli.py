@@ -18,6 +18,9 @@ def test_run_subset_and_report(brief_path, tmp_path, capsys):
                      "--out", str(runs)], client_factory=lambda s: FakeClient())
     assert code == 0
     assert (runs / "test-idea" / "problem.json").exists()
+    import json
+    prog = json.loads((runs / "test-idea" / "progress.json").read_text())
+    assert prog["state"] == "complete" and prog["total"] == 2
     assert cli.main(["report", "--idea", "test-idea", "--out", str(runs)]) == 0
     assert "Decision memo" in capsys.readouterr().out
 

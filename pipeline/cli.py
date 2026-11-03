@@ -9,14 +9,14 @@ from .config import MissingKeyError, Settings, make_client
 from .council import CouncilContext, run_council
 from .ingest import IngestRequest, build_brief
 from .palgu_run import run_palgu_cmd
+from .cli_run import report_cmd, run_stages
 from .prompts import PROMPT_DIR, SCHEMA_DIR, load_brief
 from .providers import Chat, load_keys
-from .report_export import ReportJob, cli_report
-from .runner import MissingDependency, RunContext, run_stage
+from .runner import RunContext
 from .selfcheck_run import finish_selfcheck, run_selfcheck_cmd
 from .signals import SIGNAL_KEYS
 from .signals_run import prep_signals, run_signals_cmd
-from .stages import STAGES, resolve
+from .stages import STAGES
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -148,17 +148,9 @@ def _cmd_run(args, factory) -> int:
                      client=_make_client(factory), deep=args.deep)
     if not getattr(args, "no_signals", False):
         prep_signals(ctx, load_keys(ROOT, SIGNAL_KEYS))
-    for stage in resolve(args.stages):
-        print(f"→ {stage.id}: {stage.name} …", flush=True)
-        try:
-            gate = run_stage(stage, ctx)["gate"]
-        except MissingDependency as exc:
-            print(f"error: {exc}", file=sys.stderr)
-            return 2
-        print(f"  {gate['verdict']} (score {gate['score']}) → {ctx.out_dir / stage.id}.md")
-        if args.stop_on_kill and gate["verdict"] == "KILL":
-            print(f"stopped: {stage.id} gate is KILL ({'; '.join(gate['reasons'])})")
-            return 3
+    code = run_stages(args, ctx)
+    if code:
+        return code
     finish_selfcheck(brief, ctx.out_dir)
     print(f"\nreport: python -m pipeline.cli report --idea {brief.slug} --out {args.out}")
     return 0
@@ -166,30 +158,21 @@ def _cmd_run(args, factory) -> int:
 
 def main(argv=None, client_factory=None, chat_factory=None) -> int:
     args = _parser().parse_args(argv)
-    if args.command == "palgu":
-        return run_palgu_cmd(args, ROOT)
-    if args.command == "stages":
-        return _cmd_stages()
-    if args.command == "doctor":
-        return _cmd_doctor()
-    if args.command == "council":
-        return _cmd_council(args, (client_factory, chat_factory))
-    if args.command == "ingest":
-        return _cmd_ingest(args, client_factory)
-    if args.command == "signals":
-        return run_signals_cmd(args, ROOT)
-    if args.command == "selfcheck":
-        return run_selfcheck_cmd(args, ROOT)
-    if args.command == "report":
-        job = ReportJob(run_dir=Path(args.out) / args.idea, fmt=args.format,
-                        dest=Path(args.dest) if args.dest else None, root=ROOT)
-        print(cli_report(job))
-        return 0
+    routes = {
+        "palgu": lambda: run_palgu_cmd(args, ROOT),
+        "stages": _cmd_stages, "doctor": _cmd_doctor,
+        "council": lambda: _cmd_council(args, (client_factory, chat_factory)),
+        "ingest": lambda: _cmd_ingest(args, client_factory),
+        "signals": lambda: run_signals_cmd(args, ROOT),
+        "selfcheck": lambda: run_selfcheck_cmd(args, ROOT),
+        "report": lambda: report_cmd(args, ROOT),
+    }
+    if args.command in routes:
+        return routes[args.command]()
     try:
         return _cmd_run(args, client_factory)
     except MissingKeyError as exc:
-        print(f"error: {exc}. Run `palgu login` for a single Palgu key, or copy .env.example to .env "
-              f"and set GEMINI_API_KEY.", file=sys.stderr)
+        print(f"error: {exc}. Run `palgu login` or set GEMINI_API_KEY in .env.", file=sys.stderr)
         return 1
 
 
