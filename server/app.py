@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 
 from mcp.server.mcpserver import Context, MCPServer
+from mcp.server.transport_security import TransportSecuritySettings
 
 from . import handlers, tools
 from .handlers import Deps
@@ -76,4 +77,9 @@ def get_report(run_id: str, ctx: Context) -> str:
     return handlers.report_for(_deps, _sid(ctx), run_id)
 
 
-app = mcp.streamable_http_app()
+# The SDK's DNS-rebinding protection (host/origin allowlist) defaults to localhost-only and 421s a
+# proxied public host. This server is reached remotely through Render's HTTPS and every action requires
+# the caller's own Palgu sign-in, so the host check adds no protection here — disable it.
+app = mcp.streamable_http_app(
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False)
+)
