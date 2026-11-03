@@ -76,6 +76,19 @@ Terminal equivalent: `claude plugin marketplace add alinaqi/ideavalidator` then
 > you to sign in with Palgu or add a `GEMINI_API_KEY`. Update later with
 > `/plugin marketplace update ideavalidator` (third-party marketplaces don't auto-update).
 
+### Install in Cursor / Grok Bot
+
+ideavalidator also ships a Cursor/Grok Bot plugin (`.cursor-plugin/`) and a root `mcp.json`. Two ways to use it:
+
+- **Hosted MCP (recommended):** point your client at the hosted server. Set `IDEAVALIDATOR_MCP_URL` to the
+  deployed `/mcp` URL (see [`docs/HOSTED.md`](docs/HOSTED.md) to deploy `server/` on Render), and the
+  `mcp.json` connector exposes the tools (`palgu_login`, `validate_idea`, `get_status`, `get_report`,
+  `list_runs`, `cancel_run`). Sign in with `palgu_login` (your own Palgu key) inside the session.
+- **Local plugin:** copy the repo into `~/.cursor/plugins/local/ideavalidator` and reload Cursor; the
+  `/ideavalidator` skill falls back to the bundled CLI (resolved via `$CURSOR_PLUGIN_ROOT`).
+
+The Claude Code plugin (`.claude-plugin/`) is unchanged — both packages live in the same repo.
+
 ### 2. Pick a key path
 
 **Easiest — sign in with Palgu (one key):**

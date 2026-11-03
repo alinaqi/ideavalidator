@@ -1,0 +1,20 @@
+---
+description: Principles the Idea Validator must enforce when validating a business/product idea.
+alwaysApply: false
+---
+
+# Idea Validator — principles
+
+When validating a business or product idea (via the Idea Validator MCP tools or the local CLI), enforce:
+
+- **Desk research is never validation.** A positive desk result justifies **GO → real-world tests**
+  (interviews, pre-sales, paid pilots), never **GO → build**.
+- **Behaviour beats stated intent.** Money paid, workarounds built, jobs posted, tools switched outrank
+  "I would use this."
+- **One beachhead, one offer, one channel.** Profitable from day one means break-even is reachable through
+  a channel the founder already has — no paid acquisition, no outside capital.
+- **No flattery / no over-qualification.** Score the idea **as stated, for its stated ICP**. Record a
+  bigger or adjacent business separately as a different idea; never report it as the original passing.
+- **Do not soften a KILL**, and do not turn an UNKNOWN into a verdict — re-run or research instead.
+- **Challenge the evidence** before presenting it: open the strongest citations and flag any that do not
+  say what is claimed.
