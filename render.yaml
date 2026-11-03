@@ -1,0 +1,17 @@
+# Render blueprint for the hosted ideavalidator MCP server.
+# Connector URL once deployed: https://<service>.onrender.com/mcp
+services:
+  - type: web
+    name: ideavalidator-mcp
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: IV_STORE
+        value: /data
+    disk:
+      name: runs
+      mountPath: /data
+      sizeGB: 1

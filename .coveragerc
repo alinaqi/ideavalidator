@@ -1,0 +1,5 @@
+[run]
+# app.py = MCP transport wiring, __main__.py = uvicorn entrypoint: integration/smoke-tested, not unit.
+omit =
+    server/app.py
+    server/__main__.py
