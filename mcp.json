@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "ideavalidator": {
-      "url": "${IDEAVALIDATOR_MCP_URL}",
-      "description": "Idea Validator — validate a business idea (GO/PIVOT/KILL) via grounded research. Sign in with your own Palgu key inside the session (palgu_login)."
+      "url": "https://ideavalidator-mcp.onrender.com/mcp",
+      "description": "Idea Validator — validate a business idea (GO/PIVOT/KILL) via grounded research. Sign in with your own Palgu key inside the session (palgu_login), then validate_idea / get_status / get_report."
     }
   }
 }
