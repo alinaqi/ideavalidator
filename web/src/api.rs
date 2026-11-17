@@ -15,8 +15,9 @@ use crate::api_input::{RunInput, RunReq};
 use crate::api_progress::progress_payload;
 use crate::db::Run;
 use crate::extract::CurrentAccount;
-use crate::ingest::{ingest_and_start, UrlForm};
+use crate::ingest::UrlForm;
 use crate::jobs::JobManager;
+use crate::jobs_url::start_url;
 use crate::report::report_page;
 use crate::state::AppState;
 
@@ -48,7 +49,7 @@ async fn start_input(st: &AppState, account: &str, input: RunInput) -> Result<St
     match input {
         RunInput::Pitch(pitch) => JobManager::new(st.clone()).start_run(account, &pitch).await,
         RunInput::Url { url, angle } => {
-            ingest_and_start(
+            start_url(
                 st,
                 account,
                 UrlForm {
@@ -73,7 +74,7 @@ pub async fn create_run(
     };
     match start_input(&st, &account, input).await {
         Ok(run_id) => (StatusCode::CREATED, Json(json!({ "run_id": run_id }))).into_response(),
-        Err(e) => json_err(StatusCode::BAD_GATEWAY, &e),
+        Err(e) => json_err(StatusCode::INTERNAL_SERVER_ERROR, &e),
     }
 }
 

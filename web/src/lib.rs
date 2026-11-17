@@ -24,6 +24,7 @@ pub mod extract;
 pub mod ingest;
 pub mod jobs;
 pub mod jobs_run;
+pub mod jobs_url;
 pub mod mcp;
 pub mod palgu;
 pub mod palgu_flow;

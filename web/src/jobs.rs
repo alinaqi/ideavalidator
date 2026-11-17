@@ -28,7 +28,7 @@ pub struct JobManager {
     st: AppState,
 }
 
-fn new_run_id() -> String {
+pub(crate) fn new_run_id() -> String {
     let mut bytes = [0u8; 6];
     rand::rngs::OsRng.fill_bytes(&mut bytes);
     hex::encode(bytes)
@@ -46,31 +46,28 @@ fn new_run(account_id: &str, run_id: &str, brief: &BriefRef) -> Run {
     }
 }
 
+/// The on-disk run dir for an account's run (`<store>/<account>/<run_id>`).
+pub(crate) fn run_dir(st: &AppState, account_id: &str, run_id: &str) -> PathBuf {
+    Path::new(&st.config.store_dir)
+        .join(account_id)
+        .join(run_id)
+}
+
+/// Decrypt the account's stored Palgu token (or "not signed in" if the user is unknown).
+pub(crate) async fn decrypt_token(st: &AppState, account_id: &str) -> Result<String, String> {
+    let user = st.db.get_user(account_id).await?.ok_or("not signed in")?;
+    st.cipher.decrypt(&user.enc_token)
+}
+
 impl JobManager {
     pub fn new(st: AppState) -> Self {
         JobManager { st }
     }
 
-    fn run_dir(&self, account_id: &str, run_id: &str) -> PathBuf {
-        Path::new(&self.st.config.store_dir)
-            .join(account_id)
-            .join(run_id)
-    }
-
-    async fn decrypt_token(&self, account_id: &str) -> Result<String, String> {
-        let user = self
-            .st
-            .db
-            .get_user(account_id)
-            .await?
-            .ok_or("not signed in")?;
-        self.st.cipher.decrypt(&user.enc_token)
-    }
-
     /// Start a validation run for `pitch`, returning its `run_id`. The worker runs in the background.
     pub async fn start_run(&self, account_id: &str, pitch: &str) -> Result<String, String> {
         let run_id = new_run_id();
-        let out_dir = self.run_dir(account_id, &run_id);
+        let out_dir = run_dir(&self.st, account_id, &run_id);
         let (slug, brief_path) = write_brief(&out_dir, pitch)?;
         let brief = BriefRef {
             slug,
@@ -96,7 +93,7 @@ impl JobManager {
         run_id: &str,
         brief: BriefRef,
     ) -> Result<String, String> {
-        let token = self.decrypt_token(account_id).await?;
+        let token = decrypt_token(&self.st, account_id).await?;
         self.st
             .db
             .insert_run(new_run(account_id, run_id, &brief))
@@ -106,7 +103,7 @@ impl JobManager {
         let ctx = SpawnCtx {
             run_id: run_id.to_string(),
             brief_path: brief.brief_path,
-            out_dir: self.run_dir(account_id, run_id),
+            out_dir: run_dir(&self.st, account_id, run_id),
             token,
             cancel,
         };

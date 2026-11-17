@@ -51,9 +51,13 @@ fn run_js(id: &str, state: &str) -> String {
         "const id='{id}';const es=new EventSource('/api/runs/'+id+'/stream');\
 es.addEventListener('stage',e=>{{const d=JSON.parse(e.data);const li=document.getElementById('stage-'+d.stage);\
 if(li){{li.classList.add('done');li.querySelector('.v').textContent=d.verdict||'done';}}}});\
-es.addEventListener('done',()=>{{es.close();show();}});es.addEventListener('cancelled',()=>es.close());\
+es.addEventListener('done',()=>{{es.close();set('done');}});es.addEventListener('cancelled',()=>{{es.close();set('cancelled');}});\
+function set(s){{document.getElementById('state').textContent=s;if(s==='done')show();}}\
 function show(){{const f=document.getElementById('memo');f.src='/api/runs/'+id+'/report';f.style.display='block';}}\
-if('{state}'==='done')show();"
+async function poll(){{try{{const d=await(await fetch('/api/runs/'+id)).json();document.getElementById('state').textContent=d.state;\
+if(d.state==='error'){{document.getElementById('runerr').textContent=d.error||'failed';clearInterval(t);}}\
+else if(d.state==='done'){{clearInterval(t);show();}}}}catch(e){{}}}}\
+var t=setInterval(poll,4000);if('{state}'==='done')show();"
     )
 }
 
@@ -63,7 +67,11 @@ fn body(run: &Run, stages: &[RunStage]) -> Markup {
             h1 { (run.slug) }
             a href="/app" { "← Dashboard" }
         }
-        div.card { p.muted { "State: " span id="state" { (run.state) } } (stage_list(stages)) }
+        div.card {
+            p.muted { "State: " span id="state" { (run.state) } }
+            p id="runerr" class="kill" { (run.error.clone().unwrap_or_default()) }
+            (stage_list(stages))
+        }
         iframe id="memo" style="display:none;width:100%;height:60vh;border:1px solid var(--line);border-radius:12px" {}
         script { (PreEscaped(run_js(&run.id, &run.state))) }
     }
