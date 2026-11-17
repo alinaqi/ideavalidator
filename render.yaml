@@ -1,6 +1,16 @@
-# Render blueprint for the hosted ideavalidator MCP server.
-# Connector URL once deployed: https://<service>.onrender.com/mcp
+# Render blueprint for ideavalidator.
+# Two services ship side by side during the migration (ADR 0013):
+#   - ideavalidator-mcp  : the existing Python remote MCP server (server/). Kept until Rust parity is
+#                          confirmed in production, then retired and mcp.json repointed.
+#   - ideavalidator-web  : the new Rust web app + hosted MCP (web/). Connector URL once deployed:
+#                          https://ideavalidator-web.onrender.com/mcp
+databases:
+  - name: ideavalidator-db
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+
 services:
+  # --- existing Python MCP server (unchanged) ---
   - type: web
     name: ideavalidator-mcp
     runtime: docker
@@ -13,5 +23,37 @@ services:
         value: /data
     disk:
       name: runs
+      mountPath: /data
+      sizeGB: 1
+
+  # --- new Rust web app + hosted MCP ---
+  - type: web
+    name: ideavalidator-web
+    runtime: docker
+    dockerfilePath: ./web/Dockerfile
+    dockerContext: .
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: PALGU_ORIGIN
+        value: https://api.palgu.ai
+      - key: PYTHON_BIN
+        value: python3
+      - key: MAX_CONCURRENT_RUNS
+        value: "3"
+      # 32-byte key for encrypting each user's Palgu token at rest. generateValue mints a random
+      # secret; if it does not decode (base64/hex) to exactly 32 bytes, set a proper key by hand
+      # (see docs/HOSTED.md). Rotating it invalidates all stored tokens (users re-sign-in).
+      - key: TOKEN_ENC_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ideavalidator-db
+          property: connectionString
+      - key: IV_STORE
+        value: /data
+    disk:
+      name: iv-web-store
       mountPath: /data
       sizeGB: 1

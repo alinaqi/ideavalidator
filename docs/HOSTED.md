@@ -51,3 +51,84 @@ with your pitch.
 - **No server-level OAuth** — the server is open; access to actually *run* a validation is gated by
   Palgu sign-in. Directory listing + OAuth is a follow-up.
 - **No image generation** — report hero images need Palgu `/v1/images` (srooter#2070), not yet available.
+
+---
+
+# ideavalidator-web — Rust web app + hosted MCP (ADR 0013)
+
+`web/` is a Rust service (axum + tokio) that adds a **web product** on top of the same Python engine: sign
+in with Palgu, submit an idea, watch per-stage progress over SSE, read the GO/PIVOT/KILL memo, and see your
+history. It **also** serves the same seven MCP tools at `/mcp`, so it is a drop-in replacement for the
+Python `server/` above. It does **not** reimplement any scoring/stage logic — it spawns `worker/run_job.py`
+(the unchanged engine) and streams its NDJSON. See **ADR 0013** (`docs/adr/0013-rust-web-app-and-mcp.md`).
+
+Compared with the Python server it adds: persistent **accounts + run history in Postgres**, a browser
+dashboard, live SSE progress, and the user's Palgu token **encrypted at rest** (AES-256-GCM). Sign-ins
+survive new MCP sessions for history/reports; a brand-new MCP session still re-runs `palgu_login` once to
+bind, then `list_runs` / `get_report` resolve across restarts.
+
+## Environment variables
+
+| Var | Required | Default | Purpose |
+|-----|----------|---------|---------|
+| `PORT` | no | `8000` | HTTP port the service binds (`0.0.0.0:$PORT`). |
+| `DATABASE_URL` | **yes** | — | Postgres for `users` / `sessions` / `runs` / `run_stages`. Migrations run on startup. |
+| `TOKEN_ENC_KEY` | **yes** | — | 32-byte key (base64 **or** hex) encrypting each user's Palgu token at rest. `openssl rand -hex 32`. Must decode to exactly 32 bytes. Never logged, never committed. |
+| `PALGU_ORIGIN` | no | `https://api.palgu.ai` | Palgu origin for the device-code sign-in. |
+| `IV_STORE` | no | `server_runs` | Disk dir for brief + stage output files (`<store>/<account>/<run>/<slug>/decision.md`). |
+| `PYTHON_BIN` | no | `.venv/bin/python` | Interpreter used to spawn the worker. The Docker image sets `python3`. |
+| `MAX_CONCURRENT_RUNS` | no | `3` | tokio-semaphore bound on concurrent validations. |
+
+Secrets come only from the environment; `.env` stays gitignored and `.env.example` lists every var with no
+values.
+
+## Run locally
+
+```bash
+# 1. A local Postgres (reuses the test compose file).
+docker compose -f web/docker-compose.test.yml up -d
+
+# 2. Point the app at it, with a real 32-byte key.
+export DATABASE_URL=postgres://iv:iv@localhost:5433/iv_test
+export TOKEN_ENC_KEY=$(openssl rand -hex 32)
+export PYTHON_BIN=.venv/bin/python     # the interpreter that can import pipeline/ + worker/
+
+# 3. Run from the repo root (the worker is spawned relative to the CWD).
+cargo run --manifest-path web/Cargo.toml --bin ideavalidator-web
+# -> ideavalidator-web listening on http://0.0.0.0:8000
+```
+
+The binary applies the `web/migrations` schema on startup (embedded in the binary), so an empty database is
+ready to use. Open `http://localhost:8000/` for the dashboard; the MCP connector URL is
+`http://localhost:8000/mcp`.
+
+## Tests
+
+The required gate needs no database or Docker:
+
+```bash
+cd web && cargo test && cargo clippy --all-targets -- -D warnings && cargo fmt --check
+```
+
+The one DB-touching test is `#[ignore]`d and gated on `TEST_DATABASE_URL`:
+
+```bash
+docker compose -f web/docker-compose.test.yml up -d
+TEST_DATABASE_URL=postgres://iv:iv@localhost:5433/iv_test \
+  cargo test --manifest-path web/Cargo.toml -- --ignored
+```
+
+## Deploy (Render)
+
+`render.yaml` defines `ideavalidator-web` (Docker, `web/Dockerfile`, build context = repo root), a managed
+Postgres (`ideavalidator-db`) wired to `DATABASE_URL`, a 1 GB disk at `/data` for `IV_STORE`, and the env
+vars above (`TOKEN_ENC_KEY` via `generateValue` — verify Render's value decodes to 32 bytes, else set one
+with `openssl rand -hex 32`). The existing `ideavalidator-mcp` Python service stays in the blueprint so both
+run side by side during the migration. The connector URL is `https://ideavalidator-web.onrender.com/mcp`.
+
+Add it as a connector exactly as for the Python server (claude.ai / ChatGPT / Grok → paste the `/mcp` URL).
+
+## Supersedes the Python server
+
+Per ADR 0013, once the Rust `/mcp` is deployed and confirmed at parity, the Python `server/` is retired and
+`mcp.json` is repointed at `ideavalidator-web`. Until then `server/` is kept intact for deploy parity.
