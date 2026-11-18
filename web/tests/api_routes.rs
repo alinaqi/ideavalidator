@@ -177,6 +177,73 @@ async fn unknown_run_is_404() {
 }
 
 #[tokio::test]
+async fn cancel_requires_authentication() {
+    let (status, _) = send(
+        app(test_state()),
+        post("/api/runs/x/cancel", None, json!({})),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn cancel_unknown_run_is_404() {
+    let router = app(test_state());
+    let cookie = sign_in(&router).await;
+    let (status, _) = send(
+        router,
+        post("/api/runs/nope/cancel", Some(&cookie), json!({})),
+    )
+    .await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn cancel_marks_a_running_run_cancelled() {
+    use ideavalidator_web::db::Run;
+    let st = test_state();
+    let router = app(st.clone());
+    let cookie = sign_in(&router).await;
+    // Learn the signed-in account via a created run, then seed a stuck "running" orphan it owns.
+    let (_s, created) = send(
+        router.clone(),
+        post("/api/runs", Some(&cookie), json!({"pitch": "an idea"})),
+    )
+    .await;
+    let account = st
+        .db
+        .get_run(created["run_id"].as_str().unwrap())
+        .await
+        .unwrap()
+        .unwrap()
+        .account_id;
+    st.db
+        .insert_run(Run {
+            id: "stuck-1".into(),
+            account_id: account,
+            slug: "x".into(),
+            pitch: "p".into(),
+            state: "running".into(),
+            error: None,
+            created_at: 0,
+        })
+        .await
+        .unwrap();
+
+    let (status, body) = send(
+        router,
+        post("/api/runs/stuck-1/cancel", Some(&cookie), json!({})),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body["state"], "cancelled");
+    assert_eq!(
+        st.db.get_run("stuck-1").await.unwrap().unwrap().state,
+        "cancelled"
+    );
+}
+
+#[tokio::test]
 async fn landing_and_dashboard_render_html() {
     let router = app(test_state());
     let resp = router

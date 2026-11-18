@@ -105,6 +105,26 @@ pub async fn run_status(
     Json(progress_payload(&run, &stages)).into_response()
 }
 
+/// `POST /api/runs/:id/cancel` — stop a run. Kills the tracked worker (if this process owns it) and
+/// marks the run `cancelled`; on a run that already finished it just echoes the current state. The
+/// direct DB write also clears a "previous" run left `running`/`pending` after a restart (no token).
+pub async fn cancel_run(
+    CurrentAccount(account): CurrentAccount,
+    State(st): State<AppState>,
+    Path(id): Path<String>,
+) -> Response {
+    let run = match owned_run(&st, &account, &id).await {
+        Ok(r) => r,
+        Err(code) => return code.into_response(),
+    };
+    if crate::runs::is_terminal(&run.state) {
+        return Json(json!({ "run_id": id, "state": run.state })).into_response();
+    }
+    JobManager::new(st.clone()).request_cancel(&id);
+    let _ = st.db.update_run_state(&id, "cancelled", None).await;
+    Json(json!({ "run_id": id, "state": "cancelled" })).into_response()
+}
+
 /// `GET /api/runs/:id/report` — the decision memo rendered to a themed HTML page.
 pub async fn run_report(
     CurrentAccount(account): CurrentAccount,

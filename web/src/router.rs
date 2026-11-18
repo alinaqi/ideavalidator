@@ -12,6 +12,7 @@ fn api_routes() -> Router<AppState> {
     Router::new()
         .route("/api/runs", post(api::create_run).get(api::list_runs))
         .route("/api/runs/:id", get(api::run_status))
+        .route("/api/runs/:id/cancel", post(api::cancel_run))
         .route("/api/runs/:id/report", get(api::run_report))
         .route("/api/runs/:id/stream", get(api_stream::run_stream))
 }
