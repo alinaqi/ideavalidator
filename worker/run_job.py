@@ -106,6 +106,25 @@ def run_safely(
     RunJob(spec, engine, emit).execute()
 
 
+def verify_token(me_call: Callable[[], dict]) -> "str | None":
+    """None if the run may proceed; a human reason only when Palgu *definitively* rejects the key.
+    A transient `/me` failure (network, 5xx) returns None so a valid key is never blocked by a blip."""
+    try:
+        res = me_call()
+    except Exception:
+        return None
+    if res.get("ok"):
+        return None
+    if res.get("status") in (401, 403):
+        return "Palgu rejected your sign-in — your key is invalid or expired. Sign out and sign in again."
+    return None
+
+
+def _me_call() -> dict:
+    from pipeline.palgu_run import _Http
+    return _Http().get("/me", os.environ.get("PALGU_API_KEY", ""))
+
+
 def _parse(argv) -> "object":
     import argparse
     parser = argparse.ArgumentParser(prog="worker.run_job", description=__doc__)
@@ -120,6 +139,11 @@ def main(argv=None) -> int:
     root = Path(__file__).resolve().parents[1]
     spec = WorkerSpec(Path(args.brief), Path(args.out), args.stages)
     print(f"worker: starting run for {spec.brief_path}", file=sys.stderr, flush=True)
+    reason = verify_token(_me_call)
+    if reason:
+        print(f"worker: {reason}", file=sys.stderr, flush=True)
+        _emit_stdout(json.dumps({"event": "error", "error": reason}))
+        return 0
     run_safely(spec, lambda: _real_engine(_client_from_env(root)), _emit_stdout)
     return 0
 

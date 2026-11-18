@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from worker.run_job import Engine, RunJob, WorkerSpec, _stage_event, run_safely
+from worker.run_job import Engine, RunJob, WorkerSpec, _stage_event, run_safely, verify_token
 
 
 class _Stage:
@@ -78,6 +78,25 @@ def test_run_safely_runs_the_engine_when_setup_succeeds() -> None:
     run_safely(WorkerSpec(Path("b.md"), Path("/out")), lambda: engine, emit)
     events = [json.loads(line) for line in lines]
     assert events[-1] == {"event": "done"}
+
+
+def test_verify_token_accepts_ok_envelope() -> None:
+    assert verify_token(lambda: {"ok": True, "status": 200, "body": {}}) is None
+
+
+def test_verify_token_blocks_on_401() -> None:
+    reason = verify_token(lambda: {"ok": False, "status": 401, "body": {}})
+    assert reason is not None
+    assert "sign in again" in reason.lower()
+
+
+def test_verify_token_ignores_transient_failure() -> None:
+    assert verify_token(lambda: {"ok": False, "status": 503, "body": {}}) is None
+
+    def boom() -> dict:
+        raise OSError("no network")
+
+    assert verify_token(boom) is None
 
 
 def test_stage_event_shape() -> None:
