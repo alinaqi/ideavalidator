@@ -72,8 +72,4 @@ pub trait Db: Send + Sync {
     async fn list_runs(&self, account_id: &str) -> Result<Vec<Run>, String>;
     async fn get_run(&self, run_id: &str) -> Result<Option<Run>, String>;
     async fn run_stages(&self, run_id: &str) -> Result<Vec<RunStage>, String>;
-
-    /// Delete an account and everything keyed to it (sessions, runs, run-stages, the user row).
-    /// Returns how many runs were removed. Idempotent: a missing account deletes nothing.
-    async fn delete_account(&self, account_id: &str) -> Result<u64, String>;
 }

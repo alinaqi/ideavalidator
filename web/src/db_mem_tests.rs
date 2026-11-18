@@ -71,45 +71,6 @@ async fn run_lifecycle_state_and_stages() {
 }
 
 #[tokio::test]
-async fn delete_account_wipes_user_sessions_and_runs_but_spares_others() {
-    let db = InMemoryDb::new();
-    db.upsert_user(User {
-        account_id: "acc".into(),
-        email: "a@b.com".into(),
-        plan: "".into(),
-        enc_token: "e".into(),
-    })
-    .await
-    .unwrap();
-    db.create_session(Session {
-        token: "t".into(),
-        account_id: "acc".into(),
-        expires_at: now_unix() + 60,
-    })
-    .await
-    .unwrap();
-    db.insert_run(run("r1", "acc")).await.unwrap();
-    db.append_stage("r1", stage()).await.unwrap();
-    db.insert_run(run("keep", "other")).await.unwrap();
-
-    assert_eq!(db.delete_account("acc").await.unwrap(), 1);
-    assert!(db.get_user("acc").await.unwrap().is_none());
-    assert_eq!(db.session_account("t").await.unwrap(), None);
-    assert!(db.list_runs("acc").await.unwrap().is_empty());
-    assert!(db.run_stages("r1").await.unwrap().is_empty());
-    assert_eq!(db.list_runs("other").await.unwrap().len(), 1);
-}
-
-fn stage() -> RunStage {
-    RunStage {
-        stage_id: "frame".into(),
-        verdict: Some("GO".into()),
-        score: Some(4.2),
-        ts: now_unix(),
-    }
-}
-
-#[tokio::test]
 async fn list_runs_scopes_to_account_newest_first() {
     let db = InMemoryDb::new();
     let mut a = run("old", "acc");

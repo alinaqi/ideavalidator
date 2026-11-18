@@ -6,7 +6,6 @@
 //! `docs/adr/0013-rust-web-app-and-mcp.md`.
 
 pub mod account;
-pub mod admin;
 pub mod api;
 pub mod api_input;
 pub mod api_progress;
