@@ -15,6 +15,9 @@ ideas/*.md
 !ideas/_template.md
 !ideas/example-*.md
 
+# Rust web service build output (keep web/Cargo.lock tracked for the binary)
+web/target/
+
 # macOS
 .DS_Store
 **/.DS_Store

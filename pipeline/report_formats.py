@@ -9,7 +9,6 @@ import subprocess
 from pathlib import Path
 
 from .report import build_memo
-from .report_xlsx import write_xlsx
 from .stages import STAGES
 
 FORMATS = ("md", "html", "xlsx", "pdf")
@@ -143,6 +142,7 @@ def export(run_dir: Path, fmt: str, image_fn=None) -> Path:
     if fmt == "md":
         out = run_dir / "report.md"; out.write_text(build_memo(run_dir)); return out
     if fmt == "xlsx":
+        from .report_xlsx import write_xlsx  # lazy: openpyxl is optional and not needed to import the CLI
         return write_xlsx(run_dir, run_dir / "report.xlsx")
     html_path = run_dir / "report.html"
     html_path.write_text(_html(run_dir, image_fn))

@@ -1,0 +1,21 @@
+# Postgres for the env-gated PgDb integration test. The REQUIRED gate (cargo test/clippy/fmt) passes
+# WITHOUT this; it is only for the #[ignore] test in src/db_pg.rs.
+#
+#   docker compose -f web/docker-compose.test.yml up -d
+#   TEST_DATABASE_URL=postgres://iv:iv@localhost:5433/iv_test \
+#     cargo test --manifest-path web/Cargo.toml -- --ignored
+#   docker compose -f web/docker-compose.test.yml down
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: iv
+      POSTGRES_PASSWORD: iv
+      POSTGRES_DB: iv_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iv -d iv_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
