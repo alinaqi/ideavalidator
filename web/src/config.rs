@@ -11,6 +11,8 @@ pub struct Config {
     pub token_enc_key: String,
     pub python_bin: String,
     pub max_concurrent_runs: usize,
+    /// Shared secret for the admin endpoints; empty disables them entirely.
+    pub admin_token: String,
 }
 
 fn parse_cap(raw: Option<String>) -> usize {
@@ -36,6 +38,7 @@ impl Config {
             token_enc_key: get("TOKEN_ENC_KEY").unwrap_or_default(),
             python_bin: get("PYTHON_BIN").unwrap_or_else(|| ".venv/bin/python".into()),
             max_concurrent_runs: parse_cap(get("MAX_CONCURRENT_RUNS")),
+            admin_token: get("ADMIN_TOKEN").unwrap_or_default(),
         }
     }
 }
@@ -61,6 +64,13 @@ mod tests {
         assert_eq!(c.max_concurrent_runs, 5);
         let z = Config::from(|k| (k == "MAX_CONCURRENT_RUNS").then(|| "0".to_string()));
         assert_eq!(z.max_concurrent_runs, 3);
+    }
+
+    #[test]
+    fn admin_token_defaults_empty_and_reads_env() {
+        assert_eq!(Config::from(|_| None).admin_token, "");
+        let c = Config::from(|k| (k == "ADMIN_TOKEN").then(|| "secret".to_string()));
+        assert_eq!(c.admin_token, "secret");
     }
 
     #[test]
