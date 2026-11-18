@@ -88,7 +88,12 @@ fn body(run: &Run, stages: &[RunStage]) -> Markup {
     html! {
         header.top {
             h1 { (display_title(run)) }
-            a href="/app" { "← Dashboard" }
+            div.topright {
+                @if !crate::runs::is_terminal(&run.state) {
+                    button id="stopbtn" class="stop" { "Stop run" }
+                }
+                a href="/app" { "← Dashboard" }
+            }
         }
         div.card {
             (progress_head(run))
@@ -174,6 +179,14 @@ mod tests {
     #[test]
     fn title_is_the_slug_for_a_pitch_run() {
         assert_eq!(display_title(&run()), "ai-tutor");
+    }
+
+    #[test]
+    fn stop_button_shows_only_while_live() {
+        assert!(body(&run(), &[]).into_string().contains("id=\"stopbtn\""));
+        let mut r = run();
+        r.state = "done".into();
+        assert!(!body(&r, &[]).into_string().contains("id=\"stopbtn\""));
     }
 
     #[test]

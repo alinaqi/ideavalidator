@@ -42,6 +42,11 @@ button{background:linear-gradient(135deg,var(--brand),color-mix(in srgb,var(--br
 color:#fff;border:0;border-radius:12px;padding:.65rem 1.25rem;font:inherit;font-weight:600;
 cursor:pointer;margin-top:.9rem;box-shadow:0 10px 24px -10px color-mix(in srgb,var(--brand) 70%,transparent)}
 button:hover{filter:brightness(1.06)}button:disabled{opacity:.5}
+.topright{display:flex;align-items:center;gap:.9rem}
+button.stop{margin:0;padding:.4rem .85rem;font-size:.82rem;background:var(--kill);
+box-shadow:0 8px 20px -10px color-mix(in srgb,var(--kill) 70%,transparent)}
+.runrow{display:flex;align-items:center;gap:.6rem}
+.runrow .row{flex:1;min-width:0}.runrow button.stop{flex:0 0 auto}
 .row{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.7rem 0;
 border-top:1px solid var(--hair)}.row:first-child{border-top:0}a.row:hover{text-decoration:none;opacity:.82}
 .badge{font-size:.72rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;border:1px solid var(--line);

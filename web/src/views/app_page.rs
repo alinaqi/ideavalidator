@@ -23,6 +23,10 @@ const r=await fetch('/api/runs',{method:'POST',headers:{'content-type':'applicat
 body:JSON.stringify(body)});if(r.status===201){location.href='/app/runs/'+(await r.json()).run_id;}\
 else{btn.disabled=false;document.getElementById('formerr').textContent='Could not start — add a pitch or a URL.';}});";
 
+const STOP_JS: &str = "document.querySelectorAll('button.stop[data-run]').forEach(b=>{\
+b.addEventListener('click',async()=>{b.disabled=true;b.textContent='Stopping…';\
+try{await fetch('/api/runs/'+b.dataset.run+'/cancel',{method:'POST'});}catch(e){}location.reload();});});";
+
 fn submit_form() -> Markup {
     html! {
         form id="runform" {
@@ -53,10 +57,15 @@ fn state_class(state: &str) -> &'static str {
 
 fn run_row(r: &Run) -> Markup {
     html! {
-        a.row href=(format!("/app/runs/{}", r.id)) {
-            span { (r.slug) }
-            span.muted { (ymd_iso(r.created_at)) }
-            span class={ "badge " (state_class(&r.state)) } { (r.state) }
+        div.runrow {
+            a.row href=(format!("/app/runs/{}", r.id)) {
+                span { (r.slug) }
+                span.muted { (ymd_iso(r.created_at)) }
+                span class={ "badge " (state_class(&r.state)) } { (r.state) }
+            }
+            @if !crate::runs::is_terminal(&r.state) {
+                button class="stop" data-run=(r.id) { "Stop" }
+            }
         }
     }
 }
@@ -83,6 +92,7 @@ fn body(runs: &[Run]) -> Markup {
         div.card { (submit_form()) }
         (history(runs))
         script { (PreEscaped(SUBMIT_JS)) }
+        script { (PreEscaped(STOP_JS)) }
     }
 }
 
@@ -131,5 +141,12 @@ mod tests {
     #[test]
     fn empty_history_shows_a_hint() {
         assert!(history(&[]).into_string().contains("No runs yet"));
+    }
+
+    #[test]
+    fn running_rows_get_a_stop_button_finished_rows_dont() {
+        let html = history(&[run("a", "live", "running"), run("b", "fin", "done")]).into_string();
+        assert!(html.contains("data-run=\"a\""));
+        assert!(!html.contains("data-run=\"b\""));
     }
 }

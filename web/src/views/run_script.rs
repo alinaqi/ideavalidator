@@ -24,7 +24,9 @@ else if(st==='pending')phase(PEND);else if(st==='done')phase('Complete ✓');\
 else if(st==='cancelled')phase('Cancelled');else if(st==='error')phase('Stopped — see the message above');}}\
 function stop(){{clearInterval(clk);clearInterval(pl);}}\
 function setState(s){{qs('#state').textContent=s;paint(s);\
-if(s==='done'||s==='cancelled'||s==='error')stop();if(s==='done')show();}}\
+if(s==='done'||s==='cancelled'||s==='error'){{stop();const b=qs('#stopbtn');if(b)b.remove();}}if(s==='done')show();}}\
+const sb=qs('#stopbtn');if(sb)sb.addEventListener('click',async()=>{{sb.disabled=true;sb.textContent='Stopping…';\
+try{{await fetch('/api/runs/'+id+'/cancel',{{method:'POST'}});}}catch(e){{}}setState('cancelled');}});\
 function show(){{const f=qs('#memo');f.src='/api/runs/'+id+'/report';f.style.display='block';}}\
 const es=new EventSource('/api/runs/'+id+'/stream');\
 es.addEventListener('stage',e=>{{const d=JSON.parse(e.data),li=document.getElementById('stage-'+d.stage);\
@@ -48,6 +50,13 @@ mod tests {
         assert!(js.contains("EventSource('/api/runs/'+id+'/stream')"));
         assert!(js.contains("'/api/runs/'+id+'/report'"));
         assert!(js.contains("setInterval(poll,4000)"));
+    }
+
+    #[test]
+    fn stop_button_posts_cancel() {
+        let js = run_js("r1", "running", "Preparing…");
+        assert!(js.contains("'/api/runs/'+id+'/cancel'"));
+        assert!(js.contains("#stopbtn"));
     }
 
     #[test]

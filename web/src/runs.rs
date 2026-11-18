@@ -9,6 +9,11 @@ use std::sync::{Arc, Mutex};
 
 use tokio::sync::Notify;
 
+/// Whether a run state is final (no worker is or will be running for it).
+pub fn is_terminal(state: &str) -> bool {
+    matches!(state, "done" | "error" | "cancelled")
+}
+
 /// A cheap, cloneable cancel signal shared between a request handler and a running worker.
 #[derive(Clone, Default)]
 pub struct CancelToken {
@@ -101,6 +106,16 @@ mod tests {
         assert!(token.is_cancelled());
         assert!(reg.is_cancelled("r1"));
         assert!(!reg.cancel("missing"));
+    }
+
+    #[test]
+    fn terminal_states_are_recognised() {
+        for s in ["done", "error", "cancelled"] {
+            assert!(is_terminal(s), "{s} should be terminal");
+        }
+        for s in ["pending", "running", ""] {
+            assert!(!is_terminal(s), "{s} should be live");
+        }
     }
 
     #[test]
