@@ -109,36 +109,6 @@ impl Db for InMemoryDb {
             .cloned()
             .unwrap_or_default())
     }
-
-    async fn delete_account(&self, account_id: &str) -> Result<u64, String> {
-        self.sessions
-            .lock()
-            .unwrap()
-            .retain(|_, s| s.account_id != account_id);
-        let ids = self.drain_account_runs(account_id);
-        let mut stages = self.stages.lock().unwrap();
-        for id in &ids {
-            stages.remove(id);
-        }
-        self.users.lock().unwrap().remove(account_id);
-        Ok(ids.len() as u64)
-    }
-}
-
-impl InMemoryDb {
-    /// Remove and return the ids of every run owned by `account_id`.
-    fn drain_account_runs(&self, account_id: &str) -> Vec<String> {
-        let mut runs = self.runs.lock().unwrap();
-        let ids: Vec<String> = runs
-            .values()
-            .filter(|r| r.account_id == account_id)
-            .map(|r| r.id.clone())
-            .collect();
-        for id in &ids {
-            runs.remove(id);
-        }
-        ids
-    }
 }
 
 #[cfg(test)]
