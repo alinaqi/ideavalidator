@@ -13,6 +13,7 @@ use crate::extract::account_from_headers;
 use crate::state::AppState;
 
 use super::layout::page;
+use super::run_script::run_js;
 
 const STAGES: [(&str, &str); 10] = [
     ("frame", "Frame the opportunity"),
@@ -30,9 +31,46 @@ const STAGES: [(&str, &str); 10] = [
 fn stage_item(id: &str, label: &str, done: bool) -> Markup {
     html! {
         li id=(format!("stage-{id}")) class=(if done { "done" } else { "" }) {
-            span { (label) }
-            span.v.muted { (if done { "done" } else { "…" }) }
+            span.lbl { (label) }
+            span.v.muted { (if done { "done" } else { "" }) }
         }
+    }
+}
+
+/// The host for an ingested run (`Ingested from https://www.x.org` → `x.org`), else the raw url.
+fn host_of(url: &str) -> String {
+    let no_scheme = url.split("://").last().unwrap_or(url);
+    let host = no_scheme.split('/').next().unwrap_or(no_scheme);
+    host.strip_prefix("www.").unwrap_or(host).to_string()
+}
+
+/// A human title for the run: the site host for an ingested run, else the slug.
+fn display_title(run: &Run) -> String {
+    match run.pitch.strip_prefix("Ingested from ") {
+        Some(url) => host_of(url),
+        None => run.slug.clone(),
+    }
+}
+
+/// The banner shown while a run is still `pending` (before the first stage completes).
+fn pending_msg(run: &Run) -> &'static str {
+    if run.pitch.starts_with("Ingested from ") {
+        "Reading the website and preparing the brief…"
+    } else {
+        "Preparing the brief…"
+    }
+}
+
+/// The state pill, progress bar, counts, elapsed clock and error line above the stage list.
+fn progress_head(run: &Run) -> Markup {
+    html! {
+        div.statrow {
+            span.muted { "State: " span id="state" { (run.state) } }
+            span.muted { span id="pcount" { "0 / 10" } " · " span id="elapsed" { "0:00" } }
+        }
+        div.pbar id="pbar" { i {} }
+        p.phase id="phase" {}
+        p id="runerr" class="kill" { (run.error.clone().unwrap_or_default()) }
     }
 }
 
@@ -46,34 +84,18 @@ fn stage_list(stages: &[RunStage]) -> Markup {
     }
 }
 
-fn run_js(id: &str, state: &str) -> String {
-    format!(
-        "const id='{id}';const es=new EventSource('/api/runs/'+id+'/stream');\
-es.addEventListener('stage',e=>{{const d=JSON.parse(e.data);const li=document.getElementById('stage-'+d.stage);\
-if(li){{li.classList.add('done');li.querySelector('.v').textContent=d.verdict||'done';}}}});\
-es.addEventListener('done',()=>{{es.close();set('done');}});es.addEventListener('cancelled',()=>{{es.close();set('cancelled');}});\
-function set(s){{document.getElementById('state').textContent=s;if(s==='done')show();}}\
-function show(){{const f=document.getElementById('memo');f.src='/api/runs/'+id+'/report';f.style.display='block';}}\
-async function poll(){{try{{const d=await(await fetch('/api/runs/'+id)).json();document.getElementById('state').textContent=d.state;\
-if(d.state==='error'){{document.getElementById('runerr').textContent=d.error||'failed';clearInterval(t);}}\
-else if(d.state==='done'){{clearInterval(t);show();}}}}catch(e){{}}}}\
-var t=setInterval(poll,4000);if('{state}'==='done')show();"
-    )
-}
-
 fn body(run: &Run, stages: &[RunStage]) -> Markup {
     html! {
         header.top {
-            h1 { (run.slug) }
+            h1 { (display_title(run)) }
             a href="/app" { "← Dashboard" }
         }
         div.card {
-            p.muted { "State: " span id="state" { (run.state) } }
-            p id="runerr" class="kill" { (run.error.clone().unwrap_or_default()) }
+            (progress_head(run))
             (stage_list(stages))
         }
         iframe id="memo" style="display:none;width:100%;height:60vh;border:1px solid var(--line);border-radius:12px" {}
-        script { (PreEscaped(run_js(&run.id, &run.state))) }
+        script { (PreEscaped(run_js(&run.id, &run.state, pending_msg(run)))) }
     }
 }
 
@@ -142,9 +164,23 @@ mod tests {
     }
 
     #[test]
-    fn script_wires_the_event_source() {
-        let js = run_js("r1", "running");
-        assert!(js.contains("EventSource('/api/runs/'+id+'/stream')"));
-        assert!(js.contains("'/api/runs/'+id+'/report'"));
+    fn title_is_the_host_for_an_ingested_run() {
+        let mut r = run();
+        r.pitch = "Ingested from https://www.harness-hub.org".into();
+        assert_eq!(display_title(&r), "harness-hub.org");
+        assert!(pending_msg(&r).contains("Reading the website"));
+    }
+
+    #[test]
+    fn title_is_the_slug_for_a_pitch_run() {
+        assert_eq!(display_title(&run()), "ai-tutor");
+    }
+
+    #[test]
+    fn progress_head_has_bar_and_clock() {
+        let html = progress_head(&run()).into_string();
+        assert!(html.contains("id=\"pbar\""));
+        assert!(html.contains("id=\"elapsed\""));
+        assert!(html.contains("id=\"phase\""));
     }
 }

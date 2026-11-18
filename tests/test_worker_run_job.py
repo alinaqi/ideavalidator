@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from worker.run_job import Engine, RunJob, WorkerSpec, _stage_event
+from worker.run_job import Engine, RunJob, WorkerSpec, _stage_event, run_safely
 
 
 class _Stage:
@@ -58,6 +58,26 @@ def test_cancel_stops_before_stage() -> None:
     RunJob(spec, _fake_engine(["frame", "problem"]), emit, is_cancelled=lambda: True).execute()
     events = [json.loads(line) for line in lines]
     assert events == [{"event": "cancelled"}]
+
+
+def test_run_safely_emits_error_when_setup_fails() -> None:
+    lines, emit = _collect()
+
+    def boom() -> Engine:
+        raise RuntimeError("no palgu token")
+
+    run_safely(WorkerSpec(Path("b.md"), Path("/out")), boom, emit)
+    events = [json.loads(line) for line in lines]
+    assert events[-1]["event"] == "error"
+    assert "no palgu token" in events[-1]["error"]
+
+
+def test_run_safely_runs_the_engine_when_setup_succeeds() -> None:
+    lines, emit = _collect()
+    engine = _fake_engine(["frame"])
+    run_safely(WorkerSpec(Path("b.md"), Path("/out")), lambda: engine, emit)
+    events = [json.loads(line) for line in lines]
+    assert events[-1] == {"event": "done"}
 
 
 def test_stage_event_shape() -> None:

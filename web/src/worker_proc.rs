@@ -56,7 +56,7 @@ fn build_command(python: &str, workdir: &Path, req: &SpawnRequest) -> Command {
         .current_dir(workdir)
         .env("PALGU_API_KEY", &req.palgu_token)
         .stdout(Stdio::piped())
-        .stderr(Stdio::null());
+        .stderr(Stdio::inherit()); // surface Python tracebacks to the service logs
     cmd
 }
 

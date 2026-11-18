@@ -50,6 +50,17 @@ background:var(--glass-2);text-transform:uppercase;letter-spacing:.04em}
 ol.stages{list-style:none;padding:0;margin:.3rem 0 0}ol.stages li{display:flex;
 justify-content:space-between;padding:.58rem 0;border-top:1px solid var(--hair)}
 ol.stages li:first-child{border-top:0}ol.stages li.done{color:var(--go)}
+ol.stages li.active{color:var(--brand);font-weight:600}
+.statrow{display:flex;justify-content:space-between;align-items:center;gap:.75rem;font-size:.9rem;margin-bottom:.55rem}
+.pbar{height:9px;border-radius:999px;background:var(--hair);overflow:hidden}
+.pbar>i{display:block;height:100%;width:0;border-radius:999px;transition:width .5s ease;
+background:linear-gradient(90deg,var(--brand),color-mix(in srgb,var(--brand) 55%,#22d3ee))}
+.phase{margin:.7rem 0 .2rem;color:var(--muted);font-size:.92rem;min-height:1.2em}
+.spin{width:14px;height:14px;display:inline-block;vertical-align:-2px;border-radius:50%;
+border:2px solid var(--line);border-top-color:var(--brand);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer.foot{margin:1.6rem auto .4rem;text-align:center;color:var(--muted);font-size:.82rem}
+footer.foot a{color:var(--muted)}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:1.5rem;letter-spacing:.2em}"#;
 
 /// Wrap `body` in the full themed document (`title` is suffixed with the product name).
@@ -64,7 +75,20 @@ pub fn page(title: &str, body: Markup) -> Markup {
                 style { (PreEscaped(APP_CSS)) }
                 script src=(HTMX_SRC) defer {}
             }
-            body { div.wrap { (body) } }
+            body { div.wrap { (body) footer.foot { "© 2026 " a href="https://palgu.ai" { "palgu.ai" } } } }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::page;
+    use maud::html;
+
+    #[test]
+    fn shell_carries_the_palgu_footer() {
+        let html = page("Run", html! { p { "x" } }).into_string();
+        assert!(html.contains("© 2026 "));
+        assert!(html.contains("palgu.ai"));
     }
 }

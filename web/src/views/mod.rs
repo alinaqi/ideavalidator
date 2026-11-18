@@ -6,3 +6,4 @@ pub mod app_page;
 pub mod landing;
 pub mod layout;
 pub mod run_page;
+pub mod run_script;

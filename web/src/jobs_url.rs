@@ -21,6 +21,14 @@ struct UrlRun {
     cancel: CancelToken,
 }
 
+/// A readable slug from a URL: drop the scheme and `www.`, keep host + path.
+/// `https://www.harness-hub.org` → `harness-hub-org`.
+fn url_slug(url: &str) -> String {
+    let no_scheme = url.split("://").last().unwrap_or(url);
+    let no_www = no_scheme.strip_prefix("www.").unwrap_or(no_scheme);
+    crate::brief::slug(&no_www.replace(['.', '/'], " "))
+}
+
 /// A fresh `pending` run row for a URL submission (`key` = account, run_id, slug).
 fn url_run_row(key: (&str, &str, &str), url: &str) -> Run {
     Run {
@@ -37,12 +45,11 @@ fn url_run_row(key: (&str, &str, &str), url: &str) -> Run {
 /// Insert the run, return its id now, and ingest + run in the background.
 pub async fn start_url(st: &AppState, account: &str, form: UrlForm<'_>) -> Result<String, String> {
     let run_id = new_run_id();
-    let key = if form.angle.is_empty() {
-        form.url
+    let slug = if form.angle.is_empty() {
+        url_slug(form.url)
     } else {
-        form.angle
+        crate::brief::slug(form.angle)
     };
-    let slug = crate::brief::slug(key);
     st.db
         .insert_run(url_run_row((account, &run_id, &slug), form.url))
         .await?;
@@ -101,7 +108,17 @@ async fn drive(j: UrlRun) {
 
 #[cfg(test)]
 mod tests {
-    use super::url_run_row;
+    use super::{url_run_row, url_slug};
+
+    #[test]
+    fn url_slug_is_readable_host() {
+        assert_eq!(url_slug("https://www.harness-hub.org"), "harness-hub-org");
+        assert_eq!(url_slug("https://harness-hub.org"), "harness-hub-org");
+        assert_eq!(
+            url_slug("http://example.com/path/to"),
+            "example-com-path-to"
+        );
+    }
 
     #[test]
     fn url_run_row_is_pending_with_ingest_pitch() {

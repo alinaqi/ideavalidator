@@ -92,16 +92,35 @@ def _emit_stdout(line: str) -> None:
     sys.stdout.flush()
 
 
-def main(argv=None) -> int:
+def run_safely(
+    spec: WorkerSpec,
+    build_engine: Callable[[], Engine],
+    emit: Callable[[str], None],
+) -> None:
+    """Build the engine and run; a setup failure becomes an error event, not a silent exit."""
+    try:
+        engine = build_engine()
+    except Exception as exc:  # bad/expired token, missing dep, bad brief path
+        emit(json.dumps({"event": "error", "error": f"worker setup failed: {exc}"}))
+        return
+    RunJob(spec, engine, emit).execute()
+
+
+def _parse(argv) -> "object":
     import argparse
     parser = argparse.ArgumentParser(prog="worker.run_job", description=__doc__)
     parser.add_argument("--brief", required=True, help="path to the idea brief markdown")
     parser.add_argument("--out", required=True, help="run output root dir")
     parser.add_argument("--stages", default="all", help="'all' or comma list of stage ids")
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def main(argv=None) -> int:
+    args = _parse(argv)
     root = Path(__file__).resolve().parents[1]
     spec = WorkerSpec(Path(args.brief), Path(args.out), args.stages)
-    RunJob(spec, _real_engine(_client_from_env(root)), _emit_stdout).execute()
+    print(f"worker: starting run for {spec.brief_path}", file=sys.stderr, flush=True)
+    run_safely(spec, lambda: _real_engine(_client_from_env(root)), _emit_stdout)
     return 0
 
 
