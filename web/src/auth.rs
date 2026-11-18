@@ -51,6 +51,7 @@ pub async fn start(State(st): State<AppState>) -> Response {
     Json(json!({
         "user_code": device.user_code,
         "verification_uri": device.verification_uri,
+        "verification_uri_complete": device.verification_uri_complete,
         "poll_token": poll_token,
     }))
     .into_response()

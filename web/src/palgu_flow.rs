@@ -62,6 +62,7 @@ fn parse_device_start(body: &Value) -> Result<DeviceStart, String> {
         device_code: device_code.to_string(),
         user_code: s("user_code"),
         verification_uri: s("verification_uri"),
+        verification_uri_complete: s("verification_uri_complete"),
         interval: n("interval", 5),
         expires_in: n("expires_in", 600),
     })
@@ -156,6 +157,34 @@ mod tests {
         assert_eq!(start.device_code, "dc");
         assert_eq!(start.user_code, "WXYZ");
         assert_eq!(start.interval, 7);
+    }
+
+    #[tokio::test]
+    async fn start_device_reads_complete_uri() {
+        let http = fake(
+            vec![json!({"ok": true, "body": {
+                "device_code": "dc", "user_code": "WXYZ",
+                "verification_uri": "https://www.palgu.ai/connect",
+                "verification_uri_complete": "https://www.palgu.ai/connect?code=WXYZ&client=ideavalidator"}})],
+            Value::Null,
+        );
+        let start = start_device(&http).await.unwrap();
+        assert_eq!(
+            start.verification_uri_complete,
+            "https://www.palgu.ai/connect?code=WXYZ&client=ideavalidator"
+        );
+    }
+
+    #[tokio::test]
+    async fn start_device_complete_uri_defaults_empty() {
+        let http = fake(
+            vec![json!({"ok": true, "body": {"device_code": "dc", "user_code": "WXYZ"}})],
+            Value::Null,
+        );
+        assert_eq!(
+            start_device(&http).await.unwrap().verification_uri_complete,
+            ""
+        );
     }
 
     #[tokio::test]

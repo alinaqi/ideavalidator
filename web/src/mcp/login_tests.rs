@@ -13,6 +13,7 @@ fn start_text_matches_python_wording() {
         device_code: "dc".into(),
         user_code: "WXYZ".into(),
         verification_uri: "https://www.palgu.ai/connect".into(),
+        verification_uri_complete: String::new(),
         interval: 5,
         expires_in: 600,
     };
@@ -51,6 +52,7 @@ async fn poll_persists_the_account_and_binds_the_session() {
         device_code: "dc".into(),
         user_code: "WXYZ".into(),
         verification_uri: "https://www.palgu.ai/connect".into(),
+        verification_uri_complete: String::new(),
         interval: 0,
         expires_in: 600,
     };
@@ -78,6 +80,7 @@ async fn poll_that_is_denied_does_not_sign_in() {
         device_code: "dc".into(),
         user_code: "WXYZ".into(),
         verification_uri: "x".into(),
+        verification_uri_complete: String::new(),
         interval: 0,
         expires_in: 600,
     };
