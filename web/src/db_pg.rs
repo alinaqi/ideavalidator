@@ -129,6 +129,10 @@ impl Db for PgDb {
     async fn run_stages(&self, run_id: &str) -> Result<Vec<RunStage>, String> {
         runs::run_stages(&self.pool, run_id).await
     }
+
+    async fn delete_account(&self, account_id: &str) -> Result<u64, String> {
+        runs::delete_account(&self.pool, account_id).await
+    }
 }
 
 #[cfg(test)]

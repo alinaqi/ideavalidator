@@ -102,6 +102,34 @@ pub async fn get_run(pool: &PgPool, run_id: &str) -> Result<Option<Run>, String>
     Ok(row.as_ref().map(to_run))
 }
 
+const DEL_STAGES: &str =
+    "DELETE FROM run_stages WHERE run_id IN (SELECT id FROM runs WHERE account_id = $1)";
+
+/// Delete an account's rows across all four tables in one transaction; returns #runs removed.
+pub async fn delete_account(pool: &PgPool, account_id: &str) -> Result<u64, String> {
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    let q = |sql: &'static str| sqlx::query(sql).bind(account_id);
+    q(DEL_STAGES)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    let runs = q("DELETE FROM runs WHERE account_id = $1")
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?
+        .rows_affected();
+    q("DELETE FROM sessions WHERE account_id = $1")
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    q("DELETE FROM users WHERE account_id = $1")
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())?;
+    Ok(runs)
+}
+
 pub async fn run_stages(pool: &PgPool, run_id: &str) -> Result<Vec<RunStage>, String> {
     let rows = sqlx::query(SELECT_STAGES)
         .bind(run_id)

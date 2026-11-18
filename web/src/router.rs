@@ -6,7 +6,7 @@ use axum::Router;
 
 use crate::mcp::http as mcp_http;
 use crate::state::AppState;
-use crate::{api, api_stream, auth, views};
+use crate::{admin, api, api_stream, auth, views};
 
 fn api_routes() -> Router<AppState> {
     Router::new()
@@ -31,6 +31,7 @@ pub fn app(state: AppState) -> Router {
         .route("/auth/start", post(auth::start))
         .route("/auth/poll", post(auth::poll))
         .route("/auth/logout", post(auth::logout))
+        .route("/admin/users/delete", post(admin::delete_user))
         .route("/mcp", post(mcp_http::mcp_post).get(mcp_http::mcp_get))
         .merge(page_routes())
         .merge(api_routes())
