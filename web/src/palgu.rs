@@ -23,6 +23,7 @@ pub struct DeviceStart {
     pub device_code: String,
     pub user_code: String,
     pub verification_uri: String,
+    pub verification_uri_complete: String,
     pub interval: u64,
     pub expires_in: u64,
 }
