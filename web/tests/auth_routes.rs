@@ -137,6 +137,25 @@ async fn poll_with_unknown_token_is_404() {
     assert_eq!(body["status"], "unknown_poll_token");
 }
 
+#[tokio::test]
+async fn logout_redirects_to_landing_and_clears_cookie() {
+    let req = Request::builder()
+        .method("POST")
+        .uri("/auth/logout")
+        .body(Body::empty())
+        .unwrap();
+    let resp = app(state_with(vec![])).oneshot(req).await.unwrap();
+    assert_eq!(resp.status(), StatusCode::SEE_OTHER);
+    assert_eq!(resp.headers().get(header::LOCATION).unwrap(), "/");
+    let cookie = resp
+        .headers()
+        .get(header::SET_COOKIE)
+        .unwrap()
+        .to_str()
+        .unwrap();
+    assert!(cookie.contains("iv_session=") && cookie.contains("Max-Age=0"));
+}
+
 async fn whoami(acc: CurrentAccount) -> String {
     acc.0
 }

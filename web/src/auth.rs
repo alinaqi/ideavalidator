@@ -4,7 +4,7 @@
 use axum::extract::State;
 use axum::http::header::{HeaderMap, COOKIE, SET_COOKIE};
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::{IntoResponse, Redirect, Response};
 use axum::Json;
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -127,14 +127,11 @@ async fn persist(st: &AppState, acc: &Account) -> Result<String, String> {
     Ok(build_cookie(&token, SESSION_MAX_AGE))
 }
 
-/// `POST /auth/logout`: drop the session (if any) and clear the cookie.
+/// `POST /auth/logout`: drop the session (if any), clear the cookie and send the browser to `/`.
+/// A 303 turns the form POST into a GET of the landing page instead of rendering raw JSON.
 pub async fn logout(State(st): State<AppState>, headers: HeaderMap) -> Response {
     if let Some(token) = cookie_token(&headers) {
         let _ = st.db.delete_session(&token).await;
     }
-    (
-        [(SET_COOKIE, clear_cookie())],
-        Json(json!({"status": "signed_out"})),
-    )
-        .into_response()
+    ([(SET_COOKIE, clear_cookie())], Redirect::to("/")).into_response()
 }
