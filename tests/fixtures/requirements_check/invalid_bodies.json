@@ -1,0 +1,13 @@
+[
+ {"name": "not_an_object", "body": []},
+ {"name": "missing_intent", "body": {"requirements": [{"id": "R-1", "text": "x"}]}},
+ {"name": "empty_intent", "body": {"intent": "  ", "requirements": [{"id": "R-1", "text": "x"}]}},
+ {"name": "intent_too_long", "body": {"intent": "@LONG4001@", "requirements": [{"id": "R-1", "text": "x"}]}},
+ {"name": "no_requirements", "body": {"intent": "i", "requirements": []}},
+ {"name": "too_many_requirements", "body": {"intent": "i", "requirements": "@201REQS@"}},
+ {"name": "requirement_without_text", "body": {"intent": "i", "requirements": [{"id": "R-1"}]}},
+ {"name": "requirement_without_id", "body": {"intent": "i", "requirements": [{"text": "x"}]}},
+ {"name": "duplicate_ids", "body": {"intent": "i", "requirements": [{"id": "R-1", "text": "x"}, {"id": "R-1", "text": "y"}]}},
+ {"name": "context_not_object", "body": {"intent": "i", "requirements": [{"id": "R-1", "text": "x"}], "context": "nope"}},
+ {"name": "bad_depth", "body": {"intent": "i", "requirements": [{"id": "R-1", "text": "x"}], "depth": "deep"}}
+]

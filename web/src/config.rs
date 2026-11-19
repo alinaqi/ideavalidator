@@ -11,12 +11,19 @@ pub struct Config {
     pub token_enc_key: String,
     pub python_bin: String,
     pub max_concurrent_runs: usize,
+    /// Hard deadline for one requirements check; past it the route answers 503 (contract: <= 45 s).
+    pub req_check_timeout_ms: u64,
+    pub max_concurrent_checks: usize,
 }
 
 fn parse_cap(raw: Option<String>) -> usize {
+    parse_positive(raw, 3)
+}
+
+fn parse_positive<T: std::str::FromStr + PartialOrd + Default>(raw: Option<String>, dflt: T) -> T {
     raw.and_then(|v| v.parse().ok())
-        .filter(|n| *n > 0)
-        .unwrap_or(3)
+        .filter(|n| *n > T::default())
+        .unwrap_or(dflt)
 }
 
 impl Config {
@@ -36,6 +43,8 @@ impl Config {
             token_enc_key: get("TOKEN_ENC_KEY").unwrap_or_default(),
             python_bin: get("PYTHON_BIN").unwrap_or_else(|| ".venv/bin/python".into()),
             max_concurrent_runs: parse_cap(get("MAX_CONCURRENT_RUNS")),
+            req_check_timeout_ms: parse_positive(get("REQ_CHECK_TIMEOUT_MS"), 45_000),
+            max_concurrent_checks: parse_positive(get("MAX_CONCURRENT_CHECKS"), 8),
         }
     }
 }
@@ -53,6 +62,16 @@ mod tests {
         assert_eq!(c.palgu_origin, "https://api.palgu.ai");
         assert_eq!(c.python_bin, ".venv/bin/python");
         assert_eq!(c.max_concurrent_runs, 3);
+        assert_eq!(c.req_check_timeout_ms, 45_000);
+        assert_eq!(c.max_concurrent_checks, 8);
+    }
+
+    #[test]
+    fn req_check_limits_parse_and_guard_zero() {
+        let c = Config::from(|k| (k == "REQ_CHECK_TIMEOUT_MS").then(|| "1500".to_string()));
+        assert_eq!(c.req_check_timeout_ms, 1500);
+        let z = Config::from(|k| (k == "MAX_CONCURRENT_CHECKS").then(|| "0".to_string()));
+        assert_eq!(z.max_concurrent_checks, 8);
     }
 
     #[test]

@@ -1,0 +1,8 @@
+{"intent": "A web app where freelance designers send invoices to their clients and get paid by card.",
+ "requirements": [
+   {"id": "R-1", "text": "A freelancer can create an invoice with line items, a due date and a client email."},
+   {"id": "R-2", "text": "The client pays the invoice by card on a hosted payment page."},
+   {"id": "R-3", "text": "Store the client's full card number and CVV in our database so repeat payments are one click."}
+ ],
+ "context": {"project": "invoicer", "audience": "freelance designers", "answers": [], "existing_app": true, "profile": "quick"},
+ "depth": "quick"}

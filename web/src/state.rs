@@ -11,6 +11,7 @@ use crate::crypto::Cipher;
 use crate::db::Db;
 use crate::mcp::sessions::McpSessions;
 use crate::palgu::{DeviceStart, PalguHttp};
+use crate::reqcheck_proc::ReqChecker;
 use crate::runs::RunRegistry;
 use crate::sse::SseHub;
 use crate::worker_proc::WorkerSpawner;
@@ -51,6 +52,8 @@ pub struct AppState {
     pub runs: RunRegistry,
     /// Live MCP session -> account bindings (the hosted `/mcp` sign-in map).
     pub mcp: McpSessions,
+    /// Runs the fast requirements check (`/api/v1/requirements/check`, ADR 0014).
+    pub checker: Arc<dyn ReqChecker>,
 }
 
 /// A fresh, empty pending-flow map (fields are public, so callers build `AppState` as a literal).

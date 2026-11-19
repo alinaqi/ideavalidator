@@ -77,6 +77,7 @@ fn test_state() -> AppState {
         sem: Arc::new(Semaphore::new(2)),
         runs: RunRegistry::new(),
         mcp: ideavalidator_web::mcp::sessions::new_mcp_sessions(),
+        checker: std::sync::Arc::new(ideavalidator_web::reqcheck_proc::UnavailableChecker),
     }
 }
 

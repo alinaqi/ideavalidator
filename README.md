@@ -149,6 +149,15 @@ otherwise PIVOT.** Present demand signals add a small capped bonus (≤ +0.5); a
 GO means "go run the two-week real-world test plan," never "go build." Full procedure:
 [`docs/WORKFLOW.md`](docs/WORKFLOW.md) · frameworks: [`docs/FRAMEWORKS.md`](docs/FRAMEWORKS.md).
 
+### Fast requirements check (for Palgu)
+
+Besides the full validation, the hosted service answers `POST /api/v1/requirements/check` in seconds
+(p50 ~17 s live, hard cap 45 s). Palgu sends a spec's intent and numbered requirements; ideavalidator
+flags each one that is wrong, contradictory, unclear, untestable, off-ICP, scope creep or unsupported,
+plus gaps the intent implies, and returns `ok` / `questions` / `blocked`. One structured call, plus
+grounded research for new products. See [`docs/HOSTED.md`](docs/HOSTED.md#requirements-check-api-adr-0014)
+and [ADR 0014](docs/adr/0014-requirements-check.md).
+
 ## Using it well in Claude Code
 
 The tool is **agentic** — you talk to it and it drives the whole pipeline. Three ways to start:
@@ -303,12 +312,14 @@ nesting ≤ 2, ≤ 200 lines and ≤ 10 functions per file. Architecture decisio
 commands/            the /ideavalidator slash command
 pipeline/            config, stages, prompts, gemini + palgu clients, evidence, gates, runner, report, cli,
                      providers (multi-model chat), council + council_io (sounding board), personas.json
-pipeline/prompts/    one research prompt per stage (+ _common.md rules block)
+pipeline/prompts/    one research prompt per stage (+ _common.md rules block, requirements_*.md for the check)
 pipeline/schemas/    JSON output schema per stage
 ideas/               idea briefs (start from _template.md)
 runs/                per-idea outputs (gitignored)
 docs/                WORKFLOW.md, FRAMEWORKS.md, KILL_LOG.md, adr/
-tests/               pytest suite with fake clients (no real network)
+worker/              run_job.py (validation worker) + req_check.py (requirements-check worker), spawned by web/
+web/                 Rust web app + hosted MCP + /api/v1/requirements/check (ADR 0013, 0014)
+tests/               pytest suite with fake clients (no real network); fixtures/requirements_check shared with web/
 ```
 
 ## License

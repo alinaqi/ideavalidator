@@ -78,9 +78,37 @@ bind, then `list_runs` / `get_report` resolve across restarts.
 | `IV_STORE` | no | `server_runs` | Disk dir for brief + stage output files (`<store>/<account>/<run>/<slug>/decision.md`). |
 | `PYTHON_BIN` | no | `.venv/bin/python` | Interpreter used to spawn the worker. The Docker image sets `python3`. |
 | `MAX_CONCURRENT_RUNS` | no | `3` | tokio-semaphore bound on concurrent validations. |
+| `REQ_CHECK_TIMEOUT_MS` | no | `45000` | Hard deadline for one requirements check; past it the route answers 503. |
+| `MAX_CONCURRENT_CHECKS` | no | `8` | Bound on concurrent requirements-check workers (separate from runs). |
+| `PALGU_STRUCTURE_MODEL` | no | `gemini-3.8-flash` | Palgu model alias the worker uses for structured calls (same setting as the pipeline). |
 
 Secrets come only from the environment; `.env` stays gitignored and `.env.example` lists every var with no
 values.
+
+## Requirements check API (ADR 0014)
+
+`POST /api/v1/requirements/check` is the fast check the Palgu gateway runs on every spec (srooter#2785,
+contract v1). It takes `Authorization: Bearer <Palgu key>`; the gateway sends a short-lived key scoped to
+chat + research, and every LLM and research call runs on it. No sign-in or cookie is needed.
+
+```bash
+curl -X POST https://ideavalidator-web.onrender.com/api/v1/requirements/check \
+  -H "Authorization: Bearer $PALGU_KEY" -H 'content-type: application/json' -d '{
+  "intent": "A web app where freelance designers invoice clients and get paid by card.",
+  "requirements": [{"id": "R-1", "text": "Store the full card number and CVV for one-click repeat payments."}],
+  "context": {"project": "invoicer", "audience": "freelance designers", "existing_app": true},
+  "depth": "quick"}'
+# -> 200 {"verdict":"blocked","findings":[{"req_id":"R-1","kind":"wrong","severity":"blocker",
+#         "message":"...","suggested_text":"...","evidence":[]}],"summary":"...",
+#         "model":"gemini-3.8-flash","duration_ms":13189,"contract":1}
+```
+
+- `verdict`: `blocked` = at least one blocker (`wrong`, `contradiction`); `questions` = majors (`unclear`,
+  `untestable`); `ok` = only minors (`missing`, `scope_creep`, `off_icp`, `unsupported_claim`) or none.
+- Grounded research (with cited `evidence`) runs only when `context.existing_app` is `false`.
+- Errors: 401 missing/rejected key, 402 Palgu's body passed through, 422 invalid body, 503 timeout or check
+  failure. It never answers `ok` for a check that did not run.
+- Only `depth: "quick"` is accepted. Logs carry counts only, never the key or the requirement text.
 
 ## Run locally
 
