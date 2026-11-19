@@ -1,0 +1,5 @@
+{"summary": "One requirement cannot be tested as written.",
+ "findings": [
+   {"req_id": "R-1", "kind": "untestable", "message": "'fast' has no number.", "question": "How fast must it be, in seconds?", "suggested_text": ""},
+   {"req_id": "", "kind": "missing", "message": "No help text is specified.", "question": "", "suggested_text": ""}
+ ]}

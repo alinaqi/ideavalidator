@@ -6,7 +6,7 @@ use axum::Router;
 
 use crate::mcp::http as mcp_http;
 use crate::state::AppState;
-use crate::{api, api_stream, auth, views};
+use crate::{api, api_stream, auth, reqcheck, views};
 
 fn api_routes() -> Router<AppState> {
     Router::new()
@@ -15,6 +15,7 @@ fn api_routes() -> Router<AppState> {
         .route("/api/runs/:id/cancel", post(api::cancel_run))
         .route("/api/runs/:id/report", get(api::run_report))
         .route("/api/runs/:id/stream", get(api_stream::run_stream))
+        .route("/api/v1/requirements/check", post(reqcheck::check))
 }
 
 fn page_routes() -> Router<AppState> {

@@ -1,0 +1,7 @@
+{"intent": "A command-line tool that counts the words in a text file.",
+ "requirements": [
+   {"id": "R-1", "text": "`wc-lite FILE` prints the number of whitespace-separated words in FILE followed by a newline."},
+   {"id": "R-2", "text": "If FILE does not exist, it prints an error to stderr and exits with status 1."}
+ ],
+ "context": {"project": "wc-lite", "existing_app": false, "profile": "quick"},
+ "depth": "quick"}

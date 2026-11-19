@@ -84,6 +84,7 @@ pub fn state_with(palgu: ScriptedPalgu) -> AppState {
         sem: Arc::new(Semaphore::new(2)),
         runs: RunRegistry::new(),
         mcp: new_mcp_sessions(),
+        checker: std::sync::Arc::new(crate::reqcheck_proc::UnavailableChecker),
     }
 }
 

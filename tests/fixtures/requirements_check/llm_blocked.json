@@ -1,0 +1,7 @@
+{"summary": "Storing card numbers and CVV is wrong.",
+ "findings": [
+   {"req_id": "R-3", "kind": "wrong", "message": "Storing the CVV is forbidden by PCI DSS; use the processor's saved-card token instead.", "question": "Can we use the payment processor's saved-card token instead?", "suggested_text": "Save a processor card token (never the card number or CVV) so repeat payments are one click."},
+   {"req_id": "R-1", "kind": "unclear", "message": "Currency is not specified.", "question": "Which currencies must an invoice support?", "suggested_text": ""},
+   {"req_id": "R-99", "kind": "missing", "message": "No way to see whether an invoice was paid.", "question": "", "suggested_text": ""},
+   {"req_id": "R-2", "kind": "made_up_kind", "message": "dropped", "question": "", "suggested_text": ""}
+ ]}

@@ -69,6 +69,7 @@ fn state_with(spawner: Arc<dyn crate::worker_proc::WorkerSpawner>) -> AppState {
         sem: Arc::new(Semaphore::new(2)),
         runs: RunRegistry::new(),
         mcp: crate::mcp::sessions::new_mcp_sessions(),
+        checker: std::sync::Arc::new(crate::reqcheck_proc::UnavailableChecker),
     }
 }
 

@@ -13,6 +13,7 @@ use ideavalidator_web::db_pg::PgDb;
 use ideavalidator_web::mcp::sessions::new_mcp_sessions;
 use ideavalidator_web::palgu::PalguHttp;
 use ideavalidator_web::palgu_http::ReqwestHttp;
+use ideavalidator_web::reqcheck_proc::{ProcessChecker, ReqChecker};
 use ideavalidator_web::router::app;
 use ideavalidator_web::runs::RunRegistry;
 use ideavalidator_web::sse::SseHub;
@@ -21,9 +22,21 @@ use ideavalidator_web::worker_proc::{ProcessSpawner, WorkerSpawner};
 
 type BoxError = Box<dyn std::error::Error>;
 
+fn workdir() -> PathBuf {
+    std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+}
+
 fn build_spawner(cfg: &Config) -> Arc<dyn WorkerSpawner> {
-    let workdir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-    Arc::new(ProcessSpawner::new(cfg.python_bin.clone(), workdir))
+    Arc::new(ProcessSpawner::new(cfg.python_bin.clone(), workdir()))
+}
+
+fn build_checker(cfg: &Config) -> Arc<dyn ReqChecker> {
+    let python = cfg.python_bin.clone();
+    Arc::new(ProcessChecker::new(
+        python,
+        workdir(),
+        cfg.max_concurrent_checks,
+    ))
 }
 
 async fn build_state(cfg: Config) -> Result<AppState, BoxError> {
@@ -34,6 +47,7 @@ async fn build_state(cfg: Config) -> Result<AppState, BoxError> {
     let palgu: Arc<dyn PalguHttp> = Arc::new(ReqwestHttp::new(cfg.palgu_origin.clone()));
     let sem = Arc::new(Semaphore::new(cfg.max_concurrent_runs));
     let spawner = build_spawner(&cfg);
+    let checker = build_checker(&cfg);
     Ok(AppState {
         db,
         palgu,
@@ -45,6 +59,7 @@ async fn build_state(cfg: Config) -> Result<AppState, BoxError> {
         sem,
         runs: RunRegistry::new(),
         mcp: new_mcp_sessions(),
+        checker,
     })
 }
 
